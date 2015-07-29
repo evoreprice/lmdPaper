@@ -1,29 +1,94 @@
 ---
-title: "Template for writing scientific papers in R markdown"
-author: "Tom Harrop"
+title: Genome-wide changes in expression during inflorescence architecture development
+  in rice
 csl: csl/the-plant-journal.csl
 output:
+  word_document:
+    fig_caption: yes
+  pdf_document:
+    fig_caption: yes
+    keep_tex: yes
+    number_sections: yes
   html_document:
     fig_caption: yes
     force_captions: yes
     highlight: pygments
     number_sections: yes
     theme: cerulean
-  pdf_document:
-    fig_caption: yes
-    keep_tex: yes
-    number_sections: yes
-  word_document:
-    fig_caption: yes
 bibliography: bib/test.bib
 ---
 
-# Abstract
+Authors:
 
-lorem ipsum :)
+Addresses:
 
-# Methods
+### Running title
 
-Doing stuff [@Hrycay:2009ua]. Even more stuff [@Ren:2013jv]. @Harrop:2014dg disagrees. @Engstrom:2013cx wrote a nice paper about RNASeq mapping tools.
+### Keywords
+
+### SRA details for libaries
+
+Word count
+
+***
+
+# Summary
+
+# Significance statement
+
+# Introduction
+
+* Rice inflorescence development
++ branching & grain yield
++ sequential changes in meristem activity
++ few key genes
+
+# Results
+
+## Dissections in early stages of inflorescence development
++  **Figure**: laser microdissections
+
+## Transcriptome sequencing of meristem samples
++ Short (boring) section about sequencing stats
++ **Table** (or supplementary): # reads, mapping %, rRNA, introns, genes blah blah
+
+## Clustering of expression patterns
++ **Figure**: Gene expression clusters
++ GO enrichment?
++ Clusters including 'known' genes
+
+## Patterns of expression of transcription families
++ **Figure**: GSEA of transcription factor families
+
+## MADS genes: comparison of expression & homology in rice, tomato, arabidopsis
++ **Figure**: Similarity tree of MADS proteins with expression values and dN/dS values for each one.
+
+# Discussion
+
+# Experimental procedures
+
+# Accession Numbers
+
+# Acknowledgements
+
+# Short legends for Supporting Information
 
 # References
+
+***
+
+# Tables
+
+***
+
+# Figure legends
+
+***
+
+# Figures
+
+***
+
+# Junk
+
+I think `inline code` should work?

@@ -1,0 +1,5 @@
+script,/var/lib/slurm-llnl/slurmd/job02631/slurm_script
+branch,master
+hash,3f60efde8571255732206ccafd5f6564d8787224
+date,2015-07-29
+cutadapt version,1.8.1
