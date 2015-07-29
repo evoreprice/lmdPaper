@@ -47,7 +47,7 @@ trim_qualities=20
 minimum_length=25
 
 echo -e "[ "$(date)": Submitting cutadapt jobs ]"
-readFiles=("data/reads/*.fastq.gz")
+readFiles=("data/reads/os/*.fastq.gz")
 for readFile in $readFiles; do
 	fFile="$(basename $readFile)"
 	lib_name="${fFile:0:4}"
