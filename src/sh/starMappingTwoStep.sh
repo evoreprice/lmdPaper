@@ -132,6 +132,8 @@ _EOF_
 	srun --output $outdir/$library_name.out --exclusive --ntasks=1 --cpus-per-task=6 $cmd &	
 done
 
+echo -e "[ "$(date)": Waiting for step 2 jobs to finish ]"
+
 wait
 echo -e "[ "$(date)": Jobs finished, removing index from memory ]"
 srun --exclusive --ntasks=1 --cpus-per-task=6 \
