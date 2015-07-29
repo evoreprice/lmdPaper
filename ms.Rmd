@@ -1,0 +1,29 @@
+---
+title: "Template for writing scientific papers in R markdown"
+author: "Tom Harrop"
+csl: csl/the-plant-journal.csl
+output:
+  html_document:
+    fig_caption: yes
+    force_captions: yes
+    highlight: pygments
+    number_sections: yes
+    theme: cerulean
+  pdf_document:
+    fig_caption: yes
+    keep_tex: yes
+    number_sections: yes
+  word_document:
+    fig_caption: yes
+bibliography: bib/test.bib
+---
+
+# Abstract
+
+lorem ipsum :)
+
+# Methods
+
+Doing stuff [@Hrycay:2009ua]. Even more stuff [@Ren:2013jv]. @Harrop:2014dg disagrees. @Engstrom:2013cx wrote a nice paper about RNASeq mapping tools.
+
+# References
