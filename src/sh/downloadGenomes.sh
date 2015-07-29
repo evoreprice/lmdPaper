@@ -1,14 +1,15 @@
 #!/bin/bash
 
 # catch email address (-e) and password (-p) for jgi passed to bash script
+# if the jgi password has special characters this script won't work
 
 while [ "$1" != "" ]; do
 	case $1 in
 		-e )	shift
-				EMAIL="$1"
+				EMAIL=$1
 				;;
 		-p )	shift
-				PASSWORD="$1"
+				PASSWORD=$1
 				;;
 		* )		echo "Bad input"
 				exit 1
@@ -31,7 +32,7 @@ fi
 curl https://signon.jgi.doe.gov/signon/create --data-ascii \
 	login="$EMAIL"\&password="$PASSWORD" \
 	-b cookies -c cookies > /dev/null
-	
+
 curl $genome_url -b cookies -c cookies > $genome_dir/$genome_file.fa.gz
 curl $annot_url -b cookies -c cookies > $genome_dir/$annotation_file.gff3.gz
 
