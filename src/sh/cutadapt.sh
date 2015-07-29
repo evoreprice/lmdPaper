@@ -42,27 +42,25 @@ _EOF_
 trap clean_up SIGHUP SIGINT SIGTERM
 
 # parameters
-adaptorFwd='TruSeq_adaptor=AGATCGGAAGAGCACACGTCTGAACTCCAGTC'
-adaptorRev='Illumina_single_end=AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTG'
+adaptor='Illumina_Universal_Adapter=AGATCGGAAGAG'
 trim_qualities=20
-minimum_length=50
+minimum_length=25
 
 echo -e "[ "$(date)": Submitting cutadapt jobs ]"
-for fwd_reads in $(ls data/reads/*R1.fastq.gz); do
-	fFile="$(basename $fwd_reads)"
-	lib_name="${fFile:0:2}"
-	rev_reads="data/reads/$(basename $fwd_reads 1.fastq.gz)2.fastq.gz"
-	# check that rev_reads are really there
-	if [[ ! -e $rev_reads ]]; then
-		echo "Error: rev_reads not found\n[ lib_name ]:\t$lib_name\n[ rev_reads ]:\t$rev_reads"
-		exit 1
-	fi
-	output="$outdir/$lib_name.R1.fastq.gz"
-	paired_output="$outdir/$lib_name.R2.fastq.gz"
+readFiles=("data/reads/*.fastq.gz")
+for readFile in $readFiles; do
+	fFile="$(basename $readFile)"
+	lib_name="${fFile:0:4}"
+	output="$outdir/$lib_name.fastq.gz"
 	# print some info
-	echo -e "Running cutadapt:\n[ lib_name ]:\t$lib_name\n[ fwd_reads ]:\t$fwd_reads\n[ rev_reads ]:\t$rev_reads\n[ R1 out ]:\t$output\n[ R2 out ]:\t$paired_output"
+	cat <<- _EOF_
+	Running cutadapt:
+	[ lib_name ]:	$lib_name
+	[ readFile ]:	$readFile
+	[ output ]:		$output
+_EOF_
 	# run cutadapt
-	cmd="cutadapt -a $adaptorFwd -A $adaptorRev --quality-cutoff=$trim_qualities --minimum-length $minimum_length --output=$output --paired-output=$paired_output $fwd_reads $rev_reads"
+	cmd="cutadapt -a $adaptor --quality-cutoff $trim_qualities --minimum-length $minimum_length --output=$output $readFile"
 	srun --output $outdir/$lib_name.out --exclusive --ntasks=1 --cpus-per-task=1 $cmd &
 done
 
