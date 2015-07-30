@@ -54,7 +54,7 @@ _EOF_
 
 # catch SIGTERM etc
 clean_up() {
-	echo -e "[ "$(date)" : Script aborted ]"
+	echo -e "[ "$(date)": Script aborted ]"
 	# email output
 	cat <<- _EOF_ | mail -s "[Tom@SLURM] Job $SLURM_JOBID aborted" tom
 	Job $SLURM_JOBID submitted at $THEN was aborted.
@@ -74,7 +74,7 @@ cmd="STAR --runThreadN 6 --genomeDir $star_index_dir --genomeLoad LoadAndExit --
 srun --ntasks=1 --exclusive --cpus-per-task=6 $cmd
 
 # STAR options
-OPTIONS="--runThreadN 6 --genomeDir "$star_index_dir" --outSAMtype BAM Unsorted --alignIntronMax 5000 --outSJfilterReads Unique --outSJfilterCountUniqueMin 5 5 5 5 --outSJfilterCountTotalMin 5 5 5 5 --outSJfilterIntronMaxVsReadN 5000 --genomeLoad LoadAndKeep --readFilesCommand zcat"
+OPTIONS="--runThreadN 6 --genomeDir "$star_index_dir" --outSAMtype BAM Unsorted --alignIntronMax 5000 --outSJfilterReads Unique --outSJfilterCountUniqueMin 5 5 5 5 --outSJfilterCountTotalMin 5 5 5 5 --outSJfilterIntronMaxVsReadN 5000 --readFilesCommand zcat"
 
 ### STEP 1
 
@@ -94,23 +94,27 @@ do
 	n=$(basename $read_file)
 	library_name=${n:0:4}
 	cat <<- _EOF_
-	[ $(date) : Submitting STAR run ]
+	[ $(date): Submitting STAR run ]
 	library_name:   $library_name
 	read_file:      $read_file	
 _EOF_
-	cmd="STAR $OPTIONS --readFilesIn $read_file --outFileNamePrefix $outdir/step1/$library_name."
+	cmd="STAR $OPTIONS --genomeLoad LoadAndKeep --readFilesIn $read_file --outFileNamePrefix $outdir/step1/$library_name."
 	srun --output $outdir/step1/$library_name.out --exclusive --ntasks=1 --cpus-per-task=6 $cmd &	
 done
 
 echo -e "[ "$(date)": Waiting for step 1 jobs to finish ]"
 wait
 
+echo -e "[ "$(date)": Step 1 finished. Removing index from memory ]"
+srun --exclusive --ntasks=1 --cpus-per-task=6 \
+	STAR --runThreadN 6 --genomeDir $star_index_dir --genomeLoad Remove --outFileNamePrefix $outdir/gRem.
+
 ### STEP 2
 
 echo -e "[ "$(date)": Step 1 finished. Submitting step 2 mapping jobs ]"
 
 # remove step 1 bamfile (waste of space)
-rm "$outdir/step1/*.out.bam"
+rm "$outdir"/step1/*.out.bam
 
 # get the SJ.out.tab files from step 1
 sjTabs=("$outdir/step1/*.SJ.out.tab")
@@ -124,22 +128,17 @@ do
 	n=$(basename $read_file)
 	library_name=${n:0:4}
 	cat <<- _EOF_
-	[ $(date) : Submitting step 2 STAR run ]
+	[ $(date): Submitting step 2 STAR run ]
 	library_name:   $library_name
 	read_file:      $read_file	
 _EOF_
-	cmd="STAR $OPTIONS --sjdbFileChrStartEnd $sjTabs --quantMode GeneCounts --readFilesIn $read_file --outFileNamePrefix $outdir/$library_name."
+	cmd="STAR $OPTIONS --genomeLoad NoSharedMemory --sjdbFileChrStartEnd $sjTabs --quantMode GeneCounts --readFilesIn $read_file --outFileNamePrefix $outdir/$library_name."
 	srun --output $outdir/$library_name.out --exclusive --ntasks=1 --cpus-per-task=6 $cmd &	
 done
 
 echo -e "[ "$(date)": Waiting for step 2 jobs to finish ]"
-
 wait
-echo -e "[ "$(date)": Jobs finished, removing index from memory ]"
-srun --exclusive --ntasks=1 --cpus-per-task=6 \
-	STAR --runThreadN 6 --genomeDir $star_index_dir --genomeLoad Remove --outFileNamePrefix $outdir/gRem.
-
-echo -e "[ "$(date)": Tidying up ]"
+echo -e "[ "$(date)": Jobs finished. Tidying up ]"
 
 # email output
 cat <<- _EOF_ | mail -s "[Tom@SLURM] Job $SLURM_JOBID finished" tom
