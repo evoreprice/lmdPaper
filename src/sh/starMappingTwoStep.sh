@@ -40,7 +40,6 @@ outdir="$cutadapt_dir/STAR-"$(date +%F)""
 if [[ ! -d $outdir ]]; then
 	mkdir -p $outdir
 fi
-outdir=output/cutadapt-2015-07-29/STAR-2015-07-29
 
 # log metadata
 cat <<- _EOF_ > $outdir/METADATA.csv
@@ -90,18 +89,18 @@ echo -e "[ "$(date)": Submitting step 1 mapping jobs ]"
 shopt -s nullglob
 fastq_files=("$cutadapt_dir/*.fastq.gz")
 shopt -u nullglob
-# for read_file in $fastq_files
-# do
-# 	n=$(basename $read_file)
-# 	library_name=${n:0:4}
-# 	cat <<- _EOF_
-# 	[ $(date): Submitting STAR run ]
-# 	library_name:   $library_name
-# 	read_file:      $read_file	
-# _EOF_
-# 	cmd="STAR $OPTIONS --genomeLoad LoadAndKeep --readFilesIn $read_file --outFileNamePrefix $outdir/step1/$library_name."
-# 	srun --output $outdir/step1/$library_name.out --exclusive --ntasks=1 --cpus-per-task=6 $cmd &	
-# done
+for read_file in $fastq_files
+do
+	n=$(basename $read_file)
+	library_name=${n:0:4}
+	cat <<- _EOF_
+	[ $(date): Submitting STAR run ]
+	library_name:   $library_name
+	read_file:      $read_file	
+_EOF_
+	cmd="STAR $OPTIONS --genomeLoad LoadAndKeep --readFilesIn $read_file --outFileNamePrefix $outdir/step1/$library_name."
+	srun --output $outdir/step1/$library_name.out --exclusive --ntasks=1 --cpus-per-task=6 $cmd &	
+done
 
 echo -e "[ "$(date)": Waiting for step 1 jobs to finish ]"
 wait
@@ -112,7 +111,7 @@ srun --exclusive --ntasks=1 --cpus-per-task=6 \
 
 ### STEP 2
 
-echo -e "[ "$(date)": Step 1 finished. Submitting step 2 mapping jobs ]"
+echo -e "[ "$(date)": Submitting step 2 mapping jobs ]"
 
 # remove step 1 bamfile (waste of space)
 rm "$outdir"/step1/*.out.bam
