@@ -48,8 +48,6 @@ dds <- DESeq2::DESeqDataSetFromMatrix(countData = subset(starCounts, !grepl("^N_
                                       colData = colData,
                                       design = ~ stage + batch)
 
-
-
 # RUN DESEQ2
 
 dds <- DESeq2::estimateSizeFactors(dds)
