@@ -3,18 +3,18 @@ title: Genome-wide changes in expression during inflorescence architecture devel
   in rice
 csl: csl/the-plant-journal.csl
 output:
-  word_document:
-    fig_caption: yes
-  pdf_document:
-    fig_caption: yes
-    keep_tex: yes
-    number_sections: yes
   html_document:
     fig_caption: yes
     force_captions: yes
     highlight: pygments
     number_sections: yes
     theme: cerulean
+  pdf_document:
+    fig_caption: yes
+    keep_tex: yes
+    number_sections: yes
+  word_document:
+    fig_caption: yes
 bibliography: bib/test.bib
 ---
 
@@ -49,10 +49,13 @@ Word count
 +  **Figure**: laser microdissections
 
 ## Transcriptome sequencing of meristem samples
-+ Short (boring) section about sequencing stats
++ Max. 1 paragraph about boring sequencing stats
 + **Table** (or supplementary): # reads, mapping %, rRNA, introns, genes blah blah
 
 ## Clustering of expression patterns
+
+To recover common expression patterns in the meristem samples, read counts were transformed using the variance-stabilizing transformation (VST) included in the `DESeq2` package [@Love:2014cf], and the standardised, VST-transformed read counts were clustered using the fuzzy *c*-means algorithm implemented in the `Mfuzz` package [@Futschik:2005vo]. To determine the optimum number of clusters (*c*), the minimum distance between cluster centroids of clusters produced with *c* values between `cmin` to `cmax`, 
+
 + **Figure**: Gene expression clusters
 + GO enrichment?
 + Clusters including 'known' genes
