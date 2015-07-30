@@ -3,18 +3,19 @@ title: Genome-wide changes in expression during inflorescence architecture devel
   in rice
 csl: csl/the-plant-journal.csl
 output:
-  html_document:
-    fig_caption: yes
-    force_captions: yes
-    highlight: pygments
-    number_sections: yes
-    theme: cerulean
   pdf_document:
     fig_caption: yes
+    keep_md: yes
     keep_tex: yes
     number_sections: yes
   word_document:
     fig_caption: yes
+  BiocStyle::html_document:
+    fig_caption: yes
+    force_captions: yes
+    highlight: pygments
+    keep_md: yes
+    number_sections: yes
 bibliography: bib/test.bib
 ---
 
@@ -54,7 +55,7 @@ Word count
 
 ## Clustering of expression patterns
 
-To recover common expression patterns in the meristem samples, read counts were transformed using the variance-stabilizing transformation (VST) included in the `DESeq2` package [@Love:2014cf], and the standardised, VST-transformed read counts were clustered using the fuzzy *c*-means algorithm implemented in the `Mfuzz` package [@Futschik:2005vo]. To determine the optimum number of clusters (*c*), the minimum distance between cluster centroids of clusters produced with *c* values between `cmin` to `cmax`, 
+To recover common expression patterns in the meristem samples, read counts were transformed using the variance-stabilizing transformation (VST) included in the `DESeq2` package [@Love:2014do], and the standardised, VST-transformed read counts were clustered using the fuzzy *c*-means algorithm implemented in the `Mfuzz` package [@Futschik:2005vo]. To determine the number of cluster cores (*c*), the minimum distance between cluster centroids, the formation of empty clusters, and PCA plots of cluster members were monitored for clusters produced with *c* values between `cmin` and `cmax` (@SI). A cluster number of `{r} c` was chosen, 
 
 + **Figure**: Gene expression clusters
 + GO enrichment?

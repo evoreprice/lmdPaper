@@ -19,7 +19,7 @@ wget --no-parent --directory-prefix "$outdirTom" --recursive --no-directories \
 	--accept wt_sim*.tgz ftp://ftp.solgenomics.net/user_requests/LippmanZ/public_releases/by_species/Solanum_lycopersicum/transcripts/
 
 wget --no-parent --directory-prefix "$outdirTom" --recursive --no-directories \
-	--accept wt_tm*.tgz ftp://ftp.solgenomics.net/user_requests/LippmanZ/public_releases/by_species/Solanum_lycopersicum/transcripts/
+	--accept "wt_tm*.tgz" ftp://ftp.solgenomics.net/user_requests/LippmanZ/public_releases/by_species/Solanum_lycopersicum/transcripts/
 
 wget --no-parent --directory-prefix "$outdirTom" --recursive --no-directories \
 	--accept wt_fm*.tgz ftp://ftp.solgenomics.net/user_requests/LippmanZ/public_releases/by_species/Solanum_lycopersicum/transcripts/
