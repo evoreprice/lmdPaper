@@ -35,6 +35,8 @@ dummyGff <- gtfLength[,.(
   attributes = paste0("ID=", rn)
 ), by = rn]
 
+setkey(dummyGff, 'attributes')
+dummyGff[, rn := NULL]
 
 saveRDS(dummyGff, paste0(outdir, "/dummyGff.Rds"))
 

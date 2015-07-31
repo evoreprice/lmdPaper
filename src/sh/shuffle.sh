@@ -107,6 +107,10 @@ _EOF_
 
 sort-bed $bed6files	| bedtools merge -i stdin > $outdir/excl.combined.bed
 
+# unmask slopped gtf
+
+mv $outdir/Osativa_204_v7.0.gene.tmp $outdir/Osativa_204_v7.0.gene.bed6 
+
 # 4. convert the combined befile to GTF and shuffle ----------------------------------------------------------------
 
 # make a GTF file from the combined bedfile (takes ages)
