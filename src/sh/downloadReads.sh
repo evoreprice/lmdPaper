@@ -24,27 +24,28 @@ wget --no-parent --directory-prefix "$outdirTom" --recursive --no-directories \
 wget --no-parent --directory-prefix "$outdirTom" --recursive --no-directories \
 	--accept wt_fm*.tgz ftp://ftp.solgenomics.net/user_requests/LippmanZ/public_releases/by_species/Solanum_lycopersicum/transcripts/
 
-# arabidopsis
 
-outdirAt="data/reads/at"
-if [[ ! -d $outdirAt ]]; then
-	mkdir -p $outdirAt
-fi
+# # arabidopsis
 
-# IM_R1
-wget --output-document "$outdirAt"/IM_R1.fastq.gz ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR351/ERR351334/ERR351334.fastq.gz &
+# outdirAt="data/reads/at"
+# if [[ ! -d $outdirAt ]]; then
+# 	mkdir -p $outdirAt
+# fi
 
-# IM_R2
+# # IM_R1
+# wget --output-document "$outdirAt"/IM_R1.fastq.gz ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR351/ERR351334/ERR351334.fastq.gz &
 
-wget --output-document "$outdirAt"/IM_R2.fastq.gz ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR351/ERR351333/ERR351333.fastq.gz &
+# # IM_R2
 
-# FM_R1
+# wget --output-document "$outdirAt"/IM_R2.fastq.gz ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR351/ERR351333/ERR351333.fastq.gz &
 
-wget --output-document "$outdirAt"/FM_R1.fastq.gz ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR351/ERR351336/ERR351336.fastq.gz &
+# # FM_R1
 
-# FM_R2
+# wget --output-document "$outdirAt"/FM_R1.fastq.gz ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR351/ERR351336/ERR351336.fastq.gz &
 
-wget --output-document "$outdirAt"/FM_R2.fastq.gz ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR351/ERR351331/ERR351331.fastq.gz &
+# # FM_R2
+
+# wget --output-document "$outdirAt"/FM_R2.fastq.gz ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR351/ERR351331/ERR351331.fastq.gz &
 
 wait
 

@@ -4,6 +4,8 @@
 #SBATCH --ntasks=6
 #SBATCH --mail-type=ALL
 #SBATCH --cpus-per-task=1
+#SBATCH --output /tmp/dl.%N.%j.out
+
 
 outdirTom="data/reads/tomato"
 
@@ -12,7 +14,7 @@ tgzFiles=("$outdirTom/*.tgz")
 for tgz in $tgzFiles; do
 	bn=$(basename $tgz .tgz)
 	cmd="tar --gunzip --get --verbose --to-stdout --file $tgz > $outdirTom/$bn.fastq"
-	echo "srun --ntasks=1 --cpus-per-task=1 --exclusive $cmd &"
+	srun --ntasks=1 --cpus-per-task=1 --exclusive $cmd &
 done
 
 wait
