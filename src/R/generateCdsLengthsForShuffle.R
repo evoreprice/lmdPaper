@@ -20,16 +20,10 @@ gtf <- rtracklayer::import.gff(gtfFile, format = 'gtf', genome = 'Osativa_204_v7
 # coordinates 1 --> CDS length. This will be shuffled by bedtools shuffle so
 # that the intergenic windows are the same size as acual genes.
 
-##### NOT WORKING!!! TEST BELOW
-
-# take ss of gtfLength
-
-set.seed(1)
-pick <- sample(1:dim(gtfLength)[1], size = 1000, replace = FALSE)
-
-ss <- gtfLength[pick,]
-
-ss[,.(
+# Uses by = rn to collect the duplicate seqids and strands that are unhelpfully
+# returned from the GRanges object, then a second fast grouping to only keep the
+# first of each.
+dummyGff <- gtfLength[,.(
   seqid = unique(as.character(GenomeInfoDb::seqnames(gtf[gtf$gene_name == rn,]))),
   source = 'phytozomev10',
   type = 'CDS',
@@ -40,21 +34,6 @@ ss[,.(
   phase = ".",
   attributes = paste0("ID=", rn)
 ), by = rn]
-
-# Uses by = rn to collect the duplicate seqids and strands that are unhelpfully
-# returned from the GRanges object, then a second fast grouping to only keep the
-# first of each.
-dummyGff <- gtfLength[,.(
-  seqid = as.character(GenomeInfoDb::seqnames(gtf[gtf$gene_name == rn,])),
-  source = 'phytozomev10',
-  type = 'CDS',
-  start = 1,
-  end = Length,
-  score = ".",
-  strand = as.character(rtracklayer::strand(gtf[gtf$gene_name == rn,])),
-  phase = ".",
-  attributes = paste0("ID=", rn)
-), by = rn][,.(seqid = seqid[1], strand = strand[1]), by = rn]
 
 
 saveRDS(dummyGff, paste0(outdir, "/dummyGff.Rds"))
