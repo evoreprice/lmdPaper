@@ -47,7 +47,7 @@ fi
 
 # set parameters
 genomeFastaFiles="data/at/genome/Athaliana_167_TAIR9.fa"
-sjdbGTFfile="/home/tom/Documents/writing/lmdPaper/data/at/genome/Athaliana_167_TAIR10.gene_exons.cuffcomp.gtf"
+sjdbGTFfile="data/at/genome/Athaliana_167_TAIR10.gene_exons.cuffcomp.gtf"
 sjdbGTFtagExonParentTranscript="oId"
 sjdbGTFtagExonParentGene="gene_name"
 sjdbOverhang=49
@@ -94,6 +94,15 @@ if [[ ! -d $outdir ]]; then
 	mkdir -p $outdir
 fi
 
+# log metadata
+cat <<- _EOF_ > $outdir/METADATA.csv
+	script,${0}
+	branch,$(git rev-parse --abbrev-ref HEAD)
+	hash,$(git rev-parse HEAD)
+	date,$(date +%F)
+	cutadapt version,$(cutadapt --version)
+_EOF_
+
 # parameters
 adaptor='Illumina_Universal_Adapter=AGATCGGAAGAG'
 trim_qualities=20
@@ -107,7 +116,7 @@ for readFile in $readFiles; do
 	output="$outdir/$lib_name.fastq.gz"
 	# print some info
 	cat <<- _EOF_
-	[ $(date): Generating genome ]
+	[ $(date): Running cutadapt ]
 	lib_name:    $lib_name
 	readFile:    $readFile
 	  output:    $output
