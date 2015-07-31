@@ -86,10 +86,6 @@ update_output
 
 # 2. Trim adaptors
 
-echo -e "[ "$(date)": Converting reads to .fastq.gz ]"
-
-
-
 echo -e "[ "$(date)": Trimming reads with cutadapt ]"
 
 # make today's output directory
@@ -113,15 +109,15 @@ adaptorRev='TruSeq_universal_adapter=AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGT
 trim_qualities=20
 minimum_length=50
 
-
-#### THIS IS BORKED, NEED TO START AGAIN FROM HERE TO USE CONVERTED FASTQ.GZ FILES!!!
-
 echo -e "[ "$(date)": Submitting cutadapt jobs ]"
-fwd_reads=("data/reads/tomato/*L.tgz")
-for readFile in $fwd_reads; do
-	fFile="$(basename $readFile)"
+
+shopt -s nullglob
+readFiles=("data/reads/tomato/*fastq.gz")
+shopt -u nullglob
+for fwd_reads in $readFiles; do
+	fFile="$(basename $fwd_reads)"
 	lib_name="${fFile:0:8}"
-	rev_reads="data/reads/tomato/$(basename $readFile L.tgz)R.tgz"
+	rev_reads="data/reads/tomato/$(basename $fwd_reads L.tgz)R.tgz"
 	if [[ ! -e "$rev_reads" ]]; then echo -e "Error: rev_reads not found\n[ lib_name ]:\t$lib_name\n[ rev_reads ]:\t$rev_reads"; exit 1; fi
 	output="$outdir/$lib_name.R1.fastq.gz"
 	paired_output="$outdir/$lib_name.R2.fastq.gz"
@@ -129,13 +125,13 @@ for readFile in $fwd_reads; do
 	cat <<- _EOF_
 	[ $(date): Running cutadapt ]
 	     lib_name:    $lib_name
-	    fwd_reads:    $readFile
+	    fwd_reads:    $fwd_reads
 	    rev_reads:    $rev_reads
 	       output:    $output
 	paired_output:    $paired_output
 _EOF_
 	# run cutadapt
-	cmd="cutadapt -a $adaptor -A $adaptorRev --quality-cutoff $trim_qualities --minimum-length $minimum_length --output=$output --paired-output=$paired_output $readFile $rev_reads"
+	cmd="cutadapt -a $adaptor -A $adaptorRev --quality-cutoff $trim_qualities --minimum-length $minimum_length --output=$output --paired-output=$paired_output $fwd_reads $rev_reads"
 	srun --output $outdir/$lib_name.out --exclusive --ntasks=1 --cpus-per-task=1 $cmd &
 done
 
@@ -209,18 +205,27 @@ echo -e "[ "$(date)": Submitting step 1 mapping jobs ]"
 
 # find the read files
 shopt -s nullglob
-fastq_files=("$cutadapt_dir/*.fastq.gz")
+fastq_files=("$cutadapt_dir/*R1.fastq.gz")
 shopt -u nullglob
-for read_file in $fastq_files
+
+
+for fwd_read_file in $fastq_files
 do
-	n=$(basename $read_file)
-	library_name=${n:0:5}
+	n=$(basename $fwd_read_file)
+	library_name="${n:0:8}"
+	rev_read_file=${fwd_read_file/$library_name.R1/$library_name.R2}
+	# double check rev_read_file exists
+	if [[ ! -e $rev_read_file ]]; then
+		echo -e "[ "$(date)" : Error! Couldn't find reverse read file $rev_read_file for library $library_name ]"
+		exit 1
+	fi
 	cat <<- _EOF_
 	[ $(date): Submitting STAR run ]
-	library_name:    $library_name
-	   read_file:    $read_file	
+	 library_name:    $library_name
+	fwd_read_file:    $fwd_read_file
+	rev_read_file:    $rev_read_file
 _EOF_
-	cmd="STAR $OPTIONS --genomeLoad LoadAndKeep --readFilesIn $read_file --outFileNamePrefix $outdir/step1/$library_name."
+	cmd="STAR $OPTIONS --genomeLoad LoadAndKeep --readFilesIn $fwd_read_file $rev_read_file --outFileNamePrefix $outdir/step1/$library_name."
 	srun --output $outdir/step1/$library_name.out --exclusive --ntasks=1 --cpus-per-task=6 $cmd &	
 done
 
@@ -245,16 +250,23 @@ cat <<- _EOF_
 	$(for tab in $sjTabs; do echo $tab; done)
 _EOF_
 
-for read_file in $fastq_files
+for fwd_read_file in $fastq_files
 do
-	n=$(basename $read_file)
-	library_name=${n:0:5}
+	n=$(basename $fwd_read_file)
+	library_name="${n:0:8}"
+	rev_read_file=${fwd_read_file/$library_name.R1/$library_name.R2}
+	# double check rev_read_file exists
+	if [[ ! -e $rev_read_file ]]; then
+		echo -e "[ "$(date)" : Error! Couldn't find reverse read file $rev_read_file for library $library_name ]"
+		exit 1
+	fi
 	cat <<- _EOF_
 	[ $(date): Submitting step 2 STAR run ]
-	library_name:    $library_name
-	   read_file:    $read_file	
+	 library_name:    $library_name
+	fwd_read_file:    $fwd_read_file
+	rev_read_file:    $rev_read_file
 _EOF_
-	cmd="STAR $OPTIONS --genomeLoad NoSharedMemory --sjdbFileChrStartEnd $sjTabs --quantMode GeneCounts --readFilesIn $read_file --outFileNamePrefix $outdir/$library_name."
+	cmd="STAR $OPTIONS --genomeLoad NoSharedMemory --sjdbFileChrStartEnd $sjTabs --quantMode GeneCounts --readFilesIn $fwd_read_file $rev_read_file --outFileNamePrefix $outdir/$library_name."
 	srun --output $outdir/$library_name.out --exclusive --ntasks=1 --cpus-per-task=6 $cmd &	
 done
 
@@ -274,9 +286,9 @@ cat <<- _EOF_ | mail -s "[Tom@SLURM] Pipeline job "$SLURM_JOBID" finished" tom
 _EOF_
 
 echo -e "[ "$(date)": Storing output ]"
-echo "output/madsComp/at/compSl."$SLURM_JOB_NODELIST"."$SLURM_JOBID".out"
+echo "output/madsComp/sl/compSl."$SLURM_JOB_NODELIST"."$SLURM_JOBID".out"
 
-mv /tmp/compSl."$SLURM_JOB_NODELIST"."$SLURM_JOBID".out output/madsComp/at/
+mv /tmp/compSl."$SLURM_JOB_NODELIST"."$SLURM_JOBID".out output/madsComp/sl/
 
 echo -e "[ "$(date)": Done, exiting ]"
 exit 0
