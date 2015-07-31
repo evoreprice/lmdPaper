@@ -6,7 +6,6 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --output /tmp/dl.%N.%j.out
 
-
 outdirTom="data/reads/tomato"
 
 #first decompress
