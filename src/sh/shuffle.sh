@@ -21,7 +21,7 @@ cat <<- _EOF_ > $outdir/METADATA.csv
 	branch,$(git rev-parse --abbrev-ref HEAD)
 	hash,$(git rev-parse HEAD)
 	date,$(date +%F)
-	gff2bed version,$(convert2bed --version)
+	gff2bed version,$(convert2bed --version 2>&1 | sed '2q;d')
 	wgsim version,$(wgsim 2>&1 | sed '3q;d')
 	bedtools version,$(bedtools --version)
 	tophat2 version,$(tophat2 --version)
@@ -93,7 +93,7 @@ src/py/seqLength.py data/genome/Osativa_204_v7.0.fa > $outdir/genome.bed
 
 # add slop
 echo -e "[ $(date): Adding slop to gtf ]"
-bedtools slop -b 1000 -i $outdir/Osativa_204_v7.0.gene.bed6 -g $outdir/genome.bed > $outdir/Osativa_204_v7.0.gene.slop.bed6
+bedtools slop -b 500 -i $outdir/Osativa_204_v7.0.gene.bed6 -g $outdir/genome.bed > $outdir/Osativa_204_v7.0.gene.slop.bed6
 
 # mask uslopped gtf in tmp
 mv $outdir/Osativa_204_v7.0.gene.bed6 $outdir/Osativa_204_v7.0.gene.tmp

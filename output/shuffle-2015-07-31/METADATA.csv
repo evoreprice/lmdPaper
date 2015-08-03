@@ -1,0 +1,11 @@
+Script,/var/lib/slurm-llnl/slurmd/job02670/slurm_script
+branch,master
+hash,8e1628569676b6b293e6f4e697f0aaf199e6300c
+date,2015-07-31
+gff2bed version,convert2bed
+  version: 2.4.13
+  author:  Alex Reynolds
+wgsim version,Version: 0.3.0
+bedtools version,bedtools v2.23.0
+tophat2 version,TopHat v2.0.13
+bowtie2-build version,bowtie2-build version 2.2.3

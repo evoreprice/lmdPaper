@@ -1,0 +1,7 @@
+Script,/var/lib/slurm-llnl/slurmd/job02641/slurm_script
+branch,master
+hash,eab0f6b5873a373d2ed0bade40f0f3761f97c119
+date,2015-07-30
+STAR version,STAR_2.4.2a_modified
+STAR index,output/star-index-2015-07-29
+cutadapt folder,output/cutadapt-2015-07-29
