@@ -58,7 +58,7 @@ outputDirs <- list.dirs(path = 'output', full.names = TRUE, recursive = FALSE)
 cutadaptDir <- rev(sort(outputDirs[grep('cutadapt', outputDirs)]))[1]
 
 # find the most recent STAR output
-outputDirs <- dir(path = cutadaptDir, pattern = "STAR", full.names = TRUE)
+outputDirs <- list.dirs(path = cutadaptDir, full.names = TRUE, recursive = FALSE)
 starDir <- rev(sort(outputDirs[grep('STAR', outputDirs)]))[1]
 
 # parse the log.final.out files
@@ -85,7 +85,7 @@ names(mu) <- gsub('.Log.final.out', '', basename(names(mu)), fixed = TRUE)
 # CALCULATE TPM
 
 # read shuffled htseq-count results into DESeq to get normalised counts
-outputDirs <- list.dirs(shuffleDir)
+outputDirs <- list.dirs(shuffleDir, full.names = TRUE, recursive = FALSE)
 htseqDir <- rev(sort(outputDirs[grep('htseq-count', outputDirs)]))[1]
 
 countFiles <- list.files(htseqDir, pattern = 'htseq-count$', full.names = TRUE)
@@ -129,13 +129,13 @@ rownames(effLength) <- rownames(counts)
 # combine with the counts and efflength dataframes from the real tpm
 
 # find DESeq2 output
-outputDirs <- dir(path = starDir, pattern = "DESeq2", full.names = TRUE)
+outputDirs <- list.dirs(path = starDir, full.names = TRUE, recursive = FALSE)
 deseqDir <- rev(sort(outputDirs[grep('DESeq2', outputDirs)]))[1]
 
 realDds <- readRDS(paste0(deseqDir, '/ddsLrt.Rds'))
-realCounts <- DESeq2::counts(dds, normalized = TRUE)
+realCounts <- DESeq2::counts(realDds, normalized = TRUE)
 
-outputDirs <- list.dirs('output')
+outputDirs <- list.dirs('output', full.names = TRUE, recursive = FALSE)
 tpmDir <- rev(sort(outputDirs[grep('tpm', outputDirs)]))[1]
 realEffLength <- readRDS(paste0(tpmDir, '/effLength.Rds'))
 
