@@ -1,27 +1,81 @@
+#!/usr/bin/Rscript
 
-# real results
-tpm <- readRDS('finalAnalysis/tpm/tpm.Rds')
-gtfLength <- readRDS('finalAnalysis/tpm/gtfLength.Rds')
+#SBATCH --job-name Rscript
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --output log/shuffledTpm.%N.%j.out
+#SBATCH --open-mode=append
+#SBATCH --mail-type=ALL
+
+library(ggplot2)
+
+# find results
+outputDirs <- list.dirs(path = 'output', full.names = TRUE, recursive = FALSE)
+shuffleDir <- rev(sort(outputDirs[grep('shuffle', outputDirs)]))[1]
+tpmDir <- rev(sort(outputDirs[grep('tpm-', outputDirs)]))[1]
+outputDirs <- list.dirs(shuffleDir, full.names = TRUE, recursive = FALSE)
+shufTpmDir <- rev(sort(outputDirs[grep('shuffledTpm', outputDirs)]))[1]
 
 # intergenic shuffle
-tpmInt <- readRDS('finalAnalysis/dnaTpm/tpm.Rds')
-gtfLengthInt <- readRDS('finalAnalysis/dnaTpm/gtfLength.Rds')
+dnaTpm <- as.data.frame(readRDS(paste0(shufTpmDir, '/dnaTpm.Rds')))
+gtfLengthInt <- readRDS(paste0(shufTpmDir, '/shuffledGtfLength.Rds'))
 
-# compare length distributions
-g <- data.table(gtfLength, keep.rownames = TRUE)
-setkey(g, 'rn')
-gI <- data.table(gtfLengthInt, keep.rownames = TRUE)
-setkey(gI, 'rn')
-plotData <- merge(g, gI, all = TRUE)
-setnames(plotData, c('gene_id', 'GTF length', 'Shuffled length'))
-pd.melt <- reshape2::melt(plotData, id.vars = 'gene_id', measure.vars = c('GTF length', 'Shuffled length'))
-ggplot(pd.melt, aes(x = log(value), colour = variable, fill = variable), alpha = 0.5) +
+# real results
+gtfLength <- readRDS(paste0(tpmDir, '/gtfLength.Rds'))
+
+# observe length distributions
+gtfLengthInt$type <- "dna"
+gtfLength$type <- "real"
+
+combLength <- rbind(gtfLengthInt, gtfLength)
+
+g <- ggplot(combLength, aes(x = log2(Length), colour = type, fill = type), alpha = 0.5) +
   theme_minimal() +
   scale_fill_brewer(palette = 'Set1') +
   scale_colour_brewer(palette = 'Set1') +
   geom_line(stat = 'density') +
   geom_density(colour = NA, alpha = 0.5)
-# distributions totally different
+
+# add factor for separating distributions
+head(dnaTpm)
+dnaTpm$type <- substr(rownames(dnaTpm), 1, 4)
+dnaTpm$type[!dnaTpm$type == "dna_"] <- "Real"
+dnaTpm$type[dnaTpm$type == "dna_"] <- "DNA"
+
+# add id column and melt
+dnaTpm$id <- rownames(dnaTpm)
+dnaTpm.plot <- reshape2::melt(dnaTpm, id.vars = c('id', 'type'), variable.name = 'lib', value.name = 'tpm')
+
+p <- ggplot(dnaTpm.plot, aes(x = log(tpm), colour = type, fill = type), alpha = 0.5) +
+  theme_minimal() +
+  scale_fill_brewer(palette = 'Set1') +
+  scale_colour_brewer(palette = 'Set1') +
+  geom_line(stat = 'density') +
+  geom_density(colour = NA, alpha = 0.5) +
+  facet_wrap(~lib)
+p + geom_vline(xintercept = 0.3337773)
+
+# up to here, for now this is not working
+
+# calculate the intersection points per library
+upper.limit <- exp(3)
+lower.limit <- 0
+calcIntersect <- function(lib) {
+  real.density <- density(log(dnaTpm.plot[
+    dnaTpm.plot$type=="Real" & dnaTpm.plot$lib == lib, "tpm"]),
+    from = lower.limit, to = upper.limit, n = 2^10)
+  dna.density <- density(log(dnaTpm.plot[
+    dnaTpm.plot$type=="DNA" & dnaTpm.plot$lib == lib, "tpm"]),
+    from = lower.limit, to = upper.limit, n = 2^10)
+  density.diff <- real.density$y - dna.density$y
+  intersection.points <- real.density$x[which(diff(density.diff > 0) != 0) + 1]
+}
+
+sapply(unique(dnaTpm.plot$lib), calcIntersect)
+exp(0)
+
+
+### EVERYTHING BELOW WILL BE DELETED ###
 
 # 95th percentile of the tpm calculated from intergenic regions
 q <- quantile(tpmInt, 0.95, type = 7)
