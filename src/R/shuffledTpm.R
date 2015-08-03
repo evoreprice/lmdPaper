@@ -112,13 +112,8 @@ dds <- DESeq2::DESeqDataSetFromMatrix(countData = subset(countMatrix, !grepl("^_
                                       colData = colData,
                                       design = ~ stage)
 dds <- DESeq2::estimateSizeFactors(dds)
-
 counts <- DESeq2::counts(dds, normalized = TRUE)
-
-# at this point i need to combine with the counts and efflength dataframes from the real tpm
-
-
-
+  
 # from code at
 # https://haroldpimentel.wordpress.com/2014/05/08/what-the-fpkm-a-review-rna-seq-expression-units/
 
@@ -128,7 +123,24 @@ effLength <- sapply(colnames(counts), function(x)
   # mu and gtfLength
   gtfLength[names(counts[,x]),'Length'] - mu[x] + 1
 )
+rownames(counts) <- paste0("dna_", rownames(counts))
 rownames(effLength) <- rownames(counts)
+
+# combine with the counts and efflength dataframes from the real tpm
+
+# find DESeq2 output
+outputDirs <- dir(path = starDir, pattern = "DESeq2", full.names = TRUE)
+deseqDir <- rev(sort(outputDirs[grep('DESeq2', outputDirs)]))[1]
+
+realDds <- readRDS(paste0(deseqDir, '/ddsLrt.Rds'))
+realCounts <- DESeq2::counts(dds, normalized = TRUE)
+
+outputDirs <- list.dirs('output')
+tpmDir <- rev(sort(outputDirs[grep('tpm', outputDirs)]))[1]
+realEffLength <- readRDS(paste0(tpmDir, '/effLength.Rds'))
+
+counts <- rbind(counts, realCounts)
+effLength <- rbind(effLength, realEffLength)
 
 # formula for calculating the per-sample TPM using the colnames in counts
 calcTpm <- function(x){

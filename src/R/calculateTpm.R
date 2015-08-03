@@ -48,7 +48,7 @@ outputDirs <- list.dirs(path = 'output', full.names = TRUE, recursive = FALSE)
 cutadaptDir <- rev(sort(outputDirs[grep('cutadapt', outputDirs)]))[1]
 
 # find the most recent STAR output
-outputDirs <- dir(path = cutadaptDir, pattern = "STAR", full.names = TRUE)
+outputDirs <- dir(path = cutadaptDir, pattern = "STAR", full.names = TRUE, recursive = FALSE)
 starDir <- rev(sort(outputDirs[grep('STAR', outputDirs)]))[1]
 
 # parse the log.final.out files
@@ -75,7 +75,7 @@ names(mu) <- gsub('.Log.final.out', '', basename(names(mu)), fixed = TRUE)
 # CALCULATE TPM
 
 # find DESeq2 output
-outputDirs <- dir(path = starDir, pattern = "DESeq2", full.names = TRUE)
+outputDirs <- list.dirs(path = starDir, full.names = TRUE, recursive = FALSE)
 deseqDir <- rev(sort(outputDirs[grep('DESeq2', outputDirs)]))[1]
 
 dds <- readRDS(paste0(deseqDir, '/ddsLrt.Rds'))
