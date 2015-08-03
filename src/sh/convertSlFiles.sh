@@ -24,7 +24,7 @@ find $outdirTom -name *fastq -type f -exec bash -c 'srun --exclusive --ntasks=1 
 wait
 
 # tidy up
-find $outdirTom -name "*.fastq" -delete
-find $outdirTom -name "*.tgz" -delete
+# find $outdirTom -name "*.fastq" -delete
+# find $outdirTom -name "*.tgz" -delete
 
 exit 0

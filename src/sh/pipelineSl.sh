@@ -8,8 +8,11 @@
 #SBATCH --nice=500
 #SBATCH --mail-type=ALL
 
-# catch sigkill
-clean_up() {
+
+### SETUP -------------------------------------------------------------------------
+
+# cleanup functions
+exit_error() {
 	echo -e "[ "$(date)": Script aborted ]"
 	# email output
 	cat <<- _EOF_ | mail -s "[Tom@SLURM] Job "$SLURM_JOBID" aborted" tom
@@ -19,7 +22,20 @@ clean_up() {
 _EOF_
 	exit 1
 }
-trap clean_up SIGHUP SIGINT SIGTERM
+
+# catch exit codes
+trap_exit() {
+	exitCode=$?
+	if (( "exitCode" == 0 )) ; then
+		exit 0
+	else
+		exit_error
+	fi
+}
+
+# traps
+trap exit_error SIGHUP SIGINT SIGTERM
+trap trap_exit EXIT
 
 # periodic updates
 update_output() {
@@ -30,6 +46,10 @@ update_output() {
 	$(cat /tmp/compSl."$SLURM_JOB_NODELIST"."$SLURM_JOBID".out)
 _EOF_
 }
+
+
+### CODE STARTS HERE ------------------------------------------------------------------
+
 
 # TOMATO
 
