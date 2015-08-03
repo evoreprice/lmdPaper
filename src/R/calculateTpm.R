@@ -113,6 +113,7 @@ if (!dir.exists(outDir)) {
 
 saveRDS(tpm, paste0(outDir, "/tpm.Rds"))
 saveRDS(gtfLength, paste0(outDir, "/gtfLength.Rds"))
+saveRDS(effLength, paste0(outDir, "/effLength.Rds"))
 
 # SAVE LOGS
 

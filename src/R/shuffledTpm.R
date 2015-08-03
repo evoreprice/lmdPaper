@@ -115,6 +115,10 @@ dds <- DESeq2::estimateSizeFactors(dds)
 
 counts <- DESeq2::counts(dds, normalized = TRUE)
 
+# at this point i need to combine with the counts and efflength dataframes from the real tpm
+
+
+
 # from code at
 # https://haroldpimentel.wordpress.com/2014/05/08/what-the-fpkm-a-review-rna-seq-expression-units/
 
