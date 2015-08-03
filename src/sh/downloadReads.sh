@@ -15,18 +15,14 @@ if [[ ! -d $outdirTom ]]; then
 	mkdir -p $outdirTom
 fi
 
-cmd1="wget --no-parent --directory-prefix "$outdirTom" --recursive --no-directories \
-	--accept wt_sim*.tgz ftp://ftp.solgenomics.net/user_requests/LippmanZ/public_releases/by_species/Solanum_lycopersicum/transcripts/"
+wget --no-parent --directory-prefix "$outdirTom" --recursive --no-directories \
+	--accept "wt_sim*.tgz" ftp://ftp.solgenomics.net/user_requests/LippmanZ/public_releases/by_species/Solanum_lycopersicum/transcripts/
 
-cmd2="wget --no-parent --directory-prefix "$outdirTom" --recursive --no-directories \
-	--accept "wt_tm*.tgz" ftp://ftp.solgenomics.net/user_requests/LippmanZ/public_releases/by_species/Solanum_lycopersicum/transcripts/"
+wget --no-parent --directory-prefix "$outdirTom" --recursive --no-directories \
+	--accept "wt_tm*.tgz" ftp://ftp.solgenomics.net/user_requests/LippmanZ/public_releases/by_species/Solanum_lycopersicum/transcripts/
 
-cmd3="wget --no-parent --directory-prefix "$outdirTom" --recursive --no-directories \
-	--accept wt_fm*.tgz ftp://ftp.solgenomics.net/user_requests/LippmanZ/public_releases/by_species/Solanum_lycopersicum/transcripts/"
-
-srun $cmd1 &
-srun $cmd2 &
-srun $cmd3 &
+wget --no-parent --directory-prefix "$outdirTom" --recursive --no-directories \
+	--accept "wt_fm*.tgz" ftp://ftp.solgenomics.net/user_requests/LippmanZ/public_releases/by_species/Solanum_lycopersicum/transcripts/
 
 # # arabidopsis
 
