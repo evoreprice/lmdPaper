@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --job-name shfcount
-#SBATCH --ntasks=1
+#SBATCH --ntasks=6
 #SBATCH --cpus-per-task=1
 #SBATCH --output /tmp/shfcount.%N.%j.out
 #SBATCH --mail-type=ALL
