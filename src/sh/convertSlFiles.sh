@@ -15,7 +15,7 @@ tgzFiles=("$outdirTom/*.tgz")
 for tgz in $tgzFiles; do
 	bn=$(basename $tgz .tgz)
 	cmd="tar --gunzip --get --verbose --to-stdout --file $tgz"
-	srun --ntasks=1 --cpus-per-task=1 --output=$outdirTom/$bn.fastq --exclusive $cmd &
+	srun --ntasks=1 --cpus-per-task=1 --output=$outdirTom/$bn.fastq --error=/dev/null --exclusive $cmd &
 done
 
 wait
