@@ -42,6 +42,7 @@ batch <- as.numeric(substr(sample, 4, 4))
 batch[batch <= 2] <- 'first'
 batch[!batch == 'first'] <- 'second'
 colData <- data.frame(row.names = sample, stage, batch)
+colData$stage <- factor(colData$stage, levels = sampleToStage)
 
 # generate DESeq2 object (exclude the STAR diagnostic lines starting with "N")
 dds <- DESeq2::DESeqDataSetFromMatrix(countData = subset(starCounts, !grepl("^N_", rownames(starCounts))),
