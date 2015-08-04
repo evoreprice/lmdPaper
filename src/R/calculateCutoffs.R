@@ -89,7 +89,7 @@ expressedGenesByLibrary <- lapply(levels(q95.plot$lib), function(libName)
   subset(dnaTpm.plot, type == 'Real' & lib == libName & tpm > cutoffs[libName])$id)
 names(expressedGenesByLibrary) <- levels(q95.plot$lib)
 
-expressedGenes <- length(unique(do.call(c, expressedGenesByLibrary)))
+expressedGenes <- unique(do.call(c, expressedGenesByLibrary))
 
 # what are the real cutoffs in the tpm calculations performed *without* the shuffled GTF?
 realTpm <- readRDS(paste0(tpmDir, '/tpm.Rds'))
