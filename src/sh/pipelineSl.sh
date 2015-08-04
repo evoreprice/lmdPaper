@@ -57,6 +57,9 @@ echo -e "[ "$(date)": Starting pipeline for Solanum lycopersicum ]"
 
 # 1. Generate genome for STAR
 
+# define a function for easy testing
+genome_generate() {
+
 echo -e "[ "$(date)": Genome generation with STAR ]"
 
 # make output directory
@@ -103,6 +106,19 @@ wait
 
 echo -e "[ "$(date)": Genome generation finished ]"
 update_output
+}
+
+# check if genome exists already
+for d in "output/madsComp/sl/star-index"*; do
+	[[ -d "$d" ]] && outdir="$d" || unset outdir
+	break
+done
+if test $outdir; then
+	echo -e "[ "$(date)": Found STAR index ]\n"$outdir""
+else
+	echo "genome_generate"
+fi
+
 
 # 2. Trim adaptors
 
@@ -132,12 +148,12 @@ minimum_length=50
 echo -e "[ "$(date)": Submitting cutadapt jobs ]"
 
 shopt -s nullglob
-readFiles=("data/reads/tomato/*fastq.gz")
+readFiles=("data/reads/tomato/*L.fastq.gz")
 shopt -u nullglob
 for fwd_reads in $readFiles; do
 	fFile="$(basename $fwd_reads)"
 	lib_name="${fFile:0:8}"
-	rev_reads="data/reads/tomato/$(basename $fwd_reads L.tgz)R.tgz"
+	rev_reads="data/reads/tomato/$(basename $fwd_reads L.fastq.gz)R.fastq.gz"
 	if [[ ! -e "$rev_reads" ]]; then echo -e "Error: rev_reads not found\n[ lib_name ]:\t$lib_name\n[ rev_reads ]:\t$rev_reads"; exit 1; fi
 	output="$outdir/$lib_name.R1.fastq.gz"
 	paired_output="$outdir/$lib_name.R2.fastq.gz"
