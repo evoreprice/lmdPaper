@@ -167,7 +167,7 @@ for fwd_reads in $readFiles; do
 	paired_output:    $paired_output
 _EOF_
 	# run cutadapt
-	cmd="cutadapt -a $adaptor -A $adaptorRev --quality-cutoff $trim_qualities --minimum-length $minimum_length --output=$output --paired-output=$paired_output $fwd_reads $rev_reads"
+	cmd="cutadapt -a $adaptorFwd -A $adaptorRev --quality-cutoff $trim_qualities --minimum-length $minimum_length --output=$output --paired-output=$paired_output $fwd_reads $rev_reads"
 	srun --output $outdir/$lib_name.out --exclusive --ntasks=1 --cpus-per-task=1 $cmd &
 done
 
