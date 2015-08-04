@@ -47,9 +47,11 @@ Word count
 # Results
 
 ## Dissections in early stages of inflorescence development
+
 +  **Figure**: laser microdissections
 
 ## Transcriptome sequencing of meristem samples
+
 + Max. 1 paragraph about boring sequencing stats
 + **Table** (or supplementary): # reads, mapping %, rRNA, introns, genes blah blah
 

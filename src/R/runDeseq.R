@@ -35,7 +35,7 @@ sampleToStage <- c(
   n1 = "RM",
   n2 = "PBM",
   n3 = "ePBM/SBM",
-  n4 = "RM"
+  n4 = "SM"
 )
 stage <- sampleToStage[substr(sample, 1, 2)]
 batch <- as.numeric(substr(sample, 4, 4))
