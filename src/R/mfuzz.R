@@ -8,6 +8,7 @@
 #SBATCH --mail-type=ALL
 
 library(Mfuzz)
+library(ggplot2)
 
 # set variables
 scriptName <- 'mfuzz'
@@ -36,50 +37,56 @@ gm_mean <- function(x, na.rm = TRUE) {
 vstMeans.matrix <- sapply(levels(vst$stage), function(x)
   apply(GenomicRanges::assay(vst[, vst$stage == x]), 1, gm_mean))
 
+# load the expressed gene list
+expressedGenes <- readRDS(paste0(cutoffDir, '/expressedGenesAll.Rds'))
 
-# select genes that were significant in the LRT from DESeq2
-# sigLRT <- read.table('/home/tom/Desktop/laserdissect/finalAnalysis/agriGO/LRToutput/lrtSig.txt')$V1
-# varGenes <- vstMeans.matrix[sigLRT,]
-# rmean <- apply(varGenes, 1, mean)
-# rmax <- apply(varGenes, 1, max)
-# varGenes <- varGenes[rmean > 6 | rmax > 6,]
-
-# filter by geometric mean of tpm at cutoff
+# only keep expressed genes
 vstMeans <- data.frame(vstMeans.matrix)
-
-expressedGenes <- readRDS('../deseq/LRT/expressedGenes.Rds')
-
 vstFiltered <- vstMeans[expressedGenes,]
-#varGenes <- vstFiltered
 
-#vstMeans$rowmean <- rowMeans(vstMeans)
-#vstMeans$rowmax <- apply(vstMeans[,c(1:4)], 1, max)
-#vstFiltered <- vstMeans[vstMeans$rowmean > 8 | vstMeans$rowmax > 8, ]
-#vstFiltered <- subset(vstFiltered, select = Rachis.Meristem:Spikelet.Meristem)
-
-# variable genes across the whole dataset
+# get the most variable genes
 vstByVar <- vstFiltered[(rev(order(apply(vstFiltered, 1, var)))),]
-
 varGenes <- vstByVar[1:(0.25 * dim(vstByVar)[1]),]
 
-#write(rownames(varGenes), sep = '\n', file = '/home/tom/Desktop/laserdissect/finalAnalysis/agriGO/mfuzzOutput/background.txt')
-
 # set up the expressionSet
-colnames(varGenes) <- gsub('\\.', '\n', colnames(varGenes))
 pData <- data.frame(Stage = as.factor(colnames(varGenes)), row.names = colnames(varGenes))
 phenoData <- new('AnnotatedDataFrame', data = pData)
 vg.e <- ExpressionSet(assayData = as.matrix(varGenes), phenoData = phenoData)
 
-# standardise and find clustering parameters
+# standardise
 vg.s <- standardise(vg.e)
-m1 <- mestimate(vg.s)
-# 3 clusters of expression
-Dmin(vg.s, m = m1, crange = seq(2, 20, 1), repeats = 3, visu = TRUE)
-cselection(vg.s, m = m1, crange = seq(2, 20, 2), repeats = 3, visu = TRUE)
 
+# estimate the fuzzifier
+m1 <- mestimate(vg.s)
+
+# estimate the cluster number
+maxClust <- 15
+centroids <- data.frame(
+  x = 1:(maxClust - 1),
+  y = Dmin(vg.s, m = m1, crange = seq(2, maxClust, 1), repeats = 3, visu = FALSE)
+)
+
+# up to here, looking ok
+
+points <- seq(1, maxClust - 1, length.out = 20)
+pred <- predict(loess(centroids$y ~ centroids$x), points)
+infl <- c(FALSE, diff(diff(diff(pred)) > 0) != 0)
+
+ggplot(centroids, aes(x = x, y = y)) +
+  theme_minimal() +
+  geom_point() +
+  geom_smooth() +
+  geom_point(data = data.frame(x = points[infl], y = pred[infl]), colour = 'red')
+
+c <- as.integer(round(points[infl]), 0)
+
+for (i in c) {
+  
 set.seed(1)
-c1 <- mfuzz(vg.s, c = 6, m = m1 * 1)
+c1 <- mfuzz(vg.s, c = i, m = m1 * 1)
 clusters <- acore(vg.s, c1)
+print(ggplotClusters(clusters = c1, expressionMatrix = exprs(vg.s), memCutoff = 0.7, pointsize = 10, ncol = 3))
+}
 
 length(unique(unlist(sapply(clusters, rownames)))) ## number of genes that got clustered
 
