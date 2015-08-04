@@ -5,6 +5,8 @@
 #SBATCH --mail-type=ALL
 #SBATCH --cpus-per-task=1
 #SBATCH --output /tmp/dl.%N.%j.out
+#SBATCH --error /tmp/dl.%N.%j.out
+#SBATCH --open-mode append
 
 outdirTom="data/reads/tomato"
 
@@ -12,14 +14,14 @@ outdirTom="data/reads/tomato"
 tgzFiles=("$outdirTom/*.tgz")
 for tgz in $tgzFiles; do
 	bn=$(basename $tgz .tgz)
-	cmd="tar --gunzip --get --verbose --to-stdout --file $tgz > $outdirTom/$bn.fastq"
-	srun --ntasks=1 --cpus-per-task=1 --exclusive $cmd &
+	cmd="tar --gunzip --get --verbose --to-stdout --file $tgz"
+	srun --ntasks=1 --cpus-per-task=1 --output=$outdirTom/$bn.fastq --exclusive $cmd &
 done
 
 wait
 
 # then recompress
-find $outdirTom -name *fastq -type f -exec bash -c 'srun --exclusive --ntasks=1 --cpus-per-task=1 gzip --best {} &' \;
+find $outdirTom -name "*fastq" -type f -exec bash -c 'srun --exclusive --ntasks=1 --cpus-per-task=1 gzip --best {} &' \;
 
 wait
 
