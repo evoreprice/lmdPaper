@@ -56,7 +56,6 @@ g <- ggplot(combLength, aes(x = log2(Length), colour = type, fill = type), alpha
   geom_density(colour = NA, alpha = 0.5)
 
 # add factor for separating distributions
-head(dnaTpm)
 dnaTpm$type <- substr(rownames(dnaTpm), 1, 4)
 dnaTpm$type[!dnaTpm$type == "dna_"] <- "Real"
 dnaTpm$type[dnaTpm$type == "dna_"] <- "DNA"
@@ -105,7 +104,7 @@ realTpmCutoffs <- sapply(colnames(realTpm), realTpmCutoff)
 saveRDS(g, paste0(outDir, "/gtfLengthDistributions.ggplot2.Rds"))
 saveRDS(p, paste0(outDir, "/realAndShuffledTpmDistributions.ggplot2.Rds"))
 saveRDS(expressedGenesByLibrary, paste0(outDir, "/expressedGenesByLibrary.Rds"))
-saveRDS(expressedGenesAll, paste0(outDir, "/expressedGenesAll.Rds"))
+saveRDS(expressedGenes, paste0(outDir, "/expressedGenesAll.Rds"))
 saveRDS(realTpmCutoffs, paste0(outDir, "/tpmCutoffs.Rds"))
 
 sInf <- c(paste("git branch:",system("git rev-parse --abbrev-ref HEAD", intern = TRUE)),
