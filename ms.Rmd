@@ -1,6 +1,6 @@
 ---
-title: Genome-wide changes in expression during inflorescence architecture development
-  in rice
+title: "Genome-wide changes in expression during inflorescence architecture development
+  in rice"
 csl: csl/the-plant-journal.csl
 output:
   pdf_document:

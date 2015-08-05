@@ -1,0 +1,8 @@
+---
+title: "Supporting Information"
+csl: csl/the-plant-journal.csl
+output:
+  word_document:
+    fig_caption: yes
+bibliography: bib/test.bib
+---

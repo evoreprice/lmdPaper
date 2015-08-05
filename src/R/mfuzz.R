@@ -9,6 +9,8 @@
 
 library(Mfuzz)
 library(ggplot2)
+library(data.table)
+library(xlsx)
 
 # set variables
 scriptName <- 'mfuzz'
@@ -28,6 +30,12 @@ outputDirs <- list.dirs(path = starDir, full.names = TRUE, recursive = FALSE)
 deseqDir <- rev(sort(outputDirs[grep('DESeq2', outputDirs)]))[1]
 outputDirs <- list.dirs(tpmDir, full.names = TRUE, recursive = FALSE)
 cutoffDir <- rev(sort(outputDirs[grep('calculateCutoffs', outputDirs)]))[1]
+
+# make output folder
+outDir <- paste(deseqDir, outputBasename, sep = "/")
+if (!dir.exists(outDir)) {
+  dir.create(outDir)
+}
 
 # take the geometric mean of the vst expression values
 vst <- readRDS(paste0(deseqDir, "/vst.Rds"))
@@ -74,154 +82,29 @@ centPlot <- ggplot(centroids, aes(x = x, y = y)) +
   geom_point() +
   stat_smooth(method = loess, se = FALSE)
 
-# we will go with 6 clusters
-c <- 6
-
 # can try to find inflection points, doesn't work very well.
 points <- seq(2, maxClust, length.out = 10000)
 pred <- predict(loess(centroids$y ~ centroids$x), points)
 infl <- c(FALSE, diff(diff(pred) > 0) != 0)
-centPlot + geom_point(data = data.frame(x = points[infl], y = pred[infl]), colour = 'red')
+centPlotWithPoints <- centPlot + geom_point(data = data.frame(x = points[infl], y = pred[infl]), colour = 'red')
 
+# we will go with 6 clusters
+c <- 6
+memCutoff <- 0.5
+
+# run the clustering
 set.seed(1)
 c1 <- mfuzz(vg.s, c = c, m = m1)
-clusters <- acore(vg.s, c1, min.acore = 0.5)
+clusters <- acore(vg.s, c1, min.acore = memCutoff)
 print(ggplotClusters(clusters = c1, expressionMatrix = exprs(vg.s), memCutoff = 0.5, pointsize = 10, ncol = 3))
 
-clusteredGenes <- oryzr::LocToGeneName(unique(unlist(sapply(clusters, rownames))))$names
-clusteredGenes[!is.na(clusteredGenes)]
-clusteredGenes[!is.na(clusteredGenes) & substr(clusteredGenes, 1, 4) == "MADS"]
-
-length(unique(unlist(sapply(clusters, rownames)))) ## number of genes that got clustered
-
-ggplotClusters(clusters = c1, expressionMatrix = exprs(vg.s), memCutoff = 0.7, pointsize = 10, ncol = 3)
-
-g <- ggplotClusters(clusters = c1, expressionMatrix = exprs(vg.s), memCutoff = 0.7, pointsize = 10, ncol = 3) +
-  theme_minimal(base_size = 12) +
-  xlab(NULL) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) 
-g
-# add cluster centres to plot
-centreLines <- melt(c1$centers)
-centreLines$cluster <- levels(g$data$cluster)[centreLines$Var1]
-gL <- g + geom_line(data = centreLines,
-                    mapping = aes(x = Var2, y = value, group = 1)) +
-  labs(colour = 'Membership\n')
-cairo_pdf('clustersWithCentres.pdf', width = width, height = height, family = "Verdana")
-gL
-dev.off()
-
-## output for aiguablava
-
-exprs <- (data.frame(exprs(vg.s)))
-data.table::setnames(exprs,
-                     old = c("Rachis.Meristem",
-                             "Primary.Branch.Meristem",
-                             "Secondary.Branch.Meristem",
-                             "Spikelet.Meristem"),
-                     new = c("RM",
-                             "PBM",
-                             "ePBM/\nAM",
-                             "SM"))
-cl <- centreLines
-cl$Var2 <- plyr::revalue(cl$Var2, c(
-  "Rachis\nMeristem" = "RM",
-  "Primary\nBranch\nMeristem" = "PBM",
-  "Secondary\nBranch\nMeristem" = "ePBM/\nAM",
-  "Spikelet\nMeristem" = "SM"))
-
-g <- ggplotClusters(clusters = c1, expressionMatrix = exprs, memCutoff = 0.7, pointsize = 24, ncol = 3) +
-  theme_minimal(base_size = 24, base_family = 'Lato') +
-  xlab(NULL) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
-        rect = element_rect(fill = 'transparent', colour = NA)) +
-        #panel.background = element_rect(fill = 'transparent', colour = NA),
-        #plot.background = element_rect(fill = 'transparent', colour = NA)) +
-  geom_line(data = cl, mapping = aes(x = Var2, y = value, group = 1)) +
-  labs(colour = 'Membership')
-
-# set height for AID figures
-extrafont::loadfonts()
-wA <- convertUnit(unit(452.038, 'mm'), unitTo = 'in', valueOnly = TRUE)
-hA <- convertUnit(unit(172.945, 'mm'), unitTo = 'in', valueOnly = TRUE)
-cairo_pdf('/home/tom/Dropbox/temp/clusters.pdf', width = wA, height = hA,
-          family = 'Lato', bg = 'transparent')
-g + theme(
-  legend.text = element_text(size = 10),
-  legend.text.align = 0.5,
-  legend.title = element_text(size = 14),
-  axis.ticks = element_blank()
-  )
-dev.off()
-
-### output for knitr
-
-#saveRDS(gL, '/home/tom/Desktop/laserdissect/finalAnalysis/reports/fuzzyClusters.Rds')
-
-#output for DAVID
-
-#saveRDS(clusters, 'clusters.Rds')
-length(unique(unlist(sapply(clusters, rownames)))) ## number of genes that got clustered
-
-names(clusters) <- paste0('Cluster', 1:length(clusters))
-for (cluster in names(clusters)){
-  write(rownames(clusters[[cluster]]), sep = '\n', file = paste0('/home/tom/Desktop/laserdissect/finalAnalysis/agriGO/mfuzzOutput/', cluster, '.txt'))
-  #write(rownames(clusters[[cluster]]), sep = '\n', file = paste0('/home/tom/Desktop/laserdissect/finalAnalysis/agriGO/LRToutput/', cluster, '.txt'))
-}
-write(rownames(vstMeans), sep = '\n', file = '/home/tom/Desktop/laserdissect/finalAnalysis/agriGO/mfuzzOutput/background.txt')
-
-# MDS plot for clusters
-
-length(names(c1$cluster))
-
-clustered <- unique(unlist(sapply(clusters, rownames)))
-
-vg.d <- dist(exprs(vg.s))
-vg.mds <- cmdscale(vg.d, 2)
-
-c1$cluster[clustered]
-length(apply(c1$membership,1,max)
-       [clustered])
-
-vg.mds <- data.frame(MDS1 = vg.mds[,1], MDS2 = vg.mds[,2], cluster = c1$cluster,
-                     max.membership = apply(c1$membership,1,max))
-MDSgeneplot <- ggplot(vg.mds, aes(x = MDS1, y=MDS2, colour = factor(cluster))) +
-  theme(panel.background = element_blank(),
-        panel.grid = element_blank(),
-        text = element_text(size = 10),
-        legend.title = element_text(face = 'plain'),
-        rect = element_blank()) +
-  scale_colour_brewer(palette = "Set1", name = "Cluster")
-
-pdf(file = 'MDS.pdf', width = 3.93701, height = 3.93701) # 1 column figure: width = 3.93701, height = 3.93701
-MDSgeneplot + geom_point(aes(size=max.membership),alpha=0.1) + scale_size(range = c(3,5), guide = FALSE) + coord_fixed(ratio = 1)
-dev.off()
-
-# output figures for talk
-
-cairo_pdf(filename = 'clusters.pdf', family = 'Verdana', width = 4.055, height = 5.482)
-ggplotClusters(clusters = c1, expressionMatrix = exprs(vg.s), memCutoff = 0.7, pointsize = 12, ncol = 3) + theme_minimal() + xlab(NULL) + theme(plot.margin = unit(c(0,0,0,0), "lines"), legend.title = element_text(face = 'plain'))
-dev.off()
-
-cairo_pdf(filename = 'clustersMDS.pdf', family = 'Verdana', width = 4.055, height = 2.505)
-MDSgeneplot + geom_point(aes(size=max.membership),alpha=0.7) + scale_size(range = c(1,3), guide = FALSE) + coord_fixed(ratio = 1)
-dev.off()
-
-cairo_pdf(filename = 'clustersMDS.pdf', family = 'Verdana', width = 4.055, height = 2.505)
-MDSgeneplot + geom_point(aes(size=max.membership),alpha=0.7) + scale_size_area(max_size = 1.5, guide = FALSE) + coord_fixed(ratio = 1)
-dev.off()
-
-#########################
-### ANNOTATE CLUSTERS ###
-#########################
-
-load('/home/tom/Desktop/laserdissect/output_phytozome_no_rRNA/cummeRbund/annotationToAdd.Rdata')
+# annotate the clusters for output
 
 # take a copy of clusters
 clusterExpr <- lapply(clusters, as.data.table)
 
 # only output genes above cutoff
-clusterExpr <- lapply(clusterExpr, function(x) x[MEM.SHIP >= 0.7,])
+clusterExpr <- lapply(clusterExpr, function(x) x[MEM.SHIP >= memCutoff,])
 
 # add ID to each dt
 clusterExpr <- lapply(1:length(clusterExpr), function(i)
@@ -233,9 +116,13 @@ clusterExpr <- do.call(rbind, clusterExpr)
 setkey(clusterExpr, 'NAME')
 annotatedClusters <- cbind(clusterExpr, oryzr::LocToGeneName(clusterExpr[, NAME], plotLabels = FALSE))
 
-# get annotation from annotationToAdd
+# get MSU annotation from all.locus_brief_info.7.0.tab
 acNAME <- as.character(annotatedClusters[,NAME])
-annotatedClusters[, MSU.annotation := as.character(annotationToAdd[acNAME, gene_description])]
+msuAnn <- data.table(read.delim(file = 'data/genome/all.locus_brief_info.7.0.tab',
+                                sep = "\t",header = TRUE, fill = TRUE), key = 'locus')  
+# data.table magic to get 1 annotation per LOC ID
+anns <- msuAnn[acNAME, .(annotation = paste(unique(annotation), sep = ",")), by = locus]
+annotatedClusters[, MSU.annotation := as.character(anns[, annotation])]
 
 # rename and reorder columns
 annotatedClusters[, gene_id := NAME][, membership := MEM.SHIP][, c('NAME', 'MEM.SHIP') := NULL]
@@ -253,54 +140,16 @@ for(i in 1:max(annotatedClusters[,Cluster])){
 }
 
 # write the wb
-saveWorkbook(wb, paste0('annotatedClusters', Sys.Date(), '.xlsx'))
+saveWorkbook(wb, "xlsx/annotatedClusters.xlsx")
 
-##############################
-### TROUBLESHOOT LABELLING ###
-##############################
+# write the other output
+saveRDS(vg.s, paste0(outDir, "/expressionMatrix.Rds"))
+saveRDS(c1, paste0(outDir, "/c1.Rds"))
+saveRDS(clusters, paste0(outDir, "/clusters.Rds"))
+saveRDS(annotatedClusters, paste0(outDir, "/annotatedClusters.Rds"))
+saveRDS(centPlot, paste0(outDir, "/centPlot.Rds"))
 
-clusterData <- data.frame(ids = names(c1$cluster), cluster = factor(c1$cluster), Membership = apply(c1$membership, 1, max), exprs(vg.s)[as.vector(names(c1$cluster)),])
-
-
-####################
-### OLD ANALYSIS ###
-####################
-
-vstMeans.matrix <- sapply(levels(vst$stage), function(x) apply(assay(vst[,vst$stage == x]), 1, mean))
-vstMeans <- data.frame(vstMeans.matrix)
-vstMeans$rowmean <- rowMeans(vstMeans)
-vstMeans$rowmax <- apply(vstMeans[,c(1:4)], 1, max)
-
-# get highly expressed genes by filtering and take the top 10% of them by
-# variance
-
-vstFiltered <- vstMeans[vstMeans$rowmean > 8 | vstMeans$rowmax > 8, ]
-vstFiltered <- subset(vstFiltered, select = Rachis.Meristem:Spikelet.Meristem)
-
-vstByVar <- vstFiltered[(rev(order(apply(vstFiltered, 1, var)))),]
-varGenes <- vstByVar[1:(0.25 * dim(vstByVar)[1]),]
-
-#########################
-### OUTPUT FOR AGRIGO ###
-#########################
-
-write(paste(rownames(varGenes), collapse = '\n'), file = 'background.txt')
-
-write(paste(sigLRT, collapse = '\n'), file = 'sigLRT.txt')
-write(paste(clusters[[2]]$NAME, collapse = '\n'), file = 'cluster2.txt')
-write(paste(clusters[[4]]$NAME, collapse = '\n'), file = 'cluster4.txt')
-
-
-sapply(c(1:length(clusters)), function(i) 'LOC_Os10g33780' %in% clusters[[i]]$NAME)
-
-gL
-
-tawawa <- melt(data.frame(exprs(vg.s['LOC_Os10g33780',])))
-tawawa$variable <- gsub('\\.', '\n', tawawa$variable)
-
-['LOC_Os10g33780',]
-
-gL + geom_line(data = tawawa,
-               aes(x = variable, y = value, group = 1), colour = 'blue')
-
-sapply(c(1:length(clusters)), function(i) 'LOC_Os04g22870' %in% clusters[[i]]$NAME)
+sInf <- c(paste("git branch:",system("git rev-parse --abbrev-ref HEAD", intern = TRUE)),
+          paste("git hash:", system("git rev-parse HEAD", intern = TRUE)),
+          capture.output(sessionInfo()))
+writeLines(sInf, paste0(outDir, "/sessionInfo.txt"))
