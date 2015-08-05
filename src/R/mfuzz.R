@@ -3,7 +3,7 @@
 #SBATCH --job-name Rscript
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --output log/shuffledTpm.%N.%j.out
+#SBATCH --output log/mfuzz.%N.%j.out
 #SBATCH --open-mode=append
 #SBATCH --mail-type=ALL
 
