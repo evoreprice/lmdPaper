@@ -113,7 +113,7 @@ for d in "output/madsComp/sl/star-index"*; do
 	[[ -d "$d" ]] && outdir="$d" || unset outdir
 	break
 done
-if test $outdir; then
+if [[ $outdir ]]; then
 	echo -e "[ "$(date)": Found STAR index ]\n"$outdir""
 else
 	echo "genome_generate"
@@ -152,7 +152,7 @@ readFiles=("data/reads/tomato/*L.fastq.gz")
 shopt -u nullglob
 for fwd_reads in $readFiles; do
 	fFile="$(basename $fwd_reads)"
-	lib_name="${fFile:0:8}"
+	lib_name="${fFile%"_L.fastq.gz"}"
 	rev_reads="data/reads/tomato/$(basename $fwd_reads L.fastq.gz)R.fastq.gz"
 	if [[ ! -e "$rev_reads" ]]; then echo -e "Error: rev_reads not found\n[ lib_name ]:\t$lib_name\n[ rev_reads ]:\t$rev_reads"; exit 1; fi
 	output="$outdir/$lib_name.R1.fastq.gz"
@@ -248,7 +248,7 @@ shopt -u nullglob
 for fwd_read_file in $fastq_files
 do
 	n=$(basename $fwd_read_file)
-	library_name="${n:0:8}"
+	library_name="${n%".R1.fastq.gz"}"
 	rev_read_file=${fwd_read_file/$library_name.R1/$library_name.R2}
 	# double check rev_read_file exists
 	if [[ ! -e $rev_read_file ]]; then
@@ -289,7 +289,7 @@ _EOF_
 for fwd_read_file in $fastq_files
 do
 	n=$(basename $fwd_read_file)
-	library_name="${n:0:8}"
+	library_name="${n%".R1.fastq.gz"}"
 	rev_read_file=${fwd_read_file/$library_name.R1/$library_name.R2}
 	# double check rev_read_file exists
 	if [[ ! -e $rev_read_file ]]; then
