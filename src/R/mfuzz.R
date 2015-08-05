@@ -96,7 +96,6 @@ memCutoff <- 0.5
 set.seed(1)
 c1 <- mfuzz(vg.s, c = c, m = m1)
 clusters <- acore(vg.s, c1, min.acore = memCutoff)
-print(ggplotClusters(clusters = c1, expressionMatrix = exprs(vg.s), memCutoff = 0.5, pointsize = 10, ncol = 3))
 
 # annotate the clusters for output
 
