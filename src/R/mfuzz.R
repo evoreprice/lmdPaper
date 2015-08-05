@@ -46,7 +46,7 @@ vstFiltered <- vstMeans[expressedGenes,]
 
 # get the most variable genes
 vstByVar <- vstFiltered[(rev(order(apply(vstFiltered, 1, var)))),]
-varGenes <- vstByVar[1:(0.25 * dim(vstByVar)[1]),]
+varGenes <- vstByVar[1:(0.1 * dim(vstByVar)[1]),]
 
 # set up the expressionSet
 pData <- data.frame(Stage = as.factor(colnames(varGenes)), row.names = colnames(varGenes))
@@ -60,33 +60,37 @@ vg.s <- standardise(vg.e)
 m1 <- mestimate(vg.s)
 
 # estimate the cluster number
-maxClust <- 15
+maxClust <- 20
 centroids <- data.frame(
-  x = 1:(maxClust - 1),
+  x = 2:(maxClust),
   y = Dmin(vg.s, m = m1, crange = seq(2, maxClust, 1), repeats = 3, visu = FALSE)
 )
 
-# up to here, looking ok
-
-points <- seq(1, maxClust - 1, length.out = 20)
-pred <- predict(loess(centroids$y ~ centroids$x), points)
-infl <- c(FALSE, diff(diff(diff(pred)) > 0) != 0)
-
-ggplot(centroids, aes(x = x, y = y)) +
+# visualise dmin vs cluster number
+centPlot <- ggplot(centroids, aes(x = x, y = y)) +
   theme_minimal() +
+  xlab(expression(Cluster~number~"("*italic(c)*")")) +
+  ylab("Minimum centroid distance") +
   geom_point() +
-  geom_smooth() +
-  geom_point(data = data.frame(x = points[infl], y = pred[infl]), colour = 'red')
+  stat_smooth(method = loess, se = FALSE)
 
-c <- as.integer(round(points[infl]), 0)
+# we will go with 6 clusters
+c <- 6
 
-for (i in c) {
-  
+# can try to find inflection points, doesn't work very well.
+points <- seq(2, maxClust, length.out = 10000)
+pred <- predict(loess(centroids$y ~ centroids$x), points)
+infl <- c(FALSE, diff(diff(pred) > 0) != 0)
+centPlot + geom_point(data = data.frame(x = points[infl], y = pred[infl]), colour = 'red')
+
 set.seed(1)
-c1 <- mfuzz(vg.s, c = i, m = m1 * 1)
-clusters <- acore(vg.s, c1)
-print(ggplotClusters(clusters = c1, expressionMatrix = exprs(vg.s), memCutoff = 0.7, pointsize = 10, ncol = 3))
-}
+c1 <- mfuzz(vg.s, c = c, m = m1)
+clusters <- acore(vg.s, c1, min.acore = 0.5)
+print(ggplotClusters(clusters = c1, expressionMatrix = exprs(vg.s), memCutoff = 0.5, pointsize = 10, ncol = 3))
+
+clusteredGenes <- oryzr::LocToGeneName(unique(unlist(sapply(clusters, rownames))))$names
+clusteredGenes[!is.na(clusteredGenes)]
+clusteredGenes[!is.na(clusteredGenes) & substr(clusteredGenes, 1, 4) == "MADS"]
 
 length(unique(unlist(sapply(clusters, rownames)))) ## number of genes that got clustered
 
@@ -172,11 +176,12 @@ length(names(c1$cluster))
 
 clustered <- unique(unlist(sapply(clusters, rownames)))
 
-vg.d <- dist(exprs(vg.s)[clustered,])
+vg.d <- dist(exprs(vg.s))
 vg.mds <- cmdscale(vg.d, 2)
 
 c1$cluster[clustered]
-apply(c1$membership,1,max)[clustered]
+length(apply(c1$membership,1,max)
+       [clustered])
 
 vg.mds <- data.frame(MDS1 = vg.mds[,1], MDS2 = vg.mds[,2], cluster = c1$cluster,
                      max.membership = apply(c1$membership,1,max))

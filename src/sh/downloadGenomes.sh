@@ -54,6 +54,11 @@ sed '/LOC_Os09g01000/d' $genome_dir/$annotation_file.cuffcomp.combined.gtf \
 rm $genome_dir/*cuffcomp*
 mv $genome_dir/gtf_final.tmp $genome_dir/$annotation_file.cuffcomp.rRNAremoved.gtf
 
+# download MSU annotations file
+annotationsUrl="ftp://ftp.plantbiology.msu.edu/pub/data/Eukaryotic_Projects/o_sativa/annotation_dbs/pseudomolecules/version_7.0/all.dir/all.locus_brief_info.7.0"
+annotationsFile="$(basename $annotationsUrl).tab".
+curl $annotationsUrl > "$genome_dir"/"$annotationsFile"
+
 # log metadata
 cat -t <<- _EOF_ > $genome_dir/METADATA.csv
 	script,${0}
