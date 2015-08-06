@@ -27,7 +27,7 @@ extrafont::loadfonts()
 
 knitr::opts_chunk$set(fig.path='figures/',
                cache.path='cache/',
-               dev=c("cairo_pdf", "svg", "png"),
+               dev=c("cairo_pdf"),
                fig.width=6.614,
                fig.height=6.614,
                fig.align = 'center',
@@ -69,6 +69,15 @@ tableCat <- function(inFrame){
 	}))
 	return(outText)
 }
+
+capwords <- function(s, strict = FALSE) {
+    cap <- function(s) paste(toupper(substring(s, 1, 1)),
+                  {s <- substring(s, 2); if(strict) tolower(s) else s},
+                             sep = "", collapse = " " )
+    sapply(strsplit(s, split = " "), cap, USE.NAMES = !is.null(names(s)))
+}
+
+
 ```
 
 Authors:
@@ -145,6 +154,9 @@ centres.wide <- data.table(c1$centers, Cluster = clustLabels)
 centres <- reshape2::melt(centres.wide, id.vars = 'Cluster', variable.name = 'Stage', value.name = "Normalised, transformed read counts")
 centres[, Stage := plyr::mapvalues(Stage, "ePBM.SBM", "ePBM/SBM")]
 
+# number of clusters (for text)
+c <- length(unique(c1$cluster))
+
 f_mfuzzClusters <- ggplot(plotData, aes(x = Stage, y = `Normalised, transformed read counts`,
                      colour = Membership, group = id)) +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
@@ -157,10 +169,10 @@ f_mfuzzClusters <- ggplot(plotData, aes(x = Stage, y = `Normalised, transformed 
 figCount <- incCount(figCount, "f_mfuzzClusters")
 ```
 
-To recover common expression patterns in the meristem samples, read counts were transformed using the variance-stabilizing transformation (VST) included in the `DESeq2` package [@Love:2014do], and the standardised, VST-transformed read counts were clustered using the fuzzy *c*-means algorithm implemented in the `Mfuzz` package [@Futschik:2005vo]. To determine the number of cluster cores (*c*), the minimum distance between cluster centroids, the formation of empty clusters, and PCA plots of cluster members were monitored for clusters produced with *c* values between `cmin` and `cmax` (@SI). A cluster number of `{r} c` was chosen (**`r I(pasteLabel("Figure", figCount, "f_mfuzzClusters"))`**).
+To recover common expression patterns in the meristem samples, read counts were transformed using the variance-stabilizing transformation (VST) included in the `DESeq2` package [@Love:2014do], and the standardised, VST-transformed read counts were clustered using the fuzzy *c*-means algorithm implemented in the `Mfuzz` package [@Futschik:2005vo]. To determine the number of cluster cores (*c*), the minimum distance between cluster centroids, the formation of empty clusters, and PCA plots of cluster members were monitored for clusters produced with *c* values between `cmin` and `cmax` (@SI). A cluster number of `r as.character(english::english(c))` *justify chosing this? double diffential was closest to zero?* (**`r I(pasteLabel("Figure", figCount, "f_mfuzzClusters"))`**).
 
 <a id="f_mfuzzClusters"></a>
-```{r f_mfuzzClusters, fig.cap="Fuzzy \\emph{c}-means clustering of normalised, transformed read counts"}
+```{r f_mfuzzClusters, fig.height=4.40933}
 print(f_mfuzzClusters)
 ```
 
@@ -195,6 +207,11 @@ print(f_mfuzzClusters)
 ***
 
 # Figure legends
+
+`r I(pasteLabel("Figure", figCount, "f_mfuzzClusters"))`
+**Fuzzy *c*-means clustering of normalised, transformed read counts**
+
+`r capwords(as.character(english::english(c)))` common patterns of expression were recovered from the normalised, variance-stabilised read counts. Genes expressed in blah blah
 
 ***
 
