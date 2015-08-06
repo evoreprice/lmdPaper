@@ -1,15 +1,15 @@
 ---
-title: "Genome-wide changes in expression during inflorescence architecture development
-  in rice"
+title: Genome-wide changes in expression during inflorescence architecture development
+  in rice
 csl: csl/the-plant-journal.csl
+header-includes: \usepackage{graphicx}
 output:
-  pdf_document:
-    fig_caption: yes
-    keep_md: yes
-    keep_tex: yes
-    number_sections: yes
   word_document:
     fig_caption: yes
+  pdf_document:
+    fig_caption: yes
+    keep_tex: yes
+    number_sections: yes
   BiocStyle::html_document:
     fig_caption: yes
     force_captions: yes
@@ -18,6 +18,58 @@ output:
     number_sections: yes
 bibliography: bib/test.bib
 ---
+
+```{r Setup, include=FALSE, results="hide", warning=FALSE}
+
+library(data.table)
+library(ggplot2)
+extrafont::loadfonts()
+
+knitr::opts_chunk$set(fig.path='figures/',
+               cache.path='cache/',
+               dev=c("cairo_pdf", "svg", "png"),
+               fig.width=6.614,
+               fig.height=6.614,
+               fig.align = 'center',
+               dpi=300,
+               fig.show='hold',
+               cache=TRUE,
+               echo=FALSE,
+               results="hide",
+               message=FALSE,
+               warning=FALSE)
+
+# https://gist.githubusercontent.com/rmflight/3858973/raw/591ee603ce0996ac407902f7dd59520b35b3702a/tableFigureFuncs.r
+pasteLabel <- function(preText, inObj, objName, insLink=TRUE){
+	objNum <- inObj[objName]
+	
+	useText <- paste(preText, objNum, sep=" ")
+	if (insLink){
+		useText <- paste("[", useText, "](#", objName, ")", sep="")
+	}
+	useText
+}
+
+# this increments the counter, and gives a name to the number so we can reference it later
+incCount <- function(inObj, useName){
+	nObj <- length(inObj)
+	useNum <- max(inObj) + 1
+	inObj <- c(inObj, useNum)
+	names(inObj)[nObj+1] <- useName
+	inObj
+}
+figCount <- c("_"=0)
+tableCount <- c("_"=0)
+
+tableCat <- function(inFrame){
+	outText <- paste(names(inFrame), collapse=" | ")
+	outText <- c(outText, paste(rep("---", ncol(inFrame)), collapse=" | "))
+	invisible(apply(inFrame, 1, function(inRow){
+		outText <<- c(outText, paste(inRow, collapse=" | "))
+	}))
+	return(outText)
+}
+```
 
 Authors:
 
@@ -57,16 +109,71 @@ Word count
 
 ## Clustering of expression patterns
 
-To recover common expression patterns in the meristem samples, read counts were transformed using the variance-stabilizing transformation (VST) included in the `DESeq2` package [@Love:2014do], and the standardised, VST-transformed read counts were clustered using the fuzzy *c*-means algorithm implemented in the `Mfuzz` package [@Futschik:2005vo]. To determine the number of cluster cores (*c*), the minimum distance between cluster centroids, the formation of empty clusters, and PCA plots of cluster members were monitored for clusters produced with *c* values between `cmin` and `cmax` (@SI). A cluster number of `{r} c` was chosen, 
+```{r mfuzz}
+expressionMatrix <- readRDS('output/cutadapt-2015-07-29/STAR-2015-07-29/DESeq2-2015-08-04/mfuzz-2015-08-05/expressionMatrix.Rds')
+c1 <- readRDS('output/cutadapt-2015-07-29/STAR-2015-07-29/DESeq2-2015-08-04/mfuzz-2015-08-05/c1.Rds')
+memCutoff <- 0.5
+
+# get clusters and membership
+cluster <- data.table(id = names(c1$cluster), Cluster = c1$cluster, Membership = apply(c1$membership, 1, max), key = "id")
+
+# get standardised VST counts
+exprs <- data.table(Biobase::exprs(expressionMatrix), keep.rownames = TRUE, key = "rn")
+
+# set up cluster labels
+numGenes <- cluster[Membership > 0.5, .(number = length(id)), by = Cluster]
+setkey(numGenes, 'Cluster')
+clustLabels <- numGenes[, paste0("Cluster ", Cluster, "\n(", number, " genes)")]
+
+# merge clusters with expression values
+plotData.wide <- cluster[exprs]
+
+# make long
+plotData <- reshape2::melt(plotData.wide[ Membership > memCutoff ], id.vars = c('id', 'Cluster', 'Membership'), variable.name = 'Stage', value.name = "Normalised, transformed read counts")
+
+# add cluster labels
+plotData[, Cluster := plyr::mapvalues(as.factor(Cluster), seq(1, length(unique(Cluster))), clustLabels)]
+
+# fix stage label
+plotData[, Stage := plyr::mapvalues(Stage, "ePBM.SBM", "ePBM/SBM")]
+
+# set up heatscale
+heatscale <- RColorBrewer::brewer.pal(n = 6, name = "YlOrRd")
+
+# add centres
+centres.wide <- data.table(c1$centers, Cluster = clustLabels)
+centres <- reshape2::melt(centres.wide, id.vars = 'Cluster', variable.name = 'Stage', value.name = "Normalised, transformed read counts")
+centres[, Stage := plyr::mapvalues(Stage, "ePBM.SBM", "ePBM/SBM")]
+
+f_mfuzzClusters <- ggplot(plotData, aes(x = Stage, y = `Normalised, transformed read counts`,
+                     colour = Membership, group = id)) +
+  theme_minimal(base_size = 8, base_family = "Helvetica") +
+  xlab(NULL) +
+  scale_colour_gradientn(colours = heatscale, limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
+  geom_line() +
+  geom_line(data = centres, mapping = aes(group = 1), colour = "black", alpha = 0.5) +
+  facet_wrap(~ Cluster)
+
+figCount <- incCount(figCount, "f_mfuzzClusters")
+```
+
+To recover common expression patterns in the meristem samples, read counts were transformed using the variance-stabilizing transformation (VST) included in the `DESeq2` package [@Love:2014do], and the standardised, VST-transformed read counts were clustered using the fuzzy *c*-means algorithm implemented in the `Mfuzz` package [@Futschik:2005vo]. To determine the number of cluster cores (*c*), the minimum distance between cluster centroids, the formation of empty clusters, and PCA plots of cluster members were monitored for clusters produced with *c* values between `cmin` and `cmax` (@SI). A cluster number of `{r} c` was chosen (**`r I(pasteLabel("Figure", figCount, "f_mfuzzClusters"))`**).
+
+<a id="f_mfuzzClusters"></a>
+```{r f_mfuzzClusters, fig.cap="Fuzzy \\emph{c}-means clustering of normalised, transformed read counts"}
+print(f_mfuzzClusters)
+```
 
 + **Figure**: Gene expression clusters
 + GO enrichment?
 + Clusters including 'known' genes
 
 ## Patterns of expression of transcription families
+
 + **Figure**: GSEA of transcription factor families
 
 ## MADS genes: comparison of expression & homology in rice, tomato, arabidopsis
+
 + **Figure**: Similarity tree of MADS proteins with expression values and dN/dS values for each one.
 
 # Discussion
