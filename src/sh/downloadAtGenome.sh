@@ -26,16 +26,16 @@ annot_url='http://genome.jgi.doe.gov/Athaliana/download/_JAMO/53112a1a49607a1be0
 genome_file="$(basename $genome_url .fa.gz)"
 annotation_file="$(basename $annot_url .gff3.gz)"
 
+# download genomes
+if [ ! -d $genome_dir ]; then
+	mkdir -p $genome_dir
+fi
+
 # open phytozome session
 echo -e "[ "$(date)": Signing on to phytozome at JGI ]"
 curl https://signon.jgi.doe.gov/signon/create --data-ascii \
 	login="$EMAIL"\&password="$PASSWORD" \
 	-b "$genome_dir"/cookies -c "$genome_dir"/cookies > /dev/null
-
-# download genomes
-if [ ! -d $genome_dir ]; then
-	mkdir -p $genome_dir
-fi
 
 cat <<- _EOF_
 	[ $(date): Downloading genome fasta ]

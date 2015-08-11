@@ -107,9 +107,6 @@ def touch(fname, mode=0o666, dir_fd=None, **kwargs):
         os.utime(f.fileno() if os.utime in os.supports_fd else fname,
             dir_fd=None if os.supports_fd else dir_fd, **kwargs)
 
-# folder for ruffus files
-@mkdir("ruffus")
-
 #---------------------------------------------------------------
 # download rice genomes
 #
@@ -155,4 +152,4 @@ pipeline_printout()
 pipeline_printout_graph("ruffus/flowchart." + slurm_jobid + ".pdf", "pdf")
 
 # run the pipeline (disabled for now)
-cmdline.run(options, multithread = 8)
+cmdline.run(options, multiprocess = 8, exceptions_terminate_immediately = True)
