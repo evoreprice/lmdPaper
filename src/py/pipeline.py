@@ -76,11 +76,10 @@ def submit_download_job(jobScript, job_name, jgiLogon, jgiPassword):
     assert jgiPassword, "--password is required"
 
     ntasks = '1'
-    cpus_per_task = '1'
 
     # call download script    
-    proc = Popen(['salloc', '--ntasks=' + ntasks, '--cpus-per-task=' + cpus_per_task,
-    '--job-name=' + job_name, jobScript, "-e", jgiLogon, "-p", jgiPassword], 
+    proc = Popen(['salloc', '--ntasks=' + ntasks,'--job-name=' + job_name,
+                  jobScript, "-e", jgiLogon, "-p", jgiPassword], 
     stdout = PIPE, stderr = PIPE)
     # get stdout and stderr    
     out, err = proc.communicate()
@@ -98,8 +97,7 @@ def submit_download_job(jobScript, job_name, jgiLogon, jgiPassword):
                   'tom'], stdin = PIPE)
     mail.communicate(out)
     # check completion    
-    assert proc.returncode == 0, 'Job failed with non-zero exit code'
-    return(jobId)
+    return(proc.returncode, jobId)
 
 # touch function for updating ruffus flag files
 def touch(fname, mode=0o666, dir_fd=None, **kwargs):
@@ -119,7 +117,9 @@ def touch(fname, mode=0o666, dir_fd=None, **kwargs):
 def download_os_genome(outputFiles, jgiLogon, jgiPassword):
     jobScript = 'src/sh/downloadGenomes.sh'
     job_name = 'osGen'
-    submit_download_job(jobScript, job_name, jgiLogon, jgiPassword)
+    rc, jobId = submit_download_job(jobScript, job_name, jgiLogon, jgiPassword)
+    assert rc == 0, 'Job failed with non-zero exit code'
+       
     # update ruffus flag
     touch(outputFiles)
     print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
@@ -155,4 +155,4 @@ pipeline_printout()
 pipeline_printout_graph("ruffus/flowchart." + slurm_jobid + ".pdf", "pdf")
 
 # run the pipeline (disabled for now)
-cmdline.run(options, multiprocess = 8)
+cmdline.run(options, multithread = 8)
