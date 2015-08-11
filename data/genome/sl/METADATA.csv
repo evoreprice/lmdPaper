@@ -1,0 +1,5 @@
+script,src/sh/downloadSlGenome.sh
+branch,implementRuffus
+hash,67deee7fa478f72681b1e7af8f5e2a4f47af2ce9
+date,2015-08-11
+cuffcomp version,cuffcompare v2.2.1 (4237)

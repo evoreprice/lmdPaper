@@ -42,7 +42,6 @@ def print_now():
 # Custom job submission step. Dirty hack. Need to exit 0 at end of each script
 # and use set -e for safety
 def submit_job(jobScript, ntasks, cpus_per_task, job_name):
-
     '''
     Submit the job using salloc hack. When complete return job id and write output to file.
     '''
@@ -64,7 +63,6 @@ def submit_job(jobScript, ntasks, cpus_per_task, job_name):
     mail = Popen(['mail', '-s', "[Tom@SLURM] Pipeline step " + jobId + " finished",
                   'tom'], stdin = PIPE)
     mail.communicate(out)
-
     # check subprocess exit code
     assert proc.returncode == 0, 'Job failed with non-zero exit code'  
     return(jobId)
@@ -118,8 +116,8 @@ def download_os_genome(outputFiles, jgiLogon, jgiPassword):
     jobId = submit_download_job(jobScript, job_name, jgiLogon, jgiPassword)
 
     # update ruffus flag
-    touch(outputFiles)
     print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)
 
 #---------------------------------------------------------------
 # download tomato genome
@@ -129,27 +127,59 @@ def download_os_genome(outputFiles, jgiLogon, jgiPassword):
 def download_sl_genome(outputFiles, jgiLogon, jgiPassword):
     jobScript = 'src/sh/downloadSlGenome.sh'
     job_name = 'slGen'
-    submit_download_job(jobScript, job_name, jgiLogon, jgiPassword)
+    jobId = submit_download_job(jobScript, job_name, jgiLogon, jgiPassword)
     # update ruffus flag
-    touch(outputFiles)
     print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)
 
 #---------------------------------------------------------------
-# download tomato genome
+# download arabidopsis genome
 #
 @originate(['ruffus/at.genome'], jgiLogon, jgiPassword)
 
 def download_at_genome(outputFiles, jgiLogon, jgiPassword):
     jobScript = 'src/sh/downloadAtGenome.sh'
     job_name = 'atGen'
-    submit_download_job(jobScript, job_name, jgiLogon, jgiPassword)
+    jobId = submit_download_job(jobScript, job_name, jgiLogon, jgiPassword)
     # update ruffus flag
-    touch(outputFiles)
     print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
-   
+    touch(outputFiles)
+    
+#---------------------------------------------------------------
+# download tomato reads
+#
+@originate(['ruffus/sl.reads'])
+
+def download_sl_reads(outputFiles):
+    jobScript = 'src/sh/downloadSlReads.sh'
+    ntasks = '4'
+    cpus_per_task = '1'
+    job_name = 'slReads'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)
+
+#---------------------------------------------------------------
+# download arabidopsis reads
+#
+@originate(['ruffus/at.reads'])
+
+def download_at_reads(outputFiles):
+    jobScript = 'src/sh/downloadAtReads.sh'
+    ntasks = '1'
+    cpus_per_task = '1'
+    job_name = 'atReads'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)
+    
+
+    
 # options for visualising
 pipeline_printout()
 pipeline_printout_graph("ruffus/flowchart." + slurm_jobid + ".pdf", "pdf")
 
 # run the pipeline (disabled for now)
-cmdline.run(options, multiprocess = 8, exceptions_terminate_immediately = True)
+cmdline.run(options, multithread = 8)
