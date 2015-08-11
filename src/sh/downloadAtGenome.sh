@@ -19,29 +19,29 @@ while [ "$1" != "" ]; do
 	shift
 done
 
-genome_dir='data/genome/os'
-genome_url='http://genome.jgi.doe.gov/Osativa/download/_JAMO/53112abc49607a1be00559bc/Osativa_204_v7.0.fa.gz'
-annot_url='http://genome.jgi.doe.gov/Osativa/download/_JAMO/53112ab649607a1be00559b0/Osativa_204_v7.0.gene_exons.gff3.gz'
-
+# arabidopsis
+genome_dir='data/genome/at'
+genome_url='http://genome.jgi.doe.gov/Athaliana/download/_JAMO/53112a1d49607a1be0055864/Athaliana_167_TAIR9.fa.gz'
+annot_url='http://genome.jgi.doe.gov/Athaliana/download/_JAMO/53112a1a49607a1be005585d/Athaliana_167_TAIR10.gene_exons.gff3.gz'
 genome_file="$(basename $genome_url .fa.gz)"
 annotation_file="$(basename $annot_url .gff3.gz)"
+
+# open phytozome session
+echo -e "[ "$(date)": Signing on to phytozome at JGI ]"
+curl https://signon.jgi.doe.gov/signon/create --data-ascii \
+	login="$EMAIL"\&password="$PASSWORD" \
+	-b "$genome_dir"/cookies -c "$genome_dir"/cookies > /dev/null
 
 # download genomes
 if [ ! -d $genome_dir ]; then
 	mkdir -p $genome_dir
 fi
 
-echo -e "[ "$(date)": Signing on to phytozome at JGI ]"
-curl https://signon.jgi.doe.gov/signon/create --data-ascii \
-	login="$EMAIL"\&password="$PASSWORD" \
-	-b "$genome_dir"/cookies -c "$genome_dir"/cookies > /dev/null
-
 cat <<- _EOF_
 	[ $(date): Downloading genome fasta ]
 	$genome_url
 _EOF_
 curl $genome_url -b "$genome_dir"/cookies -c "$genome_dir"/cookies > $genome_dir/$genome_file.fa.gz
-
 # make sure the file was downloaded
 if [[ ! -s "$genome_dir"/"$genome_file.fa.gz" ]]; then
 	echo -e "[ "$(date)": ERROR: download failed, check password? ]"
@@ -58,30 +58,20 @@ echo -e "[ "$(date)": Unzipping downloads ]"
 gunzip $genome_dir/$genome_file.fa.gz
 gunzip $genome_dir/$annotation_file.gff3.gz
 
-rm "$genome_dir"/cookies
-
 # make cuffcomp gtf
 echo -e "[ "$(date)": Making GTF file with cuffcompare ]"
 cuffcompare -s $genome_dir/$genome_file.fa -CG -r $genome_dir/$annotation_file.gff3 \
 	-o $genome_dir/$annotation_file.cuffcomp $genome_dir/$annotation_file.gff3
 
-# remove Chr9 rRNA 'genes'
-sed '/LOC_Os09g01000/d' $genome_dir/$annotation_file.cuffcomp.combined.gtf \
-	| sed '/LOC_Os09g00999/d' \
-	> $genome_dir/gtf_final.tmp
+# stash new gtf
+mv $genome_dir/$annotation_file.cuffcomp.combined.gtf $genome_dir/gtf_final.tmp
 
 # remove cuffcomp intermediates
 rm $genome_dir/*cuffcomp*
-mv $genome_dir/gtf_final.tmp $genome_dir/$annotation_file.cuffcomp.rRNAremoved.gtf
+mv $genome_dir/gtf_final.tmp $genome_dir/$annotation_file.cuffcomp.gtf
 
-# download MSU annotations file
-annotationsUrl="ftp://ftp.plantbiology.msu.edu/pub/data/Eukaryotic_Projects/o_sativa/annotation_dbs/pseudomolecules/version_7.0/all.dir/all.locus_brief_info.7.0"
-annotationsFile="$(basename $annotationsUrl).tab".
-cat <<- _EOF_
-	[ $(date): Downloading MSU gene function annotations ]
-	$genome_url
-_EOF_
-curl $annotationsUrl > "$genome_dir"/"$annotationsFile"
+# tidy up
+rm "$genome_dir"/cookies
 
 # log metadata
 cat -t <<- _EOF_ > $genome_dir/METADATA.csv
