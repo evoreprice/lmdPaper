@@ -79,8 +79,8 @@ def submit_download_job(jobScript, job_name, jgiLogon, jgiPassword):
 
     # call download script    
     proc = Popen(['salloc', '--ntasks=' + ntasks,'--job-name=' + job_name,
-                  jobScript, "-e", jgiLogon, "-p", jgiPassword], 
-    stdout = PIPE, stderr = PIPE)
+                  jobScript, "-e", jgiLogon, "-p", jgiPassword],
+                  stdout = PIPE, stderr = PIPE)
     # get stdout and stderr    
     out, err = proc.communicate()
     # parse stderr (salloc output) for job id
@@ -97,7 +97,8 @@ def submit_download_job(jobScript, job_name, jgiLogon, jgiPassword):
                   'tom'], stdin = PIPE)
     mail.communicate(out)
     # check completion    
-    return(proc.returncode, jobId)
+    assert proc.returncode == 0, "Job " + job_name + " failed with non-zero exit code"
+    return(jobId)
 
 # touch function for updating ruffus flag files
 def touch(fname, mode=0o666, dir_fd=None, **kwargs):
@@ -117,9 +118,8 @@ def touch(fname, mode=0o666, dir_fd=None, **kwargs):
 def download_os_genome(outputFiles, jgiLogon, jgiPassword):
     jobScript = 'src/sh/downloadGenomes.sh'
     job_name = 'osGen'
-    rc, jobId = submit_download_job(jobScript, job_name, jgiLogon, jgiPassword)
-    assert rc == 0, 'Job failed with non-zero exit code'
-       
+    jobId = submit_download_job(jobScript, job_name, jgiLogon, jgiPassword)
+
     # update ruffus flag
     touch(outputFiles)
     print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
