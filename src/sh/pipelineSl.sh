@@ -1,25 +1,18 @@
 #!/bin/bash
 
-#SBATCH --job-name compSl
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=6
-#SBATCH --output /tmp/compSl.%N.%j.out
-#SBATCH --open-mode=append
-#SBATCH --nice=500
-#SBATCH --mail-type=ALL
+set -e
 
-
-### SETUP -------------------------------------------------------------------------
+# how many CPUs we got?
+if [[ $SLURM_JOB_CPUS_PER_NODE ]]; then
+	maxCpus="$SLURM_JOB_CPUS_PER_NODE"
+	echo -e "[ "$(date)": Running with "$maxCpus" CPUs ]"
+else
+	maxCpus=1
+fi
 
 # cleanup functions
 exit_error() {
 	echo -e "[ "$(date)": Script aborted ]"
-	# email output
-	cat <<- _EOF_ | mail -s "[Tom@SLURM] Job "$SLURM_JOBID" aborted" tom
-	Job $SLURM_JOBID submitted at $THEN was aborted.
-	Output so far:
-	$(cat /tmp/compSl."$SLURM_JOB_NODELIST"."$SLURM_JOBID".out)
-_EOF_
 	exit 1
 }
 
@@ -37,21 +30,18 @@ trap_exit() {
 trap exit_error SIGHUP SIGINT SIGTERM
 trap trap_exit EXIT
 
-# periodic updates
-update_output() {
-	echo -e "[ "$(date)": updating output ]"
-	cat <<- _EOF_ | mail -s "[Tom@SLURM] Pipeline job "$SLURM_JOBID" running" tom
-	Job $SLURM_JOBID submitted at $THEN is running.
-	Output so far:
-	$(cat /tmp/compSl."$SLURM_JOB_NODELIST"."$SLURM_JOBID".out)
-_EOF_
+# handle waiting
+FAIL=0
+fail_wait() {
+for job in $(jobs -p); do
+  wait $job || let "FAIL+=1"
+done
+if [[ ! "$FAIL" == 0 ]]; then
+  exit 1
+fi
 }
 
-
 ### CODE STARTS HERE ------------------------------------------------------------------
-
-
-# TOMATO
 
 echo -e "[ "$(date)": Starting pipeline for Solanum lycopersicum ]"
 
@@ -63,27 +53,26 @@ genome_generate() {
 echo -e "[ "$(date)": Genome generation with STAR ]"
 
 # make output directory
-outdir="output/madsComp/sl/star-index-"$(date +%F)""
+outdir="output/madsComp/sl/star-index"
 if [[ ! -d $outdir ]]; then
 	mkdir -p $outdir
 fi
 
 # set parameters
-genomeFastaFiles="data/sl/genome/Slycopersicum_225_iTAGv2.40.fa"
-sjdbGTFfile="data/sl/genome/Slycopersicum_225_iTAGv2.3.gene_exons.cuffcomp.gtf"
+genomeFastaFiles="data/genome/sl/Slycopersicum_225_iTAGv2.40.fa"
+sjdbGTFfile="data/genome/sl/Slycopersicum_225_iTAGv2.3.gene_exons.cuffcomp.gtf"
 sjdbGTFtagExonParentTranscript="oId"
 sjdbGTFtagExonParentGene="gene_name"
 sjdbOverhang=49
 outFileNamePrefix="$outdir/"
 
 # log metadata
-version="$(STAR --version)"
 cat -t <<- _EOF_ > $outdir/METADATA.csv
 	Script,${0}
 	branch,$(git rev-parse --abbrev-ref HEAD)
 	hash,$(git rev-parse HEAD)
 	date,$(date +%F)
-	STAR version,$version
+	STAR version,$(STAR --version)
 	genomeFastaFiles,$genomeFastaFiles
 	sjdbGTFfile,$sjdbGTFfile
 	sjdbOverhang,$sjdbOverhang
@@ -97,35 +86,29 @@ sjdbGTFtagExonParentTranscript:    $sjdbGTFtagExonParentTranscript
                   sjdbOverhang:    $sjdbOverhang
 _EOF_
 
-cmd="STAR --runThreadN 6 --runMode genomeGenerate --genomeDir $outdir --genomeFastaFiles $genomeFastaFiles --sjdbGTFfile $sjdbGTFfile --sjdbGTFtagExonParentTranscript $sjdbGTFtagExonParentTranscript --sjdbGTFtagExonParentGene $sjdbGTFtagExonParentGene --sjdbOverhang $sjdbOverhang --outFileNamePrefix $outFileNamePrefix"
-
-srun --output $outdir/stargg.out --exclusive --ntasks=1 --cpus-per-task=6 $cmd &
+FAIL=0
+cmd="STAR --runThreadN "$maxCpus" --runMode genomeGenerate --genomeDir $outdir --genomeFastaFiles $genomeFastaFiles --sjdbGTFfile $sjdbGTFfile --sjdbGTFtagExonParentTranscript $sjdbGTFtagExonParentTranscript --sjdbGTFtagExonParentGene $sjdbGTFtagExonParentGene --sjdbOverhang $sjdbOverhang --outFileNamePrefix $outFileNamePrefix"
+srun --output $outdir/stargg.out --exclusive --ntasks=1 --cpus-per-task="$maxCpus" $cmd &
 
 echo -e "[ "$(date)": Waiting... ]"
-wait
-
+fail_wait
 echo -e "[ "$(date)": Genome generation finished ]"
-update_output
 }
 
 # check if genome exists already
-for d in "output/madsComp/sl/star-index"*; do
-	[[ -d "$d" ]] && outdir="$d" || unset outdir
-	break
-done
+outdir="output/madsComp/sl/star-index"
 if [[ $outdir ]]; then
 	echo -e "[ "$(date)": Found STAR index ]\n"$outdir""
 else
-	echo "genome_generate"
+	genome_generate
 fi
-
 
 # 2. Trim adaptors
 
 echo -e "[ "$(date)": Trimming reads with cutadapt ]"
 
 # make today's output directory
-outdir="output/madsComp/sl/cutadapt-"$(date +%F)""
+outdir="output/madsComp/sl/cutadapt"
 if [[ ! -d $outdir ]]; then
 	mkdir -p $outdir
 fi
@@ -148,12 +131,13 @@ minimum_length=50
 echo -e "[ "$(date)": Submitting cutadapt jobs ]"
 
 shopt -s nullglob
-readFiles=("data/reads/tomato/*L.fastq.gz")
+readFiles=("data/reads/sl/*L.fastq.gz")
 shopt -u nullglob
+FAIL=0
 for fwd_reads in $readFiles; do
 	fFile="$(basename $fwd_reads)"
 	lib_name="${fFile%"_L.fastq.gz"}"
-	rev_reads="data/reads/tomato/$(basename $fwd_reads L.fastq.gz)R.fastq.gz"
+	rev_reads="data/reads/sl/$(basename $fwd_reads L.fastq.gz)R.fastq.gz"
 	if [[ ! -e "$rev_reads" ]]; then echo -e "Error: rev_reads not found\n[ lib_name ]:\t$lib_name\n[ rev_reads ]:\t$rev_reads"; exit 1; fi
 	output="$outdir/$lib_name.R1.fastq.gz"
 	paired_output="$outdir/$lib_name.R2.fastq.gz"
@@ -172,41 +156,31 @@ _EOF_
 done
 
 echo -e "[ "$(date)": Waiting for adaptor trimming to finish ]"
-wait
-
+fail_wait
 echo -e "[ "$(date)": Adaptor trimming finished ]"
-update_output
 
 # 3. Run 2-step mapping
 
 echo -e "[ "$(date)": Two-step mapping with STAR ]"
 
-# choose the most recent STAR index
-shopt -s nullglob
-folders=(output/madsComp/sl/star-index*)
-shopt -u nullglob
 # stop if there is no STAR index
-if (( ${#folders[@]} == 0 )); then
+star_index_dir="output/madsComp/sl/star-index"
+if [[ ! -d "$star_index_dir"]]; then
 	echo -e "[ "$(date)": No STAR index found ]"
 	exit 1
 fi
-star_index_dir="${folders[-1]}"
 echo -e "[ "$(date)": Using STAR index $star_index_dir ]"
 
-# choose the most recent cutadapt output
-shopt -s nullglob
-folders=(output/madsComp/sl/cutadapt*)
-shopt -u nullglob
 # stop if there is no cutadapt folder
-if (( ${#folders[@]} == 0 )); then
+cutadapt_dir="output/madsComp/sl/cutadapt"
+if [[ ! -d "$cutadapt_dir" ]]; then
 	echo -e "[ "$(date)": No cutadapt folder found ]"
 	exit 1
 fi
-cutadapt_dir="${folders[-1]}"
 echo -e "[ "$(date)": Using cutadapt folder $cutadapt_dir ]"
 
 # make today's output directory
-outdir="$cutadapt_dir/STAR-"$(date +%F)""
+outdir="output/madsComp/sl/STAR"
 if [[ ! -d $outdir ]]; then
 	mkdir -p $outdir
 fi
@@ -224,11 +198,11 @@ _EOF_
 
 # load genome
 echo -e "[ "$(date)": Loading genome into shared memory ]"
-cmd="STAR --runThreadN 6 --genomeDir $star_index_dir --genomeLoad LoadAndExit --outFileNamePrefix $outdir/gLoad."
-srun --ntasks=1 --exclusive --cpus-per-task=6 $cmd
+cmd="STAR --runThreadN "$maxCpus" --genomeDir $star_index_dir --genomeLoad LoadAndExit --outFileNamePrefix $outdir/gLoad."
+srun --ntasks=1 --exclusive --cpus-per-task="$maxCpus" $cmd
 
 # STAR options
-OPTIONS="--runThreadN 6 --genomeDir "$star_index_dir" --outSAMtype BAM Unsorted --alignIntronMax 5000 --outSJfilterReads Unique --outSJfilterCountUniqueMin 5 5 5 5 --outSJfilterCountTotalMin 5 5 5 5 --outSJfilterIntronMaxVsReadN 5000 --readFilesCommand zcat"
+OPTIONS="--runThreadN "$maxCpus" --genomeDir "$star_index_dir" --outSAMtype BAM Unsorted --alignIntronMax 5000 --outSJfilterReads Unique --outSJfilterCountUniqueMin 5 5 5 5 --outSJfilterCountTotalMin 5 5 5 5 --outSJfilterIntronMaxVsReadN 5000 --readFilesCommand zcat"
 
 ### STEP 1
 
@@ -244,9 +218,8 @@ shopt -s nullglob
 fastq_files=("$cutadapt_dir/*R1.fastq.gz")
 shopt -u nullglob
 
-
-for fwd_read_file in $fastq_files
-do
+FAIL=0
+for fwd_read_file in $fastq_files; do
 	n=$(basename $fwd_read_file)
 	library_name="${n%".R1.fastq.gz"}"
 	rev_read_file=${fwd_read_file/$library_name.R1/$library_name.R2}
@@ -262,15 +235,15 @@ do
 	rev_read_file:    $rev_read_file
 _EOF_
 	cmd="STAR $OPTIONS --genomeLoad LoadAndKeep --readFilesIn $fwd_read_file $rev_read_file --outFileNamePrefix $outdir/step1/$library_name."
-	srun --output $outdir/step1/$library_name.out --exclusive --ntasks=1 --cpus-per-task=6 $cmd &	
+	srun --output $outdir/step1/$library_name.out --exclusive --ntasks=1 --cpus-per-task="$maxCpus" $cmd &	
 done
 
 echo -e "[ "$(date)": Waiting for step 1 jobs to finish ]"
-wait
+fail_wait
 
 echo -e "[ "$(date)": Step 1 finished. Removing index from memory ]"
-srun --exclusive --ntasks=1 --cpus-per-task=6 \
-	STAR --runThreadN 6 --genomeDir $star_index_dir --genomeLoad Remove --outFileNamePrefix $outdir/gRem.
+srun --exclusive --ntasks=1 --cpus-per-task="$maxCpus" \
+	STAR --runThreadN "$maxCpus" --genomeDir $star_index_dir --genomeLoad Remove --outFileNamePrefix $outdir/gRem.
 
 ### STEP 2
 
@@ -286,8 +259,8 @@ cat <<- _EOF_
 	$(for tab in $sjTabs; do echo $tab; done)
 _EOF_
 
-for fwd_read_file in $fastq_files
-do
+FAIL=0
+for fwd_read_file in $fastq_files; do
 	n=$(basename $fwd_read_file)
 	library_name="${n%".R1.fastq.gz"}"
 	rev_read_file=${fwd_read_file/$library_name.R1/$library_name.R2}
@@ -303,28 +276,13 @@ do
 	rev_read_file:    $rev_read_file
 _EOF_
 	cmd="STAR $OPTIONS --genomeLoad NoSharedMemory --sjdbFileChrStartEnd $sjTabs --quantMode GeneCounts --readFilesIn $fwd_read_file $rev_read_file --outFileNamePrefix $outdir/$library_name."
-	srun --output $outdir/$library_name.out --exclusive --ntasks=1 --cpus-per-task=6 $cmd &	
+	srun --output $outdir/$library_name.out --exclusive --ntasks=1 --cpus-per-task="$maxCpus" $cmd &	
 done
 
 echo -e "[ "$(date)": Waiting for step 2 jobs to finish ]"
-wait
+fail_wait
 
 echo -e "[ "$(date)": Step 2 jobs finished ]"
-
-echo -e "[ "$(date)": Pipeline finished! Phew! Emailing output. ]"
-
-# email output
-cat <<- _EOF_ | mail -s "[Tom@SLURM] Pipeline job "$SLURM_JOBID" finished" tom
-	Job $SLURM_JOBID submitted at $THEN has finished.
-	Output:
-
-	$(cat /tmp/compSl."$SLURM_JOB_NODELIST"."$SLURM_JOBID".out)
-_EOF_
-
-echo -e "[ "$(date)": Storing output ]"
-echo "output/madsComp/sl/compSl."$SLURM_JOB_NODELIST"."$SLURM_JOBID".out"
-
-mv /tmp/compSl."$SLURM_JOB_NODELIST"."$SLURM_JOBID".out output/madsComp/sl/
-
 echo -e "[ "$(date)": Done, exiting ]"
+
 exit 0

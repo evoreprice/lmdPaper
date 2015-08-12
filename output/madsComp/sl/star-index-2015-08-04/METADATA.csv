@@ -1,8 +1,0 @@
-Script,/var/lib/slurm-llnl/slurmd/job02712/slurm_script
-branch,master
-hash,1598b635079f29cd56f4c07c0bb85a8e47690d1c
-date,2015-08-04
-STAR version,STAR_2.4.2a_modified
-genomeFastaFiles,data/sl/genome/Slycopersicum_225_iTAGv2.40.fa
-sjdbGTFfile,data/sl/genome/Slycopersicum_225_iTAGv2.3.gene_exons.cuffcomp.gtf
-sjdbOverhang,49

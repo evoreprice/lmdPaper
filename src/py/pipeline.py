@@ -60,8 +60,11 @@ def submit_job(jobScript, ntasks, cpus_per_task, job_name):
     f.write(out)
     f.close()
     # mail output
-    mail = Popen(['mail', '-s', "[Tom@SLURM] Pipeline step " + jobId + " finished",
-                  'tom'], stdin = PIPE)
+    if proc.returncode != 0:
+        subject = "[Tom@SLURM] Pipeline step " + jobId + " FAILED"
+    else:
+        subject = "[Tom@SLURM] Pipeline step " + jobId + " finished"
+    mail = Popen(['mail', '-s', subject, 'tom'], stdin = PIPE)
     mail.communicate(out)
     # check subprocess exit code
     assert proc.returncode == 0, 'Job failed with non-zero exit code'  
@@ -91,8 +94,11 @@ def submit_download_job(jobScript, job_name, jgiLogon, jgiPassword):
     f.write(out)
     f.close()
     # mail output
-    mail = Popen(['mail', '-s', "[Tom@SLURM] Pipeline step " + jobId + " finished",
-                  'tom'], stdin = PIPE)
+    if proc.returncode != 0:
+        subject = "[Tom@SLURM] Pipeline step " + jobId + " FAILED"
+    else:
+        subject = "[Tom@SLURM] Pipeline step " + jobId + " finished"
+    mail = Popen(['mail', '-s', subject, 'tom'], stdin = PIPE)
     mail.communicate(out)
     # check completion    
     assert proc.returncode == 0, "Job " + job_name + " failed with non-zero exit code"
@@ -174,8 +180,73 @@ def download_at_reads(outputFiles):
     # update ruffus flag
     print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
     touch(outputFiles)
+
+#---------------------------------------------------------------
+# define rice reads
+#
+@originate(['ruffus/os.reads'])
+
+def define_os_reads(outputFiles):
+    pathToReads = 'data/reads/os'
+    assert os.path.isdir(pathToReads), "Error: reads folder " + pathToReads + " missing"
+    readFiles = os.listdir(pathToReads)
+    print("[", print_now(), ": Using Oryza sativa reads in folder " + pathToReads + " ]")
+    for fileName in readFiles:
+        qualName = pathToReads + '/' + fileName
+        assert os.path.isfile(qualName), "Error: read file " + qualName + " missing"
+        print(qualName)
+    touch(outputFiles)
+
+#---------------------------------------------------------------
+# trim rice reads
+#
+@transform(define_os_reads, suffix('.reads'), '.trimmedReads')
+
+def trim_os_reads(inputFiles, outputFiles):
+    jobScript = 'src/sh/cutadapt.sh'
+    ntasks = '6'
+    cpus_per_task = '1'
+    job_name = 'cutadapt'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)
     
 
+
+
+#---------------------------------------------------------------
+# map tomato reads
+#
+@transform([download_sl_reads, download_sl_genome], filter = suffix(".reads"),
+           output = ".bamfiles")
+
+def map_sl_reads(input_files, output_files):
+    jobScript = 'src/sh/pipelineSl.sh'
+    ntasks = '1'
+    cpus_per_task = '4'
+    job_name = 'slMap'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)
+
+#---------------------------------------------------------------
+# map arabidopsis reads
+#
+@transform([download_at_reads, download_at_genome], filter = suffix(".reads"),
+           output = ".bamfiles")
+
+def map_at_reads(input_files, output_files):
+    jobScript = 'src/sh/pipelineAt.sh'
+    ntasks = '1'
+    cpus_per_task = '4'
+    job_name = 'atMap'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)
+    
     
 # options for visualising
 pipeline_printout()
