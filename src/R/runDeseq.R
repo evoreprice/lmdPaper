@@ -1,25 +1,20 @@
 #!/usr/bin/Rscript
 
-# set variables
-scriptName <- 'runDeseq'
-outputBasename <- paste(
-  Sys.Date(),
-  scriptName,
-  sep = "-"
-)
-
 # 1. SETUP
 
-# find the most recent cutadapt output
-outputDirs <- list.dirs(path = 'output', full.names = TRUE, recursive = FALSE)
-cutadaptDir <- rev(sort(outputDirs[grep('cutadapt', outputDirs)]))[1]
-
-# find the most recent STAR output
-outputDirs <- dir(path = cutadaptDir, pattern = "STAR", full.names = TRUE)
-starDir <- rev(sort(outputDirs[grep('STAR', outputDirs)]))[1]
+# check for STAR output
+starDir <- "output/STAR"
+if (!dir.exists(starDir)) {
+  cat("starDir not found, exiting\n", file = stderr())
+  quit(status = 1)
+}
 
 # load the quant files
 starFiles <- list.files(starDir, pattern = "ReadsPerGene", full.names = TRUE)
+if (length(starFiles) == 0) {
+  cat("Couldn't find STAR count files, exiting\n", file = stderr())
+  quit(status = 1)
+}
 starCounts <- do.call(cbind,
                       lapply(starFiles, read.table, header = FALSE, sep = "\t", row.names = 1,
                              colClasses = c("character", "integer", rep("NULL", 2))))
@@ -69,7 +64,7 @@ rld <- DESeq2::rlogTransformation(dds)
 
 # MAKE OUTPUT FOLDER
 
-outDir <- paste0(starDir, "/DESeq2-", Sys.Date())
+outDir <- "output/DESeq2"
 if (!dir.exists(outDir)) {
   dir.create(outDir)
 }
@@ -85,5 +80,5 @@ saveRDS(rld, paste0(outDir, "/rld.Rds"))
 sInf <- c(paste("git branch:",system("git rev-parse --abbrev-ref HEAD", intern = TRUE)),
           paste("git hash:", system("git rev-parse HEAD", intern = TRUE)),
           capture.output(sessionInfo()))
-logLocation <- paste0(outDir, "/", scriptName, '-', Sys.Date(), '.out')
+logLocation <- paste0(outDir, "/SessionInfo.txt")
 writeLines(sInf, logLocation)

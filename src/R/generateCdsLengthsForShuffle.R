@@ -5,15 +5,18 @@ library(data.table)
 args <- commandArgs(TRUE)
 outdir <- args[1]
 
-# find the gtfLength
-outputDirs <- list.dirs(path = 'output', full.names = TRUE, recursive = FALSE)
-tpmDir <- rev(sort(outputDirs[grep('tpm', outputDirs)]))[1]
+# check for gtfLength
+tpmDir <- "output/tpm"
+if (!dir.exists(tpmDir)) {
+  cat("tpmDir not found, exiting\n", file = stderr())
+  quit(status = 1)
+}
 
 # import gtfLength
 gtfLength <- data.table(readRDS(paste0(tpmDir, "/gtfLength.Rds")), keep.rownames = TRUE)
 
 # import GTF
-gtfFile <- "data/genome/Osativa_204_v7.0.gene_exons.cuffcomp.rRNAremoved.gtf"
+gtfFile <- "data/genome/os/Osativa_204_v7.0.gene_exons.cuffcomp.rRNAremoved.gtf"
 gtf <- rtracklayer::import.gff(gtfFile, format = 'gtf', genome = 'Osativa_204_v7.0', asRangedData=F, feature.type="exon")
 
 # make a dummy gff file with each 'gene' on the right chromosome but with the 

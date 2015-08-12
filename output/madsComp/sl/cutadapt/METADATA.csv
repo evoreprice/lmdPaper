@@ -1,0 +1,5 @@
+script,src/sh/pipelineSl.sh
+branch,implementRuffus
+hash,0ae4f51e0ffe8510f27c0f1bfcf3c1e9bf43c133
+date,2015-08-12
+cutadapt version,1.8.3

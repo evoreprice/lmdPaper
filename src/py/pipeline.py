@@ -4,7 +4,7 @@
 #SBATCH --ntasks=1
 #SBATCH --job-name="pipeline"
 #SBATCH --mail-type=ALL
-#SBATCH --output=ruffus/pipeline.%j.out
+#SBATCH --output=ruffus/pipeline.%j.log
 
 # imports
 import os
@@ -277,33 +277,53 @@ def map_at_reads(input_files, output_files):
     jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
     # update ruffus flag
     print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
-    touch(outputFiles)
-    
-    
+    touch(outputFiles)    
+
 #---------------------------------------------------------------
 # run DESeq2
 #
 @transform(map_os_reads, suffix(".bamfiles"), ".deseq2")
 
 def run_deseq2_os(inputFiles, outputFiles):
-    print("Not implemented")
+    jobScript = 'src/R/runDeseq.R'
+    ntasks = '1'
+    cpus_per_task = '1'
+    job_name = 'DESeq'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)    
     
 #---------------------------------------------------------------
 # calculate TPM
 #
-@merge([run_deseq2_os, download_os_genome], 'ruffus/os.tpm')
+@merge([run_deseq2_os, map_os_reads, download_os_genome], 'ruffus/os.tpm')
 
 def calculate_tpm(inputFiles, outputFiles):
-    print("Not implemented")
+    jobScript = 'src/R/calculateTpm.R'
+    ntasks = '1'
+    cpus_per_task = '1'
+    job_name = 'calcTpm'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)    
 
 #---------------------------------------------------------------
 # shuffle GTF
 #
-@transform(download_os_genome, suffix(".genome"), ".shuffle")
+@merge([download_os_genome, calculate_tpm], 'ruffus/os.shuffle')
 
 def shuffle_gtf(inputFiles, outputFiles):
+    jobScript = 'src/sh/shuffle.sh'
+    ntasks = '1'
+    cpus_per_task = '1'
+    job_name = 'shuffle'
     print("Not implemented")
-
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)    
 
 #---------------------------------------------------------------
 # count reads in shuffled gtf

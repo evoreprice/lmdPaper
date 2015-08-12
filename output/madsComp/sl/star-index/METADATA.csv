@@ -1,0 +1,8 @@
+Script,src/sh/pipelineSl.sh
+branch,implementRuffus
+hash,48d2d828116501ed28394ad01066d1c1e6df2517
+date,2015-08-12
+STAR version,STAR_2.4.2a_modified
+genomeFastaFiles,data/genome/sl/Slycopersicum_225_iTAGv2.40.fa
+sjdbGTFfile,data/genome/sl/Slycopersicum_225_iTAGv2.3.gene_exons.cuffcomp.gtf
+sjdbOverhang,49
