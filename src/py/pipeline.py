@@ -218,7 +218,6 @@ def trim_os_reads(inputFiles, outputFiles):
     print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
     touch(outputFiles)
     
-
 #---------------------------------------------------------------
 # generate STAR index for OS
 #
@@ -227,7 +226,7 @@ def trim_os_reads(inputFiles, outputFiles):
 def generate_os_index(inputFiles, outputFiles):
     jobScript = 'src/sh/starGenomeGenerate.sh'
     ntasks = '1'
-    cpus_per_task = '4'
+    cpus_per_task = '1'
     job_name = 'stargg'
     jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
     # update ruffus flag
@@ -252,12 +251,12 @@ def map_os_reads(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # map tomato reads
 #
-@merge([download_sl_reads, download_sl_genome], output = "sl.bamfiles")
+@merge([download_sl_reads, download_sl_genome], output = "ruffus/sl.bamfiles")
 
-def map_sl_reads(input_files, output_files):
+def map_sl_reads(inputFiles, outputFiles):
     jobScript = 'src/sh/pipelineSl.sh'
     ntasks = '1'
-    cpus_per_task = '4'
+    cpus_per_task = '6'
     job_name = 'slMap'
     jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
     # update ruffus flag
@@ -267,12 +266,12 @@ def map_sl_reads(input_files, output_files):
 #---------------------------------------------------------------
 # map arabidopsis reads
 #
-@merge([download_at_reads, download_at_genome], output = "at.bamfiles")
+@merge([download_at_reads, download_at_genome], output = "ruffus/at.bamfiles")
 
-def map_at_reads(input_files, output_files):
+def map_at_reads(inputFiles, outputFiles):
     jobScript = 'src/sh/pipelineAt.sh'
     ntasks = '1'
-    cpus_per_task = '4'
+    cpus_per_task = '6'
     job_name = 'atMap'
     jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
     # update ruffus flag
@@ -331,23 +330,56 @@ def shuffle_gtf(inputFiles, outputFiles):
 @merge([map_os_reads, shuffle_gtf], 'ruffus/os.shufCounts')
 
 def shuffled_counts(inputFiles, outputFiles):
-    print("Not implemented")
+    jobScript = 'src/sh/htseqShuffle.sh'
+    ntasks = '6'
+    cpus_per_task = '1'
+    job_name = 'shfcount'        
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)    
 
 #---------------------------------------------------------------
-# calculate list of expressed genes (MAY NEED TO SPLIT THIS... see R scripts)
+# calculate intergenic tpms
 #
-@merge([shuffled_counts, run_deseq2_os], 'ruffus/os.expgen')
+@merge([shuffle_gtf, shuffled_counts, map_os_reads, run_deseq2_os, calculate_tpm], 'ruffus/os.intTpm')
+def intergenic_tpm(inputFiles, outputFiles):
+    jobScript = 'src/R/shuffledTpm.R'
+    ntasks = '1'
+    cpus_per_task = '1'
+    job_name = 'shufTpm'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)    
+
+#---------------------------------------------------------------
+# calculate list of expressed genes
+#
+@merge([shuffle_gtf, intergenic_tpm, calculate_tpm], 'ruffus/os.expgen')
 def detect_expressed_genes(inputFiles, outputFiles):
-    print("Not implemented")
+    jobScript = 'src/R/calculateCutoffs.R'
+    ntasks = '1'
+    cpus_per_task = '1'
+    job_name = 'expGen'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)    
     
 #---------------------------------------------------------------
 # fuzzy c-means clustering
 #
-@merge([detect_expressed_genes, run_deseq2_os], 'ruffus/os.mfuzz')
+@merge([detect_expressed_genes, run_deseq2_os, download_os_genome], 'ruffus/os.mfuzz')
 def mfuzz(inputFiles, outputFiles):
-    print("Not implemented")
-
-
+    jobScript = 'src/R/mfuzz.R'
+    ntasks = '1'
+    cpus_per_task = '1'
+    job_name = 'mfuzz'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)    
 
 # options for visualising
 pipeline_printout()

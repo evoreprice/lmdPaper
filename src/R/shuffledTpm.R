@@ -1,30 +1,40 @@
 #!/usr/bin/Rscript
 
-#SBATCH --job-name Rscript
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=1
-#SBATCH --output log/shuffledTpm.%N.%j.out
-#SBATCH --open-mode=append
-#SBATCH --mail-type=ALL
-
 library(rtracklayer)
 
-# set variables
-scriptName <- 'shuffledTpm'
-outputBasename <- paste(
-  scriptName,
-  Sys.Date(),
-  sep = "-"
-)
+# check for shuffled GTF
+shuffleDir <- "output/shuffle"
+if (!dir.exists(shuffleDir)) {
+  cat("shuffleDir not found, exiting\n", file = stderr())
+  quit(status = 1)
+}
 
-# find the most recent shuffled gff3
-outputDirs <- list.dirs(path = 'output', full.names = TRUE, recursive = FALSE)
-shuffleDir <- rev(sort(outputDirs[grep('shuffle', outputDirs)]))[1]
+# check for htseq counts
+htseqDir <- "output/dnaTpm/shuffledCounts"
+if (!dir.exists(htseqDir)) {
+  cat("htseqDir not found, exiting\n", file = stderr())
+  quit(status = 1)
+}
 
-# make output folder
-outDir <- paste(shuffleDir, outputBasename, sep = "/")
-if (!dir.exists(outDir)) {
-  dir.create(outDir)
+# check for STAR output
+starDir <- "output/STAR"
+if (!dir.exists(starDir)) {
+  cat("starDir not found, exiting\n", file = stderr())
+  quit(status = 1)
+}
+
+# check for DESeq2 output
+deseqDir <- "output/DESeq2"
+if (!dir.exists(deseqDir)) {
+  cat("deseqDir not found, exiting\n", file = stderr())
+  quit(status = 1)
+}
+
+# check for tpm output
+tpmDir <- "output/tpm"
+if (!dir.exists(tpmDir)) {
+  cat("tpmDir not found, exiting\n", file = stderr())
+  quit(status = 1)
 }
 
 # FEATURE LENGTHS FROM GTF
@@ -53,16 +63,7 @@ gtfLength <- data.frame(Length = output, row.names = names(output))
 
 # PARSE STAR FILES
 
-# find the most recent cutadapt output
-outputDirs <- list.dirs(path = 'output', full.names = TRUE, recursive = FALSE)
-cutadaptDir <- rev(sort(outputDirs[grep('cutadapt', outputDirs)]))[1]
-
-# find the most recent STAR output
-outputDirs <- list.dirs(path = cutadaptDir, full.names = TRUE, recursive = FALSE)
-starDir <- rev(sort(outputDirs[grep('STAR', outputDirs)]))[1]
-
 # parse the log.final.out files
-
 # parse STAR files for the average mapped fragment length
 files <- list.files(starDir, full.names = TRUE, pattern = 'final.out')
 
@@ -127,16 +128,9 @@ rownames(counts) <- paste0("dna_", rownames(counts))
 rownames(effLength) <- rownames(counts)
 
 # combine with the counts and efflength dataframes from the real tpm
-
-# find DESeq2 output
-outputDirs <- list.dirs(path = starDir, full.names = TRUE, recursive = FALSE)
-deseqDir <- rev(sort(outputDirs[grep('DESeq2', outputDirs)]))[1]
-
 realDds <- readRDS(paste0(deseqDir, '/ddsLrt.Rds'))
 realCounts <- DESeq2::counts(realDds, normalized = TRUE)
 
-outputDirs <- list.dirs('output', full.names = TRUE, recursive = FALSE)
-tpmDir <- rev(sort(outputDirs[grep('tpm', outputDirs)]))[1]
 realEffLength <- readRDS(paste0(tpmDir, '/effLength.Rds'))
 
 counts <- rbind(counts, realCounts)
@@ -152,15 +146,19 @@ calcTpm <- function(x){
 # apply formula across rownames
 tpm <- sapply(colnames(counts), calcTpm)
 
+# make output folder
+outDir <- "output/dnaTpm"
+if (!dir.exists(outDir)) {
+  dir.create(outDir)
+}
+
 # SAVE OUTPUT
 saveRDS(tpm, paste0(outDir, "/dnaTpm.Rds"))
 saveRDS(gtfLength, paste0(outDir, "/shuffledGtfLength.Rds"))
 
 # SAVE LOGS
-
 sInf <- c(paste("git branch:",system("git rev-parse --abbrev-ref HEAD", intern = TRUE)),
           paste("git hash:", system("git rev-parse HEAD", intern = TRUE)),
           capture.output(sessionInfo()))
-logLocation <- paste0(outDir, "/", scriptName, '-', Sys.Date(), '.out')
+logLocation <- paste0(outDir, "/SessionInfo.txt")
 writeLines(sInf, logLocation)
-

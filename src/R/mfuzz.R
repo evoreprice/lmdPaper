@@ -1,38 +1,33 @@
 #!/usr/bin/Rscript
 
-#SBATCH --job-name Rscript
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=1
-#SBATCH --output log/mfuzz.%N.%j.out
-#SBATCH --open-mode=append
-#SBATCH --mail-type=ALL
-
 library(Mfuzz)
 library(ggplot2)
 library(data.table)
 library(xlsx)
 
-# set variables
-scriptName <- 'mfuzz'
-outputBasename <- paste(
-  scriptName,
-  Sys.Date(),
-  sep = "-"
-)
+# check for DESeq2 output
+deseqDir <- "output/DESeq2"
+if (!dir.exists(deseqDir)) {
+  cat("deseqDir not found, exiting\n", file = stderr())
+  quit(status = 1)
+}
 
-# find results
-outputDirs <- list.dirs(path = 'output', full.names = TRUE, recursive = FALSE)
-tpmDir <- rev(sort(outputDirs[grep('tpm-', outputDirs)]))[1]
-cutadaptDir <- rev(sort(outputDirs[grep('cutadapt', outputDirs)]))[1]
-outputDirs <- list.dirs(path = cutadaptDir, full.names = TRUE, recursive = FALSE)
-starDir <- rev(sort(outputDirs[grep('STAR', outputDirs)]))[1]
-outputDirs <- list.dirs(path = starDir, full.names = TRUE, recursive = FALSE)
-deseqDir <- rev(sort(outputDirs[grep('DESeq2', outputDirs)]))[1]
-outputDirs <- list.dirs(tpmDir, full.names = TRUE, recursive = FALSE)
-cutoffDir <- rev(sort(outputDirs[grep('calculateCutoffs', outputDirs)]))[1]
+# check for expressed genes output
+cutoffDir <- "output/expressedGenes"
+if (!dir.exists(cutoffDir)) {
+  cat("cutoffDir not found, exiting\n", file = stderr())
+  quit(status = 1)
+}
+
+# check for msu annotation file
+msuAnn.file <- "data/genome/os/all.locus_brief_info.7.0.tab"
+if (!file.exists(msuAnn.file)) {
+  cat("MSU annotation not found, exiting\n", file = stderr())
+  quit(status = 1)
+}
 
 # make output folder
-outDir <- paste(deseqDir, outputBasename, sep = "/")
+outDir <- "output/mfuzz"
 if (!dir.exists(outDir)) {
   dir.create(outDir)
 }
@@ -117,8 +112,8 @@ annotatedClusters <- cbind(clusterExpr, oryzr::LocToGeneName(clusterExpr[, NAME]
 
 # get MSU annotation from all.locus_brief_info.7.0.tab
 acNAME <- as.character(annotatedClusters[,NAME])
-msuAnn <- data.table(read.delim(file = 'data/genome/all.locus_brief_info.7.0.tab',
-                                sep = "\t",header = TRUE, fill = TRUE), key = 'locus')  
+msuAnn <- data.table(read.delim(file = msuAnn.file, sep = "\t",header = TRUE,
+                                fill = TRUE), key = 'locus')  
 # data.table magic to get 1 annotation per LOC ID
 anns <- msuAnn[acNAME, .(annotation = paste(unique(annotation), sep = ",")), by = locus]
 annotatedClusters[, MSU.annotation := as.character(anns[, annotation])]
@@ -148,7 +143,9 @@ saveRDS(clusters, paste0(outDir, "/clusters.Rds"))
 saveRDS(annotatedClusters, paste0(outDir, "/annotatedClusters.Rds"))
 saveRDS(centPlot, paste0(outDir, "/centPlot.Rds"))
 
+# SAVE LOGS
 sInf <- c(paste("git branch:",system("git rev-parse --abbrev-ref HEAD", intern = TRUE)),
           paste("git hash:", system("git rev-parse HEAD", intern = TRUE)),
           capture.output(sessionInfo()))
-writeLines(sInf, paste0(outDir, "/sessionInfo.txt"))
+logLocation <- paste0(outDir, "/SessionInfo.txt")
+writeLines(sInf, logLocation)

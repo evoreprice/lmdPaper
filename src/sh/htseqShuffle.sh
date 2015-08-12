@@ -1,20 +1,77 @@
 #!/bin/bash
 
-#SBATCH --job-name shfcount
-#SBATCH --ntasks=6
-#SBATCH --cpus-per-task=1
-#SBATCH --output /tmp/shfcount.%N.%j.out
-#SBATCH --mail-type=ALL
+set -eu
 
-# try to find the shuffled GTF
-shopt -s nullglob
-folders=(output/shuffle*/)
-shopt -u nullglob
-if (( ${#folders[@]} == 0 )); then
+# bash traceback code from https://docwhat.org/tracebacks-in-bash/
+
+_showed_traceback=f
+
+_exit_trap () {
+  local _ec="$?"
+  if [[ $_ec != 0 && "${_showed_traceback}" != t ]]; then
+    traceback 1
+  fi
+}
+
+_err_trap() {
+  local _ec="$?"
+  local _cmd="${BASH_COMMAND:-unknown}"
+  traceback 1
+  _showed_traceback=t
+  echo "The command ${_cmd} exited with exit code ${_ec}." 1>&2
+}
+
+traceback() {
+  # Hide the traceback() call.
+  local -i start=$(( ${1:-0} + 1 ))
+  local -i end=${#BASH_SOURCE[@]}
+  local -i i=0
+  local -i j=0
+
+  echo "Traceback (last called is first):" 1>&2
+  for ((i=${start}; i < ${end}; i++)); do
+    j=$(( $i - 1 ))
+    local function="${FUNCNAME[$i]}"
+    local file="${BASH_SOURCE[$i]}"
+    local line="${BASH_LINENO[$j]}"
+    echo "     ${function}() in ${file}:${line}" 1>&2
+  done
+}
+
+# traps
+trap _err_trap SIGHUP SIGINT SIGTERM
+trap _exit_trap EXIT
+trap _err_trap ERR
+
+# how many CPUs we got?
+if [[ $SLURM_JOB_CPUS_PER_NODE ]]; then
+	maxCpus="$SLURM_JOB_CPUS_PER_NODE"
+	echo -e "[ "$(date)": Running with "$maxCpus" CPUs ]"
+else
+	maxCpus=1
+fi
+
+# handle waiting
+FAIL=0
+fail_wait() {
+for job in $(jobs -p); do
+	wait $job || let "FAIL+=1"
+done
+if [[ ! "$FAIL" == 0 ]]; then
+	echo -e "[ "$(date)": Detected fail in background job ]"
+	exit 1
+fi
+}
+
+### CODE STARTS HERE ------------------------------------------------------------------
+
+# check for shuffled GTF
+
+shuffDir="output/shuffle"
+if [[ ! -d "$shuffDir" ]]; then
 	echo -e "[ "$(date)": Can't find shuffled gff3 ]"
 	exit 1
 fi
-shuffDir="${folders[-1]}"
 GTF="$shuffDir"/Osativa_204_v7.shuffled.gff3
 if [[ ! -e "$GTF" ]]; then
 	echo -e "[ "$(date)": Can't find shuffled gff3 ]"
@@ -24,7 +81,7 @@ fi
 echo -e "[ "$(date)": Found shuffled gff3 "$GTF" ]"
 
 # make today's output directory
-outdir="$shuffDir/htseq-count-"$(date +%F)""
+outdir="output/dnaTpm/shuffledCounts"
 if [[ ! -d $outdir ]]; then
 	mkdir -p $outdir
 fi
@@ -40,29 +97,12 @@ cat <<- _EOF_ > $outdir/METADATA.csv
 	output,$outdir
 _EOF_
 
-
-# find STAR files
-# choose the most recent cutadapt output
-shopt -s nullglob
-folders=(output/cutadapt*)
-shopt -u nullglob
-# stop if there is no cutadapt folder
-if (( ${#folders[@]} == 0 )); then
-	echo -e "[ "$(date)": No cutadapt folder found ]"
+# stop if there is no STAR output
+star_dir="output/STAR"
+if [[ ! -d "$star_dir" ]]; then
+	echo -e "[ "$(date)": No STAR outputfound ]"
 	exit 1
 fi
-cutadapt_dir="${folders[-1]}"
-
-shopt -s nullglob
-folders=("$cutadapt_dir"/STAR*)
-shopt -u nullglob
-# stop if there is no star folder
-if (( ${#folders[@]} == 0 )); then
-	echo -e "[ "$(date)": No star folder found ]"
-	exit 1
-fi
-star_dir="${folders[-1]}"
-
 echo -e "[ "$(date)": Using star folder $star_dir ]"
 
 shopt -s nullglob
@@ -70,10 +110,10 @@ bamfiles=(""$star_dir"/*.Aligned.out.bam")
 shopt -u nullglob
 
 # run htseq-count
-
+FAIL=0
 for bam in $bamfiles; do
 	n="$(basename $bam)"
-	lib_name=${n:0:4}
+	lib_name="${n%".Aligned.out.bam"}"
 	cat <<- _EOF_
 	[ $(date): Submitting htseq-count job ]
 	 bamfile: $bam
@@ -85,18 +125,7 @@ _EOF_
 done
 
 echo -e "[ "$(date)": Waiting for htseq-count jobs to finish ]"
-wait
+fail_wait
 
-echo -e "[ "$(date)": Finished, tidying up ]"
-
-# email output
-cat <<- _EOF_ | mail -s "[Tom@SLURM] Job "$SLURM_JOBID" finished" tom
-	Job $SLURM_JOBID started at $THEN has finished.
-	Output:
-
-	$(cat /tmp/shfcount."$SLURM_JOB_NODELIST"."$SLURM_JOBID".out)
-_EOF_
-
-mv /tmp/shfcount."$SLURM_JOB_NODELIST"."$SLURM_JOBID".out $outdir/shfcount."$SLURM_JOB_NODELIST"."$SLURM_JOBID".out
-
+echo -e "[ "$(date)": Finished, exiting ]"
 exit 0

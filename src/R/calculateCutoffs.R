@@ -1,37 +1,38 @@
 #!/usr/bin/Rscript
 
-#SBATCH --job-name Rscript
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=1
-#SBATCH --output log/calculateCutoffs.%N.%j.out
-#SBATCH --open-mode=append
-#SBATCH --mail-type=ALL
-
 library(ggplot2)
 library(dplyr)
 
 ### SETUP ----------------------------------------------------------------------
 
 # find results
-outputDirs <- list.dirs(path = 'output', full.names = TRUE, recursive = FALSE)
-shuffleDir <- rev(sort(outputDirs[grep('shuffle', outputDirs)]))[1]
-tpmDir <- rev(sort(outputDirs[grep('tpm-', outputDirs)]))[1]
-outputDirs <- list.dirs(shuffleDir, full.names = TRUE, recursive = FALSE)
-shufTpmDir <- rev(sort(outputDirs[grep('shuffledTpm', outputDirs)]))[1]
 
-scriptName <- 'calculateCutoffs'
-outputBasename <- paste(
-  scriptName,
-  Sys.Date(),
-  sep = "-"
-)
+# check for shuffled GTF
+shuffleDir <- "output/shuffle"
+if (!dir.exists(shuffleDir)) {
+  cat("shuffleDir not found, exiting\n", file = stderr())
+  quit(status = 1)
+}
+
+# check for tpm output
+tpmDir <- "output/tpm"
+if (!dir.exists(tpmDir)) {
+  cat("tpmDir not found, exiting\n", file = stderr())
+  quit(status = 1)
+}
+
+# check for shufTpmDir output
+shufTpmDir <- "output/dnaTpm"
+if (!dir.exists(shufTpmDir)) {
+  cat("shufTpmDir not found, exiting\n", file = stderr())
+  quit(status = 1)
+}
 
 # make output folder
-outDir <- paste(tpmDir, outputBasename, sep = "/")
+outDir <- "output/expressedGenes"
 if (!dir.exists(outDir)) {
   dir.create(outDir)
 }
-
 
 ### SCRIPT ---------------------------------------------------------------------
 
@@ -107,7 +108,9 @@ saveRDS(expressedGenesByLibrary, paste0(outDir, "/expressedGenesByLibrary.Rds"))
 saveRDS(expressedGenes, paste0(outDir, "/expressedGenesAll.Rds"))
 saveRDS(realTpmCutoffs, paste0(outDir, "/tpmCutoffs.Rds"))
 
+# SAVE LOGS
 sInf <- c(paste("git branch:",system("git rev-parse --abbrev-ref HEAD", intern = TRUE)),
           paste("git hash:", system("git rev-parse HEAD", intern = TRUE)),
           capture.output(sessionInfo()))
-writeLines(sInf, paste0(outDir, "/log.out"))
+logLocation <- paste0(outDir, "/SessionInfo.txt")
+writeLines(sInf, logLocation)
