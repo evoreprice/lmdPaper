@@ -2,18 +2,18 @@
 
 set -eu
 
+# bash traceback code from https://docwhat.org/tracebacks-in-bash/
+
 _showed_traceback=f
 
-function _exit_trap
-{
+_exit_trap () {
   local _ec="$?"
   if [[ $_ec != 0 && "${_showed_traceback}" != t ]]; then
     traceback 1
   fi
 }
 
-function _err_trap
-{
+_err_trap() {
   local _ec="$?"
   local _cmd="${BASH_COMMAND:-unknown}"
   traceback 1
@@ -21,8 +21,7 @@ function _err_trap
   echo "The command ${_cmd} exited with exit code ${_ec}." 1>&2
 }
 
-function traceback
-{
+traceback() {
   # Hide the traceback() call.
   local -i start=$(( ${1:-0} + 1 ))
   local -i end=${#BASH_SOURCE[@]}
@@ -38,8 +37,6 @@ function traceback
     echo "     ${function}() in ${file}:${line}" 1>&2
   done
 }
-
-
 
 # traps
 trap _err_trap SIGHUP SIGINT SIGTERM
@@ -204,7 +201,7 @@ echo -e "[ "$(date)": Two-step mapping with STAR ]"
 
 # stop if there is no STAR index
 star_index_dir="output/madsComp/sl/star-index"
-if [[ ! -d "$star_index_dir"]]; then
+if [[ ! -d "$star_index_dir" ]]; then
 	echo -e "[ "$(date)": No STAR index found ]"
 	exit 1
 fi

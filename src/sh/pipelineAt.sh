@@ -1,6 +1,47 @@
 #!/bin/bash
 
-set -e
+set -eu
+
+# bash traceback code from https://docwhat.org/tracebacks-in-bash/
+
+_showed_traceback=f
+
+_exit_trap () {
+  local _ec="$?"
+  if [[ $_ec != 0 && "${_showed_traceback}" != t ]]; then
+    traceback 1
+  fi
+}
+
+_err_trap() {
+  local _ec="$?"
+  local _cmd="${BASH_COMMAND:-unknown}"
+  traceback 1
+  _showed_traceback=t
+  echo "The command ${_cmd} exited with exit code ${_ec}." 1>&2
+}
+
+traceback() {
+  # Hide the traceback() call.
+  local -i start=$(( ${1:-0} + 1 ))
+  local -i end=${#BASH_SOURCE[@]}
+  local -i i=0
+  local -i j=0
+
+  echo "Traceback (last called is first):" 1>&2
+  for ((i=${start}; i < ${end}; i++)); do
+    j=$(( $i - 1 ))
+    local function="${FUNCNAME[$i]}"
+    local file="${BASH_SOURCE[$i]}"
+    local line="${BASH_LINENO[$j]}"
+    echo "     ${function}() in ${file}:${line}" 1>&2
+  done
+}
+
+# traps
+trap _err_trap SIGHUP SIGINT SIGTERM
+trap _exit_trap EXIT
+trap _err_trap ERR
 
 # how many CPUs we got?
 if [[ $SLURM_JOB_CPUS_PER_NODE ]]; then
@@ -9,26 +50,6 @@ if [[ $SLURM_JOB_CPUS_PER_NODE ]]; then
 else
 	maxCpus=1
 fi
-
-# cleanup functions
-exit_error() {
-	echo -e "[ "$(date)": Script aborted ]"
-	exit 1
-}
-
-# catch exit codes
-trap_exit() {
-	exitCode=$?
-	if (( "exitCode" == 0 )) ; then
-		exit 0
-	else
-		exit_error
-	fi
-}
-
-# traps
-trap exit_error SIGHUP SIGINT SIGTERM
-trap trap_exit EXIT
 
 # handle waiting
 FAIL=0
@@ -158,7 +179,7 @@ echo -e "[ "$(date)": Two-step mapping with STAR ]"
 
 # stop if there is no STAR index
 star_index_dir="output/madsComp/at/star-index"
-if [[ ! -d "$star_index_dir"]]; then
+if [[ ! -d "$star_index_dir" ]]; then
 	echo -e "[ "$(date)": No STAR index found ]"
 	exit 1
 fi

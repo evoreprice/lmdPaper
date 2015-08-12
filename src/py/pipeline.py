@@ -54,10 +54,13 @@ def submit_job(jobScript, ntasks, cpus_per_task, job_name):
     jobRegex = re.compile(b'\d+')
     jobIdBytes = jobRegex.search(err).group(0)
     jobId = jobIdBytes.decode("utf-8")
-    # write stdout to log file    
+    # write stderr & stdout to log file    
     logFile = 'ruffus/' + job_name + '.' + jobId + '.ruffus.log'
     f = open(logFile, 'wb')
+    f.write(b"Standard output:\n")
     f.write(out)
+    f.write(b"\nStandard error:\n")
+    f.write(err)
     f.close()
     # mail output
     if proc.returncode != 0:
@@ -65,7 +68,7 @@ def submit_job(jobScript, ntasks, cpus_per_task, job_name):
     else:
         subject = "[Tom@SLURM] Pipeline step " + jobId + " finished"
     mail = Popen(['mail', '-s', subject, 'tom'], stdin = PIPE)
-    mail.communicate(out)
+    mail.communicate(out + err)
     # check subprocess exit code
     assert proc.returncode == 0, 'Job failed with non-zero exit code'  
     return(jobId)
@@ -88,10 +91,13 @@ def submit_download_job(jobScript, job_name, jgiLogon, jgiPassword):
     jobRegex = re.compile(b'\d+')
     jobIdBytes = jobRegex.search(err).group(0)
     jobId = jobIdBytes.decode("utf-8")
-    # write stdout to log file    
+    # write stderr & stdout to log file    
     logFile = 'ruffus/' + job_name + '.' + jobId + '.ruffus.log'
     f = open(logFile, 'wb')
+    f.write(b"Standard output:\n")
     f.write(out)
+    f.write(b"\nStandard error:\n")
+    f.write(err)
     f.close()
     # mail output
     if proc.returncode != 0:
@@ -99,7 +105,7 @@ def submit_download_job(jobScript, job_name, jgiLogon, jgiPassword):
     else:
         subject = "[Tom@SLURM] Pipeline step " + jobId + " finished"
     mail = Popen(['mail', '-s', subject, 'tom'], stdin = PIPE)
-    mail.communicate(out)
+    mail.communicate(out + err)
     # check completion    
     assert proc.returncode == 0, "Job " + job_name + " failed with non-zero exit code"
     return(jobId)
