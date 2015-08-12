@@ -34,10 +34,11 @@ trap trap_exit EXIT
 FAIL=0
 fail_wait() {
 for job in $(jobs -p); do
-  wait $job || let "FAIL+=1"
+	wait $job || let "FAIL+=1"
 done
 if [[ ! "$FAIL" == 0 ]]; then
-  exit 1
+	echo -e "[ "$(date)": Detected fail in background job ]"
+	exit 1
 fi
 }
 
@@ -97,7 +98,7 @@ echo -e "[ "$(date)": Genome generation finished ]"
 
 # check if genome exists already
 outdir="output/madsComp/sl/star-index"
-if [[ $outdir ]]; then
+if [[ -d $outdir ]]; then
 	echo -e "[ "$(date)": Found STAR index ]\n"$outdir""
 else
 	genome_generate
@@ -105,10 +106,11 @@ fi
 
 # 2. Trim adaptors
 
+cutadapt_trim() {
+
 echo -e "[ "$(date)": Trimming reads with cutadapt ]"
 
 # make today's output directory
-outdir="output/madsComp/sl/cutadapt"
 if [[ ! -d $outdir ]]; then
 	mkdir -p $outdir
 fi
@@ -158,6 +160,19 @@ done
 echo -e "[ "$(date)": Waiting for adaptor trimming to finish ]"
 fail_wait
 echo -e "[ "$(date)": Adaptor trimming finished ]"
+}
+
+# check if trimming has been done
+outdir="output/madsComp/sl/cutadapt"
+if [[ -d $outdir ]]; then
+	trimmedReads=(""$outdir"/*.fastq.gz")
+	cat <<- _EOF_
+	[ $(date): Found cutadapt output ]
+	$(for rf in $trimmedReads; do echo $rf; done)
+_EOF_
+else
+	cutadapt_trim
+fi
 
 # 3. Run 2-step mapping
 

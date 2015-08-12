@@ -231,8 +231,7 @@ def generate_os_index(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # map rice reads
 #
-@transform([trim_os_reads, generate_os_index], filter = suffix('trimmedReads'),
-           output = 'bamfiles')
+@merge([trim_os_reads, generate_os_index], output = 'ruffus/os.bamfiles')
            
 def map_os_reads(inputFiles, outputFiles):
     jobScript = 'src/sh/starMappingTwoStep.sh'
@@ -247,8 +246,7 @@ def map_os_reads(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # map tomato reads
 #
-@transform([download_sl_reads, download_sl_genome], filter = suffix(".reads"),
-           output = ".bamfiles")
+@merge([download_sl_reads, download_sl_genome], output = "sl.bamfiles")
 
 def map_sl_reads(input_files, output_files):
     jobScript = 'src/sh/pipelineSl.sh'
@@ -263,8 +261,7 @@ def map_sl_reads(input_files, output_files):
 #---------------------------------------------------------------
 # map arabidopsis reads
 #
-@transform([download_at_reads, download_at_genome], filter = suffix(".reads"),
-           output = ".bamfiles")
+@merge([download_at_reads, download_at_genome], output = "at.bamfiles")
 
 def map_at_reads(input_files, output_files):
     jobScript = 'src/sh/pipelineAt.sh'
@@ -276,6 +273,23 @@ def map_at_reads(input_files, output_files):
     print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
     touch(outputFiles)
     
+    
+#---------------------------------------------------------------
+# run DESeq2
+#
+@transform(map_os_reads, suffix(".bamfiles"), ".deseq2")
+
+def run_deseq2_os(inputFiles, outputFiles):
+    print("Not implemented")
+    
+#---------------------------------------------------------------
+# calculate TPM
+#
+@merge([run_deseq2_os, download_os_genome], 'ruffus/os.tpm')
+
+def calculate_tpm(inputFiles, outputFiles):
+    print("Not implemented")
+
     
 # options for visualising
 pipeline_printout()
