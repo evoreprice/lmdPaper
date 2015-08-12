@@ -34,10 +34,11 @@ trap trap_exit EXIT
 FAIL=0
 fail_wait() {
 for job in $(jobs -p); do
-  wait $job || let "FAIL+=1"
+	wait $job || let "FAIL+=1"
 done
 if [[ ! "$FAIL" == 0 ]]; then
-  exit 1
+	echo -e "[ "$(date)": Detected fail in background job ]"
+	exit 1
 fi
 }
 
@@ -98,7 +99,7 @@ echo -e "[ "$(date)": Genome generation finished ]"
 
 # check if genome exists already
 outdir="output/madsComp/at/star-index"
-if [[ $outdir ]]; then
+if [[ -d $outdir ]]; then
 	echo -e "[ "$(date)": Found STAR index ]\n"$outdir""
 else
 	genome_generate

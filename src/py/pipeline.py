@@ -290,7 +290,39 @@ def run_deseq2_os(inputFiles, outputFiles):
 def calculate_tpm(inputFiles, outputFiles):
     print("Not implemented")
 
+#---------------------------------------------------------------
+# shuffle GTF
+#
+@transform(download_os_genome, suffix(".genome"), ".shuffle")
+
+def shuffle_gtf(inputFiles, outputFiles):
+    print("Not implemented")
+
+
+#---------------------------------------------------------------
+# count reads in shuffled gtf
+#
+@merge([map_os_reads, shuffle_gtf], 'ruffus/os.shufCounts')
+
+def shuffled_counts(inputFiles, outputFiles):
+    print("Not implemented")
+
+#---------------------------------------------------------------
+# calculate list of expressed genes (MAY NEED TO SPLIT THIS... see R scripts)
+#
+@merge([shuffled_counts, run_deseq2_os], 'ruffus/os.expgen')
+def detect_expressed_genes(inputFiles, outputFiles):
+    print("Not implemented")
     
+#---------------------------------------------------------------
+# fuzzy c-means clustering
+#
+@merge([detect_expressed_genes, run_deseq2_os], 'ruffus/os.mfuzz')
+def mfuzz(inputFiles, outputFiles):
+    print("Not implemented")
+
+
+
 # options for visualising
 pipeline_printout()
 pipeline_printout_graph("ruffus/flowchart." + slurm_jobid + ".pdf", "pdf")
