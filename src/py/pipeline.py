@@ -213,8 +213,37 @@ def trim_os_reads(inputFiles, outputFiles):
     touch(outputFiles)
     
 
+#---------------------------------------------------------------
+# generate STAR index for OS
+#
+@transform(download_os_genome, suffix('.genome'), '.index')
 
+def generate_os_index(inputFiles, outputFiles):
+    jobScript = 'src/sh/starGenomeGenerate.sh'
+    ntasks = '1'
+    cpus_per_task = '4'
+    job_name = 'stargg'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)
 
+#---------------------------------------------------------------
+# map rice reads
+#
+@transform([trim_os_reads, generate_os_index], filter = suffix('trimmedReads'),
+           output = 'bamfiles')
+           
+def map_os_reads(inputFiles, outputFiles):
+    jobScript = 'src/sh/starMappingTwoStep.sh'
+    ntasks = '1'
+    cpus_per_task = '6'
+    job_name = 'star2s'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)
+ 
 #---------------------------------------------------------------
 # map tomato reads
 #
