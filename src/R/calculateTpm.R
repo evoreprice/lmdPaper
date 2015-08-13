@@ -23,7 +23,7 @@ elementMetadata(reducedGtf)$widths <- width(reducedGtf)
 calc_length <- function(x) {
   sum(elementMetadata(x)$widths)
 }
-output <- OpenRepGrid::sapply_pb(split(reducedGtf, elementMetadata(reducedGtf)$gene_name), calc_length)
+output <- sapply(split(reducedGtf, elementMetadata(reducedGtf)$gene_name), calc_length)
 gtfLength <- data.frame(Length = output, row.names = names(output))
 
 # PARSE STAR FILES

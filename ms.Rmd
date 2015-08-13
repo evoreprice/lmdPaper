@@ -115,6 +115,8 @@ Word count
 
 + Max. 1 paragraph about boring sequencing stats
 + **Table** (or supplementary): # reads, mapping %, rRNA, introns, genes blah blah
++ Description of the dataset
+
 
 ## Clustering of expression patterns
 
@@ -189,6 +191,8 @@ print(f_mfuzzClusters)
 Because of the enrichment of TF family members in some of the gene expression clusters, geneset-level enrichment analysis (GSEA) was used to compare the levels of expression of TF family members in the meristem samples. **Something like: Consistent with their enrichment in cluster 1 and 6, MADS genes were significantly enriched in the SM/FM samples**. TF families involved in branching were enriched in **which families, which samples**.
 
 ## MADS genes: comparison of expression & homology in rice, tomato, arabidopsis
+
+The presence of MADS genes was enriched in **which clusters** and their overall expression is enriched in the spikelet meristem sample. These results correspond with previous studies that have established the importance of MADS genes in inflorescence development. The evolution of their expression patterns was 
 
 + **Figure**: Similarity tree of MADS proteins with expression values and dN/dS values for each one.
 
