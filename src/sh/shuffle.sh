@@ -101,7 +101,7 @@ wget --output-document $outdir/rice_osa1r7_rm.gff3.gz ftp://ftp.plantbiology.msu
 cp data/irgsp1_rRNA_tRNA.gff $outdir/irgsp1_rRNA_tRNA.gff
 
 # gunzip archives after downloading
-fail-wait
+fail_wait
 echo -e "[ $(date): Extracting downloaded files ]"
 gunzip $outdir/rice_osa1r7_rm.gff3.gz 
 #gunzip $outdir/irgsp1_rRNA_tRNA.gff.gz
