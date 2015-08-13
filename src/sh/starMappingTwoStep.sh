@@ -100,15 +100,15 @@ cat <<- _EOF_ > $outdir/METADATA.csv
 	cutadapt folder,$cutadapt_dir
 _EOF_
 
+# STAR options
+OPTIONS="--runThreadN "$maxCpus" --genomeDir "$star_index_dir" --outSAMtype BAM Unsorted --alignIntronMax 5000 --outSJfilterReads Unique --outSJfilterCountUniqueMin 5 5 5 5 --outSJfilterCountTotalMin 5 5 5 5 --outSJfilterIntronMaxVsReadN 5000 --readFilesCommand zcat"
+
 # step 1 function for easy resume
 star_step1() {
 # load genome
 echo -e "[ "$(date)": Loading genome into shared memory ]"
 cmd="STAR --runThreadN "$maxCpus" --genomeDir $star_index_dir --genomeLoad LoadAndExit --outFileNamePrefix $outdir/gLoad."
 srun --ntasks=1 --exclusive --cpus-per-task="$maxCpus" $cmd
-
-# STAR options
-OPTIONS="--runThreadN "$maxCpus" --genomeDir "$star_index_dir" --outSAMtype BAM Unsorted --alignIntronMax 5000 --outSJfilterReads Unique --outSJfilterCountUniqueMin 5 5 5 5 --outSJfilterCountTotalMin 5 5 5 5 --outSJfilterIntronMaxVsReadN 5000 --readFilesCommand zcat"
 
 ### STEP 1
 
@@ -143,6 +143,9 @@ fail_wait
 echo -e "[ "$(date)": Step 1 finished. Removing index from memory ]"
 srun --exclusive --ntasks=1 --cpus-per-task="$maxCpus" \
 	STAR --runThreadN "$maxCpus" --genomeDir $star_index_dir --genomeLoad Remove --outFileNamePrefix $outdir/gRem.
+
+# remove step 1 bamfiles (waste of space)
+rm "$outdir"/step1/*.out.bam
 }
 
 # check if step 1 is already complete
@@ -157,10 +160,12 @@ cat <<- _EOF_
 	$(for tab in $sjTabs; do echo $tab; done)
 _EOF_
 
-# remove step 1 bamfiles (waste of space)
-rm "$outdir"/step1/*.out.bam
-
 ### STEP 2
+
+# find the read files
+shopt -s nullglob
+fastq_files=("$cutadapt_dir/*.fastq.gz")
+shopt -u nullglob
 
 echo -e "[ "$(date)": Submitting step 2 mapping jobs ]"
 
