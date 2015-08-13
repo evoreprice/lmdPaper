@@ -164,7 +164,7 @@ def download_at_genome(outputFiles, jgiLogon, jgiPassword):
 
 def download_sl_reads(outputFiles):
     jobScript = 'src/sh/downloadSlReads.sh'
-    ntasks = '4'
+    ntasks = '2'
     cpus_per_task = '1'
     job_name = 'slReads'
     jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
@@ -210,7 +210,7 @@ def define_os_reads(outputFiles):
 
 def trim_os_reads(inputFiles, outputFiles):
     jobScript = 'src/sh/cutadapt.sh'
-    ntasks = '6'
+    ntasks = '7'
     cpus_per_task = '1'
     job_name = 'cutadapt'
     jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
@@ -241,7 +241,7 @@ def generate_os_index(inputFiles, outputFiles):
 def map_os_reads(inputFiles, outputFiles):
     jobScript = 'src/sh/starMappingTwoStep.sh'
     ntasks = '1'
-    cpus_per_task = '6'
+    cpus_per_task = '7'
     job_name = 'star2s'
     jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
     # update ruffus flag
@@ -256,7 +256,7 @@ def map_os_reads(inputFiles, outputFiles):
 def map_sl_reads(inputFiles, outputFiles):
     jobScript = 'src/sh/pipelineSl.sh'
     ntasks = '1'
-    cpus_per_task = '6'
+    cpus_per_task = '4'
     job_name = 'slMap'
     jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
     # update ruffus flag
@@ -271,7 +271,7 @@ def map_sl_reads(inputFiles, outputFiles):
 def map_at_reads(inputFiles, outputFiles):
     jobScript = 'src/sh/pipelineAt.sh'
     ntasks = '1'
-    cpus_per_task = '6'
+    cpus_per_task = '4'
     job_name = 'atMap'
     jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
     # update ruffus flag
@@ -331,7 +331,7 @@ def shuffle_gtf(inputFiles, outputFiles):
 
 def shuffled_counts(inputFiles, outputFiles):
     jobScript = 'src/sh/htseqShuffle.sh'
-    ntasks = '6'
+    ntasks = '7'
     cpus_per_task = '1'
     job_name = 'shfcount'        
     jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
