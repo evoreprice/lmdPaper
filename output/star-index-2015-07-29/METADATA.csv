@@ -1,8 +1,0 @@
-Script,/var/lib/slurm-llnl/slurmd/job02635/slurm_script
-branch,master
-hash,b3ad7d53dd188f381a58b3d08a1f765881d1fde6
-date,2015-07-29
-STAR version,STAR_2.4.2a_modified
-genomeFastaFiles,data/genome/Osativa_204_v7.0.fa
-sjdbGTFfile,data/genome/Osativa_204_v7.0.gene_exons.cuffcomp.rRNAremoved.gtf
-sjdbOverhang,49

@@ -1,0 +1,8 @@
+Script,src/sh/pipelineAt.sh
+branch,implementRuffus
+hash,60e36e43009f220d768aa1717ce467db8eecf77d
+date,2015-08-12
+STAR version,STAR_2.4.2a_modified
+genomeFastaFiles,data/genome/at/Athaliana_167_TAIR9.fa
+sjdbGTFfile,data/genome/at/Athaliana_167_TAIR10.gene_exons.cuffcomp.gtf
+sjdbOverhang,49

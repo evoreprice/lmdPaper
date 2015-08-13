@@ -1,8 +1,0 @@
-Script,/var/lib/slurm-llnl/slurmd/job02651/slurm_script
-branch,master
-hash,e2578961aa90b48244786e4c13ed49ecb46da2e2
-date,2015-07-31
-STAR version,STAR_2.4.2a_modified
-genomeFastaFiles,data/at/genome/Athaliana_167_TAIR9.fa
-sjdbGTFfile,/home/tom/Documents/writing/lmdPaper/data/at/genome/Athaliana_167_TAIR10.gene_exons.cuffcomp.gtf
-sjdbOverhang,49

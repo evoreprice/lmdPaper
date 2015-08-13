@@ -1,0 +1,7 @@
+Script,src/sh/pipelineAt.sh
+branch,implementRuffus
+hash,1b5d1ac4d8d5dacb15373a7cfa7aa75fad4b93d2
+date,2015-08-12
+STAR version,STAR_2.4.2a_modified
+STAR index,output/madsComp/at/star-index
+cutadapt folder,output/madsComp/at/cutadapt

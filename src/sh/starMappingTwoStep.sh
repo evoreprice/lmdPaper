@@ -100,6 +100,8 @@ cat <<- _EOF_ > $outdir/METADATA.csv
 	cutadapt folder,$cutadapt_dir
 _EOF_
 
+# step 1 function for easy resume
+star_step1() {
 # load genome
 echo -e "[ "$(date)": Loading genome into shared memory ]"
 cmd="STAR --runThreadN "$maxCpus" --genomeDir $star_index_dir --genomeLoad LoadAndExit --outFileNamePrefix $outdir/gLoad."
@@ -141,20 +143,26 @@ fail_wait
 echo -e "[ "$(date)": Step 1 finished. Removing index from memory ]"
 srun --exclusive --ntasks=1 --cpus-per-task="$maxCpus" \
 	STAR --runThreadN "$maxCpus" --genomeDir $star_index_dir --genomeLoad Remove --outFileNamePrefix $outdir/gRem.
+}
+
+# check if step 1 is already complete
+if [[ ! -d "$outdir"/step1 ]]; then
+	star_step1
+fi
+
+# locate step 1 splice juncions
+sjTabs=("$outdir/step1/*.SJ.out.tab")
+cat <<- _EOF_
+	[ $(date): Found SJ.out.tab files from step 1 ]
+	$(for tab in $sjTabs; do echo $tab; done)
+_EOF_
+
+# remove step 1 bamfiles (waste of space)
+rm "$outdir"/step1/*.out.bam
 
 ### STEP 2
 
 echo -e "[ "$(date)": Submitting step 2 mapping jobs ]"
-
-# remove step 1 bamfile (waste of space)
-rm "$outdir"/step1/*.out.bam
-
-# get the SJ.out.tab files from step 1
-sjTabs=("$outdir/step1/*.SJ.out.tab")
-cat <<- _EOF_
-	[ SJ.out.tab files from step 1 ]
-	$(for tab in $sjTabs; do echo $tab; done)
-_EOF_
 
 FAIL=0
 for read_file in $fastq_files

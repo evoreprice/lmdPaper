@@ -1,0 +1,8 @@
+Script,src/sh/starGenomeGenerate.sh
+branch,implementRuffus
+hash,60e36e43009f220d768aa1717ce467db8eecf77d
+date,2015-08-12
+STAR version,STAR_2.4.2a_modified
+genomeFastaFiles,data/genome/os/Osativa_204_v7.0.fa
+sjdbGTFfile,data/genome/os/Osativa_204_v7.0.gene_exons.cuffcomp.rRNAremoved.gtf
+sjdbOverhang,49

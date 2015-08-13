@@ -1,0 +1,5 @@
+script,src/sh/cutadapt.sh
+branch,implementRuffus
+hash,1b5d1ac4d8d5dacb15373a7cfa7aa75fad4b93d2
+date,2015-08-12
+cutadapt version,1.8.3
