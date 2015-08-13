@@ -9,27 +9,27 @@ library(xlsx)
 deseqDir <- "output/DESeq2"
 if (!dir.exists(deseqDir)) {
   cat("deseqDir not found, exiting\n", file = stderr())
-  quit(status = 1)
+  quit(save = "no", status = 1)
 }
 
 # check for expressed genes output
 cutoffDir <- "output/expressedGenes"
 if (!dir.exists(cutoffDir)) {
   cat("cutoffDir not found, exiting\n", file = stderr())
-  quit(status = 1)
+  quit(save = "no", status = 1)
 }
 
 # check for msu annotation file
 msuAnn.file <- "data/genome/os/all.locus_brief_info.7.0.tab"
 if (!file.exists(msuAnn.file)) {
   cat("MSU annotation not found, exiting\n", file = stderr())
-  quit(status = 1)
+  quit(save = "no", status = 1)
 }
 
 # make output folder
 outDir <- "output/mfuzz"
 if (!dir.exists(outDir)) {
-  dir.create(outDir)
+  quit(save = "no", status = 1)
 }
 
 # take the geometric mean of the vst expression values
@@ -149,3 +149,5 @@ sInf <- c(paste("git branch:",system("git rev-parse --abbrev-ref HEAD", intern =
           capture.output(sessionInfo()))
 logLocation <- paste0(outDir, "/SessionInfo.txt")
 writeLines(sInf, logLocation)
+
+quit(save = "no", status = 0)

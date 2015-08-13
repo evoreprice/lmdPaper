@@ -32,7 +32,7 @@ gtfLength <- data.frame(Length = output, row.names = names(output))
 starDir <- "output/STAR"
 if (!dir.exists(starDir)) {
   cat("starDir not found, exiting\n", file = stderr())
-  quit(status = 1)
+  quit(save = "no", status = 1)
 }
 
 # parse STAR files for the average mapped fragment length
@@ -60,7 +60,7 @@ names(mu) <- gsub('.Log.final.out', '', basename(names(mu)), fixed = TRUE)
 deseqDir <- "output/DESeq2"
 if (!dir.exists(deseqDir)) {
   cat("deseqDir not found, exiting\n", file = stderr())
-  quit(status = 1)
+  quit(save = "no", status = 1)
 }
 
 # load DESeq2 output
@@ -107,3 +107,5 @@ sInf <- c(paste("git branch:",system("git rev-parse --abbrev-ref HEAD", intern =
           capture.output(sessionInfo()))
 logLocation <- paste0(outDir, "/SessionInfo.txt")
 writeLines(sInf, logLocation)
+
+quit(save = "no", status = 0)

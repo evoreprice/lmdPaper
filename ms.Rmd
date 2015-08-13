@@ -169,7 +169,9 @@ f_mfuzzClusters <- ggplot(plotData, aes(x = Stage, y = `Normalised, transformed 
 figCount <- incCount(figCount, "f_mfuzzClusters")
 ```
 
-To recover common expression patterns in the meristem samples, read counts were transformed using the variance-stabilizing transformation (VST) included in the `DESeq2` package [@Love:2014do], and the standardised, VST-transformed read counts were clustered using the fuzzy *c*-means algorithm implemented in the `Mfuzz` package [@Futschik:2005vo]. To determine the number of cluster cores (*c*), the minimum distance between cluster centroids, the formation of empty clusters, and PCA plots of cluster members were monitored for clusters produced with *c* values between `cmin` and `cmax` (@SI). A cluster number of `r as.character(english::english(c))` *justify chosing this? double diffential was closest to zero?* (**`r I(pasteLabel("Figure", figCount, "f_mfuzzClusters"))`**).
+To recover common expression patterns in the meristem samples, read counts were transformed using the variance-stabilizing transformation (VST) included in the `DESeq2` package [@Love:2014do], and the standardised, VST-transformed read counts were clustered using the fuzzy *c*-means algorithm implemented in the `Mfuzz` package [@Futschik:2005vo]. To determine the number of cluster cores (*c*), the minimum distance between cluster centroids, the formation of empty clusters, and PCA plots of cluster members were monitored for clusters produced with *c* values between `cmin` and `cmax` (**SI**). A cluster number of `r as.character(english::english(c))` *justify chosing this? double diffential was closest to zero?* (**`r I(pasteLabel("Figure", figCount, "f_mfuzzClusters"))`**).
+
+To understand the contents of the clusters, **z-score for each tf family by cluster**.
 
 <a id="f_mfuzzClusters"></a>
 ```{r f_mfuzzClusters, fig.height=4.40933}
@@ -177,12 +179,14 @@ print(f_mfuzzClusters)
 ```
 
 + **Figure**: Gene expression clusters
-+ GO enrichment?
++ GO enrichment? NO! z-score enrichment of transcription factor genes per cluster. Use dhyper in R (see http://jura.wi.mit.edu/bio/education/hot_topics/enrichment/Gene_list_enrichment_Mar10.pdf or http://stats.stackexchange.com/a/16259)
 + Clusters including 'known' genes
 
 ## Patterns of expression of transcription families
 
 + **Figure**: GSEA of transcription factor families
+
+Because of the enrichment of TF family members in some of the gene expression clusters, geneset-level enrichment analysis (GSEA) was used to compare the levels of expression of TF family members in the meristem samples. **Something like: Consistent with their enrichment in cluster 1 and 6, MADS genes were significantly enriched in the SM/FM samples**. TF families involved in branching were enriched in **which families, which samples**.
 
 ## MADS genes: comparison of expression & homology in rice, tomato, arabidopsis
 
@@ -211,7 +215,7 @@ print(f_mfuzzClusters)
 `r I(pasteLabel("Figure", figCount, "f_mfuzzClusters"))`
 **Fuzzy *c*-means clustering of normalised, transformed read counts**
 
-`r capwords(as.character(english::english(c)))` common patterns of expression were recovered from the normalised, variance-stabilised read counts. Genes expressed in blah blah
+`r capwords(as.character(english::english(c)))` common patterns of expression were recovered from normalised, variance-stabilised read counts of expressed genes. Each line describes the expression pattern of one gene, with the gene's membership to the cluster mapped to the colour of the line. The core values for each cluster are drawn in black. 
 
 ***
 

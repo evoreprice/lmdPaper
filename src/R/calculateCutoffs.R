@@ -11,21 +11,21 @@ library(dplyr)
 shuffleDir <- "output/shuffle"
 if (!dir.exists(shuffleDir)) {
   cat("shuffleDir not found, exiting\n", file = stderr())
-  quit(status = 1)
+  quit(save = "no", status = 1)
 }
 
 # check for tpm output
 tpmDir <- "output/tpm"
 if (!dir.exists(tpmDir)) {
   cat("tpmDir not found, exiting\n", file = stderr())
-  quit(status = 1)
+  quit(save = "no", status = 1)
 }
 
 # check for shufTpmDir output
 shufTpmDir <- "output/dnaTpm"
 if (!dir.exists(shufTpmDir)) {
   cat("shufTpmDir not found, exiting\n", file = stderr())
-  quit(status = 1)
+  quit(save = "no", status = 1)
 }
 
 # make output folder
@@ -114,3 +114,5 @@ sInf <- c(paste("git branch:",system("git rev-parse --abbrev-ref HEAD", intern =
           capture.output(sessionInfo()))
 logLocation <- paste0(outDir, "/SessionInfo.txt")
 writeLines(sInf, logLocation)
+
+quit(save = "no", status = 0)

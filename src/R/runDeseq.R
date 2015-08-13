@@ -6,15 +6,16 @@
 starDir <- "output/STAR"
 if (!dir.exists(starDir)) {
   cat("starDir not found, exiting\n", file = stderr())
-  quit(status = 1)
+  quit(save = "no", status = 1)
 }
 
 # load the quant files
 starFiles <- list.files(starDir, pattern = "ReadsPerGene", full.names = TRUE)
 if (length(starFiles) == 0) {
   cat("Couldn't find STAR count files, exiting\n", file = stderr())
-  quit(status = 1)
+  quit(save = "no", status = 1)
 }
+
 starCounts <- do.call(cbind,
                       lapply(starFiles, read.table, header = FALSE, sep = "\t", row.names = 1,
                              colClasses = c("character", "integer", rep("NULL", 2))))
@@ -82,3 +83,5 @@ sInf <- c(paste("git branch:",system("git rev-parse --abbrev-ref HEAD", intern =
           capture.output(sessionInfo()))
 logLocation <- paste0(outDir, "/SessionInfo.txt")
 writeLines(sInf, logLocation)
+
+quit(save = "no", status = 0)

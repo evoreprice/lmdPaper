@@ -6,35 +6,35 @@ library(rtracklayer)
 shuffleDir <- "output/shuffle"
 if (!dir.exists(shuffleDir)) {
   cat("shuffleDir not found, exiting\n", file = stderr())
-  quit(status = 1)
+  quit(save = "no", status = 1)
 }
 
 # check for htseq counts
 htseqDir <- "output/dnaTpm/shuffledCounts"
 if (!dir.exists(htseqDir)) {
   cat("htseqDir not found, exiting\n", file = stderr())
-  quit(status = 1)
+  quit(save = "no", status = 1)
 }
 
 # check for STAR output
 starDir <- "output/STAR"
 if (!dir.exists(starDir)) {
   cat("starDir not found, exiting\n", file = stderr())
-  quit(status = 1)
+  quit(save = "no", status = 1)
 }
 
 # check for DESeq2 output
 deseqDir <- "output/DESeq2"
 if (!dir.exists(deseqDir)) {
   cat("deseqDir not found, exiting\n", file = stderr())
-  quit(status = 1)
+  quit(save = "no", status = 1)
 }
 
 # check for tpm output
 tpmDir <- "output/tpm"
 if (!dir.exists(tpmDir)) {
   cat("tpmDir not found, exiting\n", file = stderr())
-  quit(status = 1)
+  quit(save = "no", status = 1)
 }
 
 # FEATURE LENGTHS FROM GTF
@@ -162,3 +162,5 @@ sInf <- c(paste("git branch:",system("git rev-parse --abbrev-ref HEAD", intern =
           capture.output(sessionInfo()))
 logLocation <- paste0(outDir, "/SessionInfo.txt")
 writeLines(sInf, logLocation)
+
+quit(save = "no", status = 0)
