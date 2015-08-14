@@ -47,11 +47,9 @@ expressedGenes <- readRDS(paste0(cutoffDir, '/expressedGenesAll.Rds'))
 vstMeans <- data.frame(vstMeans.matrix)
 vstFiltered <- vstMeans[expressedGenes,]
 
-varGenes <- vstFiltered
-
 # get the most variable genes
-#vstByVar <- vstFiltered[(rev(order(apply(vstFiltered, 1, var)))),]
-#varGenes <- vstByVar[1:(0.1 * dim(vstByVar)[1]),]
+vstByVar <- vstFiltered[(rev(order(apply(vstFiltered, 1, var)))),]
+varGenes <- vstByVar[1:(0.25 * dim(vstByVar)[1]),]
 
 # set up the expressionSet
 pData <- data.frame(Stage = as.factor(colnames(varGenes)), row.names = colnames(varGenes))
