@@ -3,6 +3,12 @@ title: "Supporting Information"
 csl: csl/the-plant-journal.csl
 header-includes: \usepackage{graphicx}
 output:
+  BiocStyle::html_document:
+    fig_caption: yes
+    force_captions: yes
+    highlight: pygments
+    keep_md: yes
+    number_sections: yes
   word_document:
     fig_caption: yes
 bibliography: bib/test.bib
@@ -18,7 +24,7 @@ knitr::opts_chunk$set(fig.path='figures/',
                fig.align = 'center',
                dpi=300,
                fig.show='hold',
-               cache=TRUE,
+               cache=FALSE,
                echo=FALSE,
                results="hide",
                message=FALSE,
