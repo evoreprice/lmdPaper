@@ -60,11 +60,6 @@ resultsLong[resultsLong$Number < 2, ]$`p-value` <- NA
 resultsLong$padj <- p.adjust(resultsLong$`p-value`, method = "BH",
                              n = sum(!is.na(resultsLong$`p-value`)))
 
-resultsLong$genesInFamily <- genesPerFamily[as.character(resultsLong$Family)]
-
-# add the number of genes expressed (think I should skip)
-resultsLong$exprGenesInFamily <- exprPerFamily[as.character(resultsLong$Family)]
-
 # go wide
 padj <- reshape2::dcast(resultsLong, Family ~ Cluster, value.var = 'padj')
 rownames(padj) <- padj$Family
