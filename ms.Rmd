@@ -10,12 +10,12 @@ output:
     highlight: pygments
     keep_md: yes
     number_sections: yes
+  word_document:
+    fig_caption: yes
   pdf_document:
     fig_caption: yes
     keep_tex: yes
     number_sections: yes
-  word_document:
-    fig_caption: yes
 bibliography: bib/test.bib
 ---
 
