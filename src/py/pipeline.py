@@ -385,7 +385,7 @@ def detect_expressed_genes(inputFiles, outputFiles):
 # fuzzy c-means clustering
 #
 @merge([detect_expressed_genes, run_deseq2_os, download_os_genome], 'ruffus/os.mfuzz')
-def mfuzz(inputFiles, outputFiles):
+def clustering(inputFiles, outputFiles):
     jobScript = 'src/R/mfuzz.R'
     ntasks = '1'
     cpus_per_task = '1'
@@ -394,6 +394,22 @@ def mfuzz(inputFiles, outputFiles):
     # update ruffus flag
     print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
     touch(outputFiles)    
+
+#---------------------------------------------------------------
+# hypergeometric tests for enrichment of TFs
+#
+@merge([clustering, download_tfdb], 'ruffus/os.hypergeom')
+def tf_hypergeom(inputFiles, outputFiles):
+    jobScript = 'src/R/tfHypergeom.R'
+    ntasks = '1'
+    cpus_per_task = '1'
+    job_name = 'tfHyper'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)    
+
+
 
 # options for visualising
 pipeline_printout()
