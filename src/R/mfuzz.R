@@ -144,6 +144,7 @@ saveRDS(clusters, paste0(outDir, "/clusters.Rds"))
 saveRDS(annotatedClusters, paste0(outDir, "/annotatedClusters.Rds"))
 saveRDS(centPlot, paste0(outDir, "/centPlot.Rds"))
 saveRDS(maxClust, paste0(outDir, "/maxClust.Rds"))
+saveRDS(vstFiltered, paste0(outDir, "/vstFiltered.Rds"))
 
 # SAVE LOGS
 sInf <- c(paste("git branch:",system("git rev-parse --abbrev-ref HEAD", intern = TRUE)),

@@ -188,6 +188,21 @@ def download_at_reads(outputFiles):
     touch(outputFiles)
 
 #---------------------------------------------------------------
+# download TFDB
+#
+@originate(['ruffus/tfdb.data'])
+
+def download_tfdb(outputFiles):
+    jobScript = 'src/sh/downloadTfdb.sh'
+    ntasks = '1'
+    cpus_per_task = '1'
+    job_name = 'tfdb'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)
+
+#---------------------------------------------------------------
 # define rice reads
 #
 @originate(['ruffus/os.reads'])

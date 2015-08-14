@@ -121,12 +121,14 @@ Word count
 figCount <- incCount(figCount, "f_mfuzzClusters")
 ```
 
-To recover common expression patterns in the meristem samples, read counts were transformed using the variance-stabilizing transformation (VST) included in the `DESeq2` package [@Love:2014do]. After determining an expression cutoff for each library, genes that were not above the cutoff in any sample were excluded, leaving (**how many genes remaining, link to methods**). These genes were ranked by variance, and genes with variance higher than the 90th percentile were used for clustering (**how many genes**). The standardised, VST-transformed read counts for the expressed, variable genes were clustered using the fuzzy *c*-means algorithm implemented in the `Mfuzz` package [@Futschik:2005vo]. To determine the number of cluster cores (*c*), the minimum distance between cluster centroids, the formation of empty clusters, and PCA plots of cluster members were monitored for clusters produced with *c* values between `cmin` and `cmax` (**SI**). A cluster number of `r as.character(english::english(c))` *justify chosing this? double diffential was closest to zero?* (**`r I(pasteLabel("Figure", figCount, "f_mfuzzClusters"))`**).
+To recover common expression patterns in the meristem samples, read counts were transformed using the variance-stabilizing transformation (VST) included in the `DESeq2` package [@Love:2014do]. After determining an expression cutoff for each library, genes that were not above the cutoff in any sample were excluded, leaving (**how many genes remaining, link to methods**). These genes were ranked by variance, and genes with variance higher than the 90th percentile were used for clustering (**how many genes**). The standardised, VST-transformed read counts for the expressed, variable genes were clustered using the fuzzy *c*-means algorithm implemented in the `Mfuzz` package [@Futschik:2005vo]. To determine the number of cluster cores (*c*), the minimum distance between cluster centroids, the formation of empty clusters, and PCA plots of cluster members were monitored for clusters produced with *c* values between 2 and `r maxClust`. A cluster number of `r as.character(english::english(c))` *justify chosing this? double diffential was closest to zero?* (**`r I(pasteLabel("Figure", figCount, "f_mfuzzClusters"))`**).
 
 To understand the contents of the clusters, **z-score for each tf family by cluster**.
 
+
+
 <a id="f_mfuzzClusters"></a>
-```{r f_mfuzzClusters, fig.height=4.40933}
+```{r f_mfuzzClusters, fig.height=4.40933, cache = FALSE}
 print(f_mfuzzClusters)
 ```
 
