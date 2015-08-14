@@ -1,6 +1,7 @@
 #!/usr/bin/Rscript
 
 library(rtracklayer)
+library(dplyr)
 
 # check for shuffled GTF
 shuffleDir <- "output/shuffle"
@@ -54,12 +55,10 @@ reducedGtf <- unlist(grl, use.names = TRUE)
 elementMetadata(reducedGtf)$gene_name <- rep(names(grl), elementLengths(grl))
 elementMetadata(reducedGtf)$widths <- width(reducedGtf)
 
-# calculate feature lengths 
-calc_length <- function(x) {
-  sum(elementMetadata(x)$widths)
-}
-output <- OpenRepGrid::sapply_pb(split(reducedGtf, elementMetadata(reducedGtf)$gene_name), calc_length)
-gtfLength <- data.frame(Length = output, row.names = names(output))
+# calculate feature lengths with dplyr
+output <- group_by(as.data.frame(reducedGtf), gene_name) %>%
+  summarize(length = sum(widths))
+gtfLength <- data.frame(Length = output$length, row.names = output$gene_name)
 
 # PARSE STAR FILES
 
@@ -84,10 +83,6 @@ mu <- sapply(files, parseStarFile)
 names(mu) <- gsub('.Log.final.out', '', basename(names(mu)), fixed = TRUE)
 
 # CALCULATE TPM
-
-# read shuffled htseq-count results into DESeq to get normalised counts
-outputDirs <- list.dirs(shuffleDir, full.names = TRUE, recursive = FALSE)
-htseqDir <- rev(sort(outputDirs[grep('htseq-count', outputDirs)]))[1]
 
 countFiles <- list.files(htseqDir, pattern = 'htseq-count$', full.names = TRUE)
 countMatrix <- do.call(cbind, lapply(countFiles, read.table, header = FALSE, sep = "\t", row.names = 1))

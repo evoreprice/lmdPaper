@@ -1,6 +1,7 @@
 #!/usr/bin/Rscript
 
 library(rtracklayer)
+library(dplyr)
 
 # FEATURE LENGTHS FROM GTF
 
@@ -19,12 +20,10 @@ reducedGtf <- unlist(grl, use.names = TRUE)
 elementMetadata(reducedGtf)$gene_name <- rep(names(grl), elementLengths(grl))
 elementMetadata(reducedGtf)$widths <- width(reducedGtf)
 
-# calculate feature lengths 
-calc_length <- function(x) {
-  sum(elementMetadata(x)$widths)
-}
-output <- sapply(split(reducedGtf, elementMetadata(reducedGtf)$gene_name), calc_length)
-gtfLength <- data.frame(Length = output, row.names = names(output))
+# calculate feature lengths with dplyr
+output <- group_by(as.data.frame(reducedGtf), gene_name) %>%
+  summarize(length = sum(widths))
+gtfLength <- data.frame(Length = output$length, row.names = output$gene_name)
 
 # PARSE STAR FILES
 

@@ -171,7 +171,7 @@ f_mfuzzClusters <- ggplot(plotData, aes(x = Stage, y = `Normalised, transformed 
 figCount <- incCount(figCount, "f_mfuzzClusters")
 ```
 
-To recover common expression patterns in the meristem samples, read counts were transformed using the variance-stabilizing transformation (VST) included in the `DESeq2` package [@Love:2014do], and the standardised, VST-transformed read counts were clustered using the fuzzy *c*-means algorithm implemented in the `Mfuzz` package [@Futschik:2005vo]. To determine the number of cluster cores (*c*), the minimum distance between cluster centroids, the formation of empty clusters, and PCA plots of cluster members were monitored for clusters produced with *c* values between `cmin` and `cmax` (**SI**). A cluster number of `r as.character(english::english(c))` *justify chosing this? double diffential was closest to zero?* (**`r I(pasteLabel("Figure", figCount, "f_mfuzzClusters"))`**).
+To recover common expression patterns in the meristem samples, read counts were transformed using the variance-stabilizing transformation (VST) included in the `DESeq2` package [@Love:2014do]. After determining an expression cutoff for each library, genes that were not above the cutoff in any sample were excluded, leaving (**how many genes remaining, link to methods**). These genes were ranked by variance, and genes with variance higher than the 90th percentile were used for clustering (**how many genes**). The standardised, VST-transformed read counts for the expressed, variable genes were clustered using the fuzzy *c*-means algorithm implemented in the `Mfuzz` package [@Futschik:2005vo]. To determine the number of cluster cores (*c*), the minimum distance between cluster centroids, the formation of empty clusters, and PCA plots of cluster members were monitored for clusters produced with *c* values between `cmin` and `cmax` (**SI**). A cluster number of `r as.character(english::english(c))` *justify chosing this? double diffential was closest to zero?* (**`r I(pasteLabel("Figure", figCount, "f_mfuzzClusters"))`**).
 
 To understand the contents of the clusters, **z-score for each tf family by cluster**.
 
@@ -217,9 +217,9 @@ The presence of MADS genes was enriched in **which clusters** and their overall 
 # Figure legends
 
 `r I(pasteLabel("Figure", figCount, "f_mfuzzClusters"))`
-**Fuzzy *c*-means clustering of normalised, transformed read counts**
+**Common patterns of expression in the meristem samples.**
 
-`r capwords(as.character(english::english(c)))` common patterns of expression were recovered from normalised, variance-stabilised read counts of expressed genes. Each line describes the expression pattern of one gene, with the gene's membership to the cluster mapped to the colour of the line. The core values for each cluster are drawn in black. 
+Fuzzy *c*-means clustering of normalised, variance-stabilised read counts was used to recover `r capwords(as.character(english::english(c)))` common patterns of expression. Each line describes the expression pattern of one gene, with the gene's membership to the cluster mapped to the colour of the line. The core values for each cluster are plotted in black. 
 
 ***
 
