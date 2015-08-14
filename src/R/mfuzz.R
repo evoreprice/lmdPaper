@@ -63,10 +63,10 @@ vg.s <- standardise(vg.e)
 m1 <- mestimate(vg.s)
 
 # estimate the cluster number
-maxClust <- 15
+maxClust <- 25
 centroids <- data.frame(
   x = 2:(maxClust),
-  y = Dmin(vg.s, m = m1, crange = seq(2, maxClust, 1), repeats = 1, visu = FALSE)
+  y = Dmin(vg.s, m = m1, crange = seq(2, maxClust, 1), repeats = 3, visu = FALSE)
 )
 
 # visualise dmin vs cluster number
@@ -143,6 +143,7 @@ saveRDS(c1, paste0(outDir, "/c1.Rds"))
 saveRDS(clusters, paste0(outDir, "/clusters.Rds"))
 saveRDS(annotatedClusters, paste0(outDir, "/annotatedClusters.Rds"))
 saveRDS(centPlot, paste0(outDir, "/centPlot.Rds"))
+saveRDS(maxClust, paste0(outDir, "/maxClust.Rds"))
 
 # SAVE LOGS
 sInf <- c(paste("git branch:",system("git rev-parse --abbrev-ref HEAD", intern = TRUE)),

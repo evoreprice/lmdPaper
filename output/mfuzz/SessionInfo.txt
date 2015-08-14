@@ -1,5 +1,5 @@
-git branch: implementRuffus
-git hash: 0e171e005bfd8298bec99e8a69f9d37e8a421952
+git branch: master
+git hash: 97849719b2dbbdb1644238de83465a9cca6cd09a
 R version 3.2.1 (2015-06-18)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 14.04.3 LTS
