@@ -1,7 +1,0 @@
-Script,/var/lib/slurm-llnl/slurmd/job02684/slurm_script
-branch,master
-hash,8579959775d38825750f4ab6439bd2ab75abfee7
-date,2015-08-03
-htseq-count version, Public License v3. Part of the 'HTSeq' framework, version 0.6.0.
-gff3,output/shuffle-2015-08-03//Osativa_204_v7.shuffled.gff3
-output,output/shuffle-2015-08-03//htseq-count-2015-08-03

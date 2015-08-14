@@ -29,7 +29,7 @@ if (!file.exists(msuAnn.file)) {
 # make output folder
 outDir <- "output/mfuzz"
 if (!dir.exists(outDir)) {
-  quit(save = "no", status = 1)
+  dir.create(outDir)
 }
 
 # take the geometric mean of the vst expression values
