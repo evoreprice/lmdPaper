@@ -88,7 +88,7 @@ centPlotWithPoints <- centPlot +
 
 # we will go with 6 clusters
 c <- 6
-memCutoff <- 0.7
+memCutoff <- 0.5
 
 # run the clustering
 set.seed(1)
