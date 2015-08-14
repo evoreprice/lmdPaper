@@ -58,11 +58,17 @@ g <- ggplot(combLength, aes(x = log2(Length), colour = type, fill = type), alpha
 
 # add factor for separating distributions
 dnaTpm$type <- substr(rownames(dnaTpm), 1, 4)
-dnaTpm$type[!dnaTpm$type == "dna_"] <- "Real"
-dnaTpm$type[dnaTpm$type == "dna_"] <- "DNA"
+dnaTpm$type[!dnaTpm$type == "dna_"] <- "Genic"
+dnaTpm$type[dnaTpm$type == "dna_"] <- "Intergenic"
 
 # add id column and melt
 dnaTpm$id <- rownames(dnaTpm)
+
+## remove ChrSy and ChrUn "genes"
+#rem <- c(grep(toupper('ChrSy'), toupper(dnaTpm$id), fixed = TRUE),
+#grep(toupper('ChrUn'), toupper(dnaTpm$id), fixed = TRUE))
+#dnaTpm <- dnaTpm[-rem,]
+
 dnaTpm.plot <- reshape2::melt(dnaTpm, id.vars = c('id', 'type'), variable.name = 'lib', value.name = 'tpm')
 
 p <- ggplot(dnaTpm.plot, aes(x = log(tpm), colour = type, fill = type), alpha = 0.5) +
@@ -76,7 +82,7 @@ p <- ggplot(dnaTpm.plot, aes(x = log(tpm), colour = type, fill = type), alpha = 
 # calculate 95th percentile per library
 q95 <- as.data.frame(dplyr::group_by(dnaTpm.plot, type, lib) %>%
   dplyr::summarise(q95 = quantile(tpm, 0.95, type = 7)))
-q95.plot <- q95[q95$type == 'DNA', ]
+q95.plot <- q95[q95$type == 'Intergenic', ]
 q95.plot$type <- NULL
 
 p <- p + geom_vline(data = q95.plot, mapping = aes(xintercept = log(q95)))
@@ -87,7 +93,7 @@ names(cutoffs) <- q95.plot$lib
 
 # which genes have tpm higher than q95?
 expressedGenesByLibrary <- lapply(levels(q95.plot$lib), function(libName)
-  subset(dnaTpm.plot, type == 'Real' & lib == libName & tpm > cutoffs[libName])$id)
+  subset(dnaTpm.plot, type == 'Genic' & lib == libName & tpm > cutoffs[libName])$id)
 names(expressedGenesByLibrary) <- levels(q95.plot$lib)
 
 expressedGenes <- unique(do.call(c, expressedGenesByLibrary))

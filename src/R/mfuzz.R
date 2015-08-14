@@ -63,10 +63,10 @@ vg.s <- standardise(vg.e)
 m1 <- mestimate(vg.s)
 
 # estimate the cluster number
-maxClust <- 20
+maxClust <- 15
 centroids <- data.frame(
   x = 2:(maxClust),
-  y = Dmin(vg.s, m = m1, crange = seq(2, maxClust, 1), repeats = 3, visu = FALSE)
+  y = Dmin(vg.s, m = m1, crange = seq(2, maxClust, 1), repeats = 1, visu = FALSE)
 )
 
 # visualise dmin vs cluster number
@@ -80,8 +80,9 @@ centPlot <- ggplot(centroids, aes(x = x, y = y)) +
 # can try to find inflection points, doesn't work very well.
 points <- seq(2, maxClust, length.out = 10000)
 pred <- predict(loess(centroids$y ~ centroids$x), points)
-infl <- c(FALSE, diff(diff(pred) > 0) != 0)
-centPlotWithPoints <- centPlot + geom_point(data = data.frame(x = points[infl], y = pred[infl]), colour = 'red')
+infl <- c(FALSE, diff(diff(diff(pred)) > 0) != 0)
+centPlotWithPoints <- centPlot +
+  geom_point(data = data.frame(x = points[infl], y = pred[infl]), colour = 'red')
 
 # we will go with 6 clusters
 c <- 6
