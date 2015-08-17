@@ -10,7 +10,7 @@ extrafont::loadfonts()
 
 expressionMatrix <- readRDS('output/mfuzz/expressionMatrix.Rds')
 c1 <- readRDS('output/mfuzz/c1.Rds')
-memCutoff <- 0.5
+memCutoff <- 0.7
 
 # get clusters and membership
 cluster <- data.table(id = names(c1$cluster), Cluster = c1$cluster, Membership = apply(c1$membership, 1, max), key = "id")
@@ -19,7 +19,7 @@ cluster <- data.table(id = names(c1$cluster), Cluster = c1$cluster, Membership =
 exprs <- data.table(Biobase::exprs(expressionMatrix), keep.rownames = TRUE, key = "rn")
 
 # set up cluster labels
-numGenes <- cluster[Membership > 0.5, .(number = length(id)), by = Cluster]
+numGenes <- cluster[Membership > memCutoff, .(number = length(id)), by = Cluster]
 setkey(numGenes, 'Cluster')
 clustLabels <- numGenes[, paste0("Cluster ", Cluster, "\n(", number, " genes)")]
 
@@ -51,11 +51,12 @@ maxClust <- readRDS('output/mfuzz/maxClust.Rds')
 f_mfuzzClusters <- ggplot(plotData, aes(x = Stage, y = `Normalised, transformed read counts`,
                                         colour = Membership, group = id)) +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
   xlab(NULL) +
   scale_colour_gradientn(colours = heatscale, limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
   geom_line(alpha = 0.8) +
   geom_line(data = centres, mapping = aes(group = 1), colour = "black", alpha = 0.5) +
-  facet_wrap(~ Cluster)
+  facet_wrap(~ Cluster, nrow = 3)
 
 # # centroid dis vs. c (for SI)
 # f_mfuzzCentroids <- readRDS('output/mfuzz/centPlot.Rds')

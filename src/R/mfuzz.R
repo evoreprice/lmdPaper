@@ -80,7 +80,7 @@ centPlot <- ggplot(centroids, aes(x = x, y = y)) +
 # can try to find inflection points, doesn't work very well.
 points <- seq(2, maxClust, length.out = 10000)
 pred <- predict(loess(centroids$y ~ centroids$x), points)
-infl <- c(FALSE, diff(diff(diff(pred)) > 0) != 0)
+infl <- c(FALSE, diff(diff(pred) > 0) != 0)
 centPlotWithPoints <- centPlot +
   geom_point(data = data.frame(x = points[infl], y = pred[infl]), colour = 'red')
 
