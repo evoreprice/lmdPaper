@@ -10,7 +10,7 @@ extrafont::loadfonts()
 
 expressionMatrix <- readRDS('output/mfuzz/expressionMatrix.Rds')
 c1 <- readRDS('output/mfuzz/c1.Rds')
-memCutoff <- 0.7
+memCutoff <- 0.5
 
 # get clusters and membership
 cluster <- data.table(id = names(c1$cluster), Cluster = c1$cluster, Membership = apply(c1$membership, 1, max), key = "id")
@@ -51,7 +51,8 @@ maxClust <- readRDS('output/mfuzz/maxClust.Rds')
 f_mfuzzClusters <- ggplot(plotData, aes(x = Stage, y = `Normalised, transformed read counts`,
                                         colour = Membership, group = id)) +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
+        legend.key.size = grid::unit(1, "lines")) +
   xlab(NULL) +
   scale_colour_gradientn(colours = heatscale, limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
   geom_line(alpha = 0.8) +
