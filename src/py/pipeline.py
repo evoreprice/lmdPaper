@@ -417,14 +417,25 @@ def rnaStats(inputFiles, outputFiles):
     jobScript = 'src/sh/countRTrna.sh'
     ntasks = '2'
     cpus_per_task = '1'
-    job_name = 'qStat'
+    job_name = 'rtCount'
     jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
     # update ruffus flag
     print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
     touch(outputFiles)
 
-
-
+#---------------------------------------------------------------
+# parse library stats
+#
+@merge([map_os_reads, rnaStats, run_deseq2_os, detect_expressed_genes], 'ruffus/os.libStats')
+def libStats(inputFiles, outputFiles):
+    jobScript = 'src/R/parseQuantStats.R'
+    ntasks = '1'
+    cpus_per_task = '1'
+    job_name = 'libStats'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)
 
 # options for visualising
 pipeline_printout()
