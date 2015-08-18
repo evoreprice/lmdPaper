@@ -52,6 +52,36 @@ capwords <- function(s, strict = FALSE) {
 
 t_libStats <- readRDS('output/quantStats/libStats.Rds')
 
+################
+### PCA PLOT ###
+################
+
+# make this for all libraries, not just the final ones
+
+expressedGenes <- readRDS('output/expressedGenes/expressedGenesAll.Rds')
+vst <- readRDS('output/DESeq2/vst.Rds')
+
+exprVst <- GenomicRanges::assay(vst)[expressedGenes,]
+pca <- prcomp(t(exprVst))
+percentVar <- pca$sdev^2/sum(pca$sdev^2)
+
+pcaPlotData <- data.frame(
+  label = toupper(rownames(pca$x)),
+  PCA1 = pca$x[,1],
+  PCA2 = pca$x[,2],
+  Stage = GenomicRanges::colData(vst)$stage
+)
+
+f_pca <- ggplot(data = pcaPlotData, aes(x = PCA1, y = PCA2, colour = Stage)) +
+  theme_minimal(base_size = 8, base_family = "Helvetica") +
+  scale_colour_brewer(palette = "Set1", name = 'Stage') +
+  guides(colour=guide_legend(title=NULL)) +
+  scale_fill_brewer(palette = "Set1", guide = FALSE) +
+  xlab(paste0("PC1: ", round(percentVar[1] * 100), "% variance")) +
+  ylab(paste0("PC2: ", round(percentVar[2] * 100), "% variance")) +
+  geom_point(shape = 16, size = 5, alpha = 0.7) +
+  geom_text(aes(x = PCA1, y = PCA2, label = label), hjust = 1.2, show.legend = FALSE)
+
 #############
 ### Mfuzz ###
 #############
@@ -108,7 +138,8 @@ f_mfuzzClusters <- ggplot(plotData, aes(x = Stage, y = `Normalised, transformed 
   facet_wrap(~ Cluster, ncol = 2)
 
 # centroid dis vs. c (for SI)
-f_mfuzzCentroids <- readRDS('output/mfuzz/centPlot.Rds')
+f_mfuzzCentroids <- readRDS('output/mfuzz/centPlot.Rds') +
+  theme_minimal(base_size = 8, base_family = "Helvetica")
 
 # MDS for SI
 vg.mds <- readRDS('output/mfuzz/vg.mds.Rds')

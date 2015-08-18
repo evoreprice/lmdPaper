@@ -49,9 +49,14 @@ tableCount <- incCount(tableCount, "t_libStats")
 knitr::kable(t_libStats, caption = "Library and sequencing statistics")
 ```
 
+```{r pca}
+figCount <- incCount(figCount, "f_pca")
+f_pca
+```
+
 ### Fuzzy *c*-means clustering
 
-```{r mfuzz, cache = TRUE}
+```{r mfuzz}
 figCount <- incCount(figCount, "f_mfuzzCentroids")
 print(f_mfuzzCentroids)
 

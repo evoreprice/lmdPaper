@@ -75,7 +75,7 @@ figCount <- incCount(figCount, "f_lmdFigure")
 
 +  **Figure**: laser microdissections
 
-To investigate gene expression during inflorescence development, LASER microdissection (LMD) was used to collect meristematic tissues from the rachis meristem (RM), primary branch meristem (PBM), elongating primary branch meristem and secondary branch meristem (ePBM/SBM) and spikelet meristem (SM) (`r I(pasteLabel("Figure", figCount, "f_lmdFigure"))`). RNA from the meristem samples was isolated, amplified and used for the production of a sequencing library. **Details of the procedure, yield, etc.**. 
+To investigate gene expression during inflorescence development, LASER microdissection (LMD) was used to collect meristematic tissues from the rachis meristem (RM), primary branch meristem (PBM), elongating primary branch meristem and secondary branch meristem (ePBM/SBM) and spikelet meristem (SM) (`r I(pasteLabel("Figure", figCount, "f_lmdFigure"))`). RNA from the meristem samples was isolated, amplified and used for the production of a sequencing library. RNA input for library preparation was between `r min(t_libStats$"Yield (ng)")` and `r max(t_libStats$"Yield (ng)")` ng and the average RNA integrity number was `r round(mean(t_libStats$"RIN"), 1)`. 
 
 <a id="f_lmdFigure"></a>
 ![](data/lmdFigure.pdf)
