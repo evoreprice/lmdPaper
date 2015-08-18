@@ -1,7 +1,7 @@
 Script,src/sh/htseqShuffle.sh
-branch,implementRuffus
-hash,70cf50668428047c564c0dc27e798ed939f5bce2
-date,2015-08-13
+branch,master
+hash,6316b9f047a90aa121ee02704b9d2902965b48a8
+date,2015-08-17
 htseq-count version, Public License v3. Part of the 'HTSeq' framework, version 0.6.0.
 gff3,output/shuffle/Osativa_204_v7.shuffled.gff3
 output,output/dnaTpm/shuffledCounts

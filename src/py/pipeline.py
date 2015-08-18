@@ -409,7 +409,19 @@ def tf_hypergeom(inputFiles, outputFiles):
     print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
     touch(outputFiles)    
 
-
+#---------------------------------------------------------------
+# count tRNA/rRNA in libraries
+#
+@merge([download_os_genome, map_os_reads], 'ruffus/os.quantStats')
+def quantStats(inputFiles, outputFiles):
+    jobScript = 'src/sh/countRTrna.sh'
+    ntasks = '7'
+    cpus_per_task = '1'
+    job_name = 'qStat'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)
 
 # options for visualising
 pipeline_printout()
