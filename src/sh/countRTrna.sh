@@ -109,7 +109,7 @@ if [[ ! -e "data/genome/os/Osativa_204_v7.0.1.bt2" ]]; then
 	bowtie2-build data/genome/os/Osativa_204_v7.0.fa data/genome/os/Osativa_204_v7.0
 fi
 echo -e "[ $(date): Mapping simulated reads ]"
-srun --ntasks=$maxCpus --exclusive tophat2 --num-threads $maxCpus --output-dir $outdir/tophat data/genome/os/Osativa_204_v7.0 $outdir/rRna.wgsim.fq
+srun --ntasks=1 --cpus-per-task="$maxCpus" --exclusive tophat2 --num-threads $maxCpus --output-dir $outdir/tophat data/genome/os/Osativa_204_v7.0 $outdir/rRna.wgsim.fq
 
 # convert tophat accepted hits to bed format
 bedtools bamtobed -i $outdir/tophat/accepted_hits.bam > $outdir/accepted_hits.bed6
