@@ -140,9 +140,9 @@ for bam in $bamfiles; do
 	library=$(basename "$bam" ".Aligned.out.bam")
 	echo -e "[ $(date): Counting rRNA and tRNA for "$library" ]"
 	cmdR="samtools view -c -F0x100 -L $outdir/rRna.combined.bed $bam"
-	srun --ntasks=1 --exclusive --output=$outdir/$library.rrna.tmp $cmdR &
+	$(srun --ntasks=1 --exclusive --output=$outdir/$library.rrna.tmp $cmdR) &
 	cmdT="samtools view -c -F0x100 -L $outdir/rap_tRNA.bed9 $bam"
-	srun --ntasks=1 --exclusive --output=$outdir/$library.trna.tmp $cmdT &
+	$(srun --ntasks=1 --exclusive --output=$outdir/$library.trna.tmp $cmdT) &
 done
 echo -e "[ $(date): Waiting for jobs to finish ]"
 fail_wait
