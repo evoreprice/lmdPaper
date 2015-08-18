@@ -148,7 +148,6 @@ done
 echo -e "[ $(date): Waiting for jobs to finish ]"
 
 fail_wait
-exit 1
 
 # read results from temporary fines into array
 lines=()
