@@ -30,44 +30,6 @@ knitr::opts_chunk$set(fig.path='figures/',
                message=FALSE,
                warning=FALSE)
 
-# https://gist.githubusercontent.com/rmflight/3858973/raw/591ee603ce0996ac407902f7dd59520b35b3702a/tableFigureFuncs.r
-pasteLabel <- function(preText, inObj, objName, insLink=TRUE){
-	objNum <- inObj[objName]
-	
-	useText <- paste(preText, objNum, sep=" ")
-	if (insLink){
-		useText <- paste("[", useText, "](#", objName, ")", sep="")
-	}
-	useText
-}
-
-# this increments the counter, and gives a name to the number so we can reference it later
-incCount <- function(inObj, useName){
-	nObj <- length(inObj)
-	useNum <- max(inObj) + 1
-	inObj <- c(inObj, useNum)
-	names(inObj)[nObj+1] <- useName
-	inObj
-}
-figCount <- c("_"=0)
-tableCount <- c("_"=0)
-
-tableCat <- function(inFrame){
-	outText <- paste(names(inFrame), collapse=" | ")
-	outText <- c(outText, paste(rep("---", ncol(inFrame)), collapse=" | "))
-	invisible(apply(inFrame, 1, function(inRow){
-		outText <<- c(outText, paste(inRow, collapse=" | "))
-	}))
-	return(outText)
-}
-
-capwords <- function(s, strict = FALSE) {
-    cap <- function(s) paste(toupper(substring(s, 1, 1)),
-                  {s <- substring(s, 2); if(strict) tolower(s) else s},
-                             sep = "", collapse = " " )
-    sapply(strsplit(s, split = " "), cap, USE.NAMES = !is.null(names(s)))
-}
-
 source('src/R/figures.R')
 
 ```
