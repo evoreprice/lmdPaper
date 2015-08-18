@@ -105,12 +105,13 @@ f_mfuzzClusters <- ggplot(plotData, aes(x = Stage, y = `Normalised, transformed 
   scale_colour_gradientn(colours = heatscale, limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
   geom_line(alpha = 0.8) +
   geom_line(data = centres, mapping = aes(group = 1), colour = "black", alpha = 0.5) +
-  facet_wrap(~ Cluster, nrow = 3)
+  facet_wrap(~ Cluster, ncol = 2)
 
 # centroid dis vs. c (for SI)
 f_mfuzzCentroids <- readRDS('output/mfuzz/centPlot.Rds')
 
-readRDS # vg.mds
+# MDS for SI
+vg.mds <- readRDS('output/mfuzz/vg.mds.Rds')
 f_mfuzzPca <- ggplot(vg.mds, aes(x = MDS1, y=MDS2, colour = factor(cluster))) +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
   coord_fixed(ratio = 1) +

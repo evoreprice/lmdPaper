@@ -1,5 +1,7 @@
 #!/usr/bin/Rscript
 
+library(data.table)
+
 # find tfdb
 tfdbFile <- 'data/tfdb/os.Rds'
 if (!file.exists(tfdbFile)) {
@@ -83,14 +85,20 @@ sigFamilies$`*n*` <- genesPerFamily[rownames(sigFamilies)]
 # add the number of expresed genes per family
 sigFamilies$`*n*~expr~` <- exprPerFamily[rownames(sigFamilies)]
 
-# set the column order
-#paste(colnames(sigFamilies)[c(13,14,1,7,2,8,3,9,4,10,5,11,6,12)], collapse = "', '")
-sigFamilies <- sigFamilies[,c('*n*', '*n*~expr~', '*n*~C1~', '*p*~adj,\\ C1~',
-                              '*n*~C2~', '*p*~adj,\\ C2~', '*n*~C3~',
-                              '*p*~adj,\\ C3~', '*n*~C4~', '*p*~adj,\\ C4~',
-                              '*n*~C5~', '*p*~adj,\\ C5~', '*n*~C6~',
-                              '*p*~adj,\\ C6~')]
-  
-  
+# set the column order programatically
+# these two are always first
+generalCn <- c("*n*", "*n*~expr~")
+# use data.table sorting to order...
+cn <- colnames(sigFamilies)
+cnDt <- data.table(cn = cn[!cn %in% generalCn])
+# ... first by cluster number ...
+cnDt[, cnum := as.numeric(gsub("^.*(\\d).*$", "\\1", cn))]
+# ... then by n in cluster / p-val
+cnDt[, pn := gsub(".*([np]).*", "\\1", cn)]
+# do the sort
+setkey(cnDt, "cnum", "pn")
+# re-order sigFamilies
+sigFamilies <- sigFamilies[, c(generalCn, cnDt[,cn])]
+
 # output
 saveRDS(sigFamilies, paste0(mfuzzDir, "/sigFamilies.Rds"))
