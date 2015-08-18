@@ -83,6 +83,7 @@ cat <<- _EOF_ > $outdir/METADATA.csv
 	bedtools version,$(bedtools --version)
 	tophat2 version,$(tophat2 --version)
 	bowtie2-build version,$(bowtie2-build --version | head -n 1)
+	samtools version,$(samtools --version | head -n 1)
 _EOF_
 
 # download oryza repeat database
@@ -139,13 +140,15 @@ bamfiles=("output/STAR/*.Aligned.out.bam")
 for bam in $bamfiles; do
 	library=$(basename "$bam" ".Aligned.out.bam")
 	echo -e "[ $(date): Counting rRNA and tRNA for "$library" ]"
-	cmdR="samtools view -c -F0x100 -L $outdir/rRna.combined.bed $bam"
-	$(srun --ntasks=1 --exclusive --output=$outdir/$library.rrna.tmp $cmdR) &
-	cmdT="samtools view -c -F0x100 -L $outdir/rap_tRNA.bed9 $bam"
-	$(srun --ntasks=1 --exclusive --output=$outdir/$library.trna.tmp $cmdT) &
+	cmdR="samtools view -c -F0x100 -L "$outdir"/rRna.combined.bed "$bam""
+	srun --ntasks=1 --exclusive --output="$outdir"/"$library".rrna.tmp $cmdR &
+	cmdT="samtools view -c -F0x100 -L "$outdir"/rap_tRNA.bed9 "$bam""
+	srun --ntasks=1 --exclusive --output="$outdir"/"$library".trna.tmp $cmdT &
 done
 echo -e "[ $(date): Waiting for jobs to finish ]"
+
 fail_wait
+exit 1
 
 # read results from temporary fines into array
 lines=()
