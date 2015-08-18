@@ -46,6 +46,11 @@ capwords <- function(s, strict = FALSE) {
   sapply(strsplit(s, split = " "), cap, USE.NAMES = !is.null(names(s)))
 }
 
+###################
+### STATS TABLE ###
+###################
+
+t_libStats <- readRDS('output/quantStats/libStats.Rds')
 
 #############
 ### Mfuzz ###
@@ -102,8 +107,8 @@ f_mfuzzClusters <- ggplot(plotData, aes(x = Stage, y = `Normalised, transformed 
   geom_line(data = centres, mapping = aes(group = 1), colour = "black", alpha = 0.5) +
   facet_wrap(~ Cluster, nrow = 3)
 
-# # centroid dis vs. c (for SI)
-# f_mfuzzCentroids <- readRDS('output/mfuzz/centPlot.Rds')
+# centroid dis vs. c (for SI)
+f_mfuzzCentroids <- readRDS('output/mfuzz/centPlot.Rds')
 # 
 # # PCA (for SI)
 # clustered <- unique(names(c1$cluster))

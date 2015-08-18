@@ -85,7 +85,7 @@ centPlotWithPoints <- centPlot +
   geom_point(data = data.frame(x = points[infl], y = pred[infl]), colour = 'red')
 
 # we will go with 6 clusters
-c <- 6
+c <- 8
 memCutoff <- 0.5
 
 # run the clustering

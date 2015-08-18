@@ -9,8 +9,13 @@ output:
     highlight: pygments
     keep_md: yes
     number_sections: yes
+    dev: svg
   word_document:
     fig_caption: yes
+  pdf_document:
+    fig_caption: yes
+    keep_tex: yes
+    number_sections: yes
 bibliography: bib/test.bib
 ---
 
@@ -18,7 +23,7 @@ bibliography: bib/test.bib
 
 knitr::opts_chunk$set(fig.path='figures/',
                cache.path='cache/',
-               dev=c("cairo_pdf"),
+               dev=c("svg", "cairo_pdf"),
                fig.width=6.614,
                fig.height=6.614,
                fig.align = 'center',
@@ -34,9 +39,19 @@ source('src/R/figures.R')
 
 ```
 
+``` {r libStats}
+tableCount <- incCount(tableCount, "t_libStats")
+```
+
+### `r I(pasteLabel("Table", tableCount, "t_libStats"))`
+
+``` {r t_libStats, results = "markup"}
+knitr::kable(t_libStats, caption = "Library and sequencing statistics")
+```
+
 ### Fuzzy *c*-means clustering
 
-```{r mfuzz}
+```{r mfuzz, cache = TRUE}
 figCount <- incCount(figCount, "f_mfuzzCentroids")
 print(f_mfuzzCentroids)
 

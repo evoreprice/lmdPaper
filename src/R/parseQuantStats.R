@@ -35,6 +35,11 @@ inputRNA <- c(27.580,7.795,5.3,2.3, # N1
               33.700,7.900,3.3,5.4, # N2
               79.635,24.225,11.4, # N3
               28.115,17.285,56.3) # N4
+RIN <- c(7.08,6.1,8,7.6, # N1
+         7.05,5.4,8,8.7, # N2
+         7,7.05,8.1, # N3
+         7.08,7.05,7.0) # N4
+
 
 # function to get required info from STAR output
 parseStarInfo <- function(x){
@@ -97,7 +102,7 @@ setkey(expGenPerLib, 'lib')
 setkey(readsPerLib, 'lib')
 setkey(rnaStats, 'lib')
 libStats <- expGenPerLib[readsPerLib][rnaStats[starInfo]]
-libStats[, "Yield (ng)" := round(inputRNA, 1)]
+libStats[, "Yield (ng)" := round(inputRNA, 1)][, RIN := RIN ]
 
 # make all columns except 'lib' numeric
 libStats <- libStats[, lapply(.SD, as.numeric), by = lib]
@@ -111,7 +116,7 @@ libStats[, lib := toupper(lib)]
 
 # arrange table
 paste(colnames(libStats)[c(1, 10, 6, 4,11,5,12,7:9,3,2)], collapse = "', '")
-setcolorder(libStats, c('lib', 'Yield (ng)', 'Reads (M)', 'rRNA reads (M)', 'rRNA (%)', 'tRNA reads (M)', 'tRNA (%)', 'Uniquely mapped reads (M)', 'Multimapped reads (M)', 'Total mapping percentage', 'Reads in genes (M)', 'Expressed genes'))
+setcolorder(libStats, c('lib', 'Yield (ng)', 'RIN', 'Reads (M)', 'rRNA reads (M)', 'rRNA (%)', 'tRNA reads (M)', 'tRNA (%)', 'Uniquely mapped reads (M)', 'Multimapped reads (M)', 'Total mapping percentage', 'Reads in genes (M)', 'Expressed genes'))
 setnames(libStats, 'lib', "Library")
 
 # save output
