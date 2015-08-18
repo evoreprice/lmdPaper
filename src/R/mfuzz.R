@@ -137,8 +137,16 @@ for(i in 1:max(annotatedClusters[,Cluster])){
 # write the wb
 saveWorkbook(wb, "xlsx/annotatedClusters.xlsx")
 
+# do mds here (takes to long to do at compile time)
+clustered <- unique(names(c1$cluster))
+vg.d <- dist(Biobase::exprs(expressionMatrix[clustered,]))
+vg.mds <- cmdscale(vg.d, 2)
+vg.mds <- data.frame(MDS1 = vg.mds[,1], MDS2 = vg.mds[,2], cluster = c1$cluster,
+                     max.membership = apply(c1$membership,1,max))
+
 # write the other output
 saveRDS(vg.s, paste0(outDir, "/expressionMatrix.Rds"))
+saveRDS(vg.mds, paste0(outDir, "/vg.mds.Rds"))
 saveRDS(c1, paste0(outDir, "/c1.Rds"))
 saveRDS(clusters, paste0(outDir, "/clusters.Rds"))
 saveRDS(annotatedClusters, paste0(outDir, "/annotatedClusters.Rds"))

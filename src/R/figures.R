@@ -109,19 +109,12 @@ f_mfuzzClusters <- ggplot(plotData, aes(x = Stage, y = `Normalised, transformed 
 
 # centroid dis vs. c (for SI)
 f_mfuzzCentroids <- readRDS('output/mfuzz/centPlot.Rds')
-# 
-# # PCA (for SI)
-# clustered <- unique(names(c1$cluster))
-# 
-# vg.d <- dist(Biobase::exprs(expressionMatrix[clustered,]))
-# vg.mds <- cmdscale(vg.d, 2)
-# vg.mds <- data.frame(MDS1 = vg.mds[,1], MDS2 = vg.mds[,2], cluster = c1$cluster,
-#                      max.membership = apply(c1$membership,1,max))
-# 
-# f_mfuzzPca <- ggplot(vg.mds, aes(x = MDS1, y=MDS2, colour = factor(cluster))) +
-#   theme_minimal(base_size = 8, base_family = "Helvetica") +
-#   coord_fixed(ratio = 1) +
-#   geom_point(aes(size=max.membership),alpha=0.5, shape = 16) +
-#   scale_colour_brewer(palette = "Set1", name = "Cluster") +
-#   scale_size_area(guide = FALSE)
+
+readRDS # vg.mds
+f_mfuzzPca <- ggplot(vg.mds, aes(x = MDS1, y=MDS2, colour = factor(cluster))) +
+  theme_minimal(base_size = 8, base_family = "Helvetica") +
+  coord_fixed(ratio = 1) +
+  geom_point(aes(size=max.membership),alpha=0.5, shape = 16) +
+  scale_colour_brewer(palette = "Set1", name = "Cluster") +
+  scale_size_area(guide = FALSE)
 
