@@ -139,7 +139,7 @@ saveWorkbook(wb, "xlsx/annotatedClusters.xlsx")
 
 # do mds here (takes to long to do at compile time)
 clustered <- unique(names(c1$cluster))
-vg.d <- dist(Biobase::exprs(expressionMatrix[clustered,]))
+vg.d <- dist(Biobase::exprs(vg.s[clustered,]))
 vg.mds <- cmdscale(vg.d, 2)
 vg.mds <- data.frame(MDS1 = vg.mds[,1], MDS2 = vg.mds[,2], cluster = c1$cluster,
                      max.membership = apply(c1$membership,1,max))
