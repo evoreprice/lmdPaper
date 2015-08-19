@@ -24,7 +24,7 @@ bibliography: bib/test.bib
 
 knitr::opts_chunk$set(fig.path='figures/',
                cache.path='cache/',
-               dev=c("svg", "cairo_pdf"),
+               dev=c("png", "cairo_pdf"),
                fig.width=3.150,
                fig.height=6.3,
                fig.align = 'center',
@@ -109,11 +109,9 @@ The presence of MADS genes was enriched in **some clusters** and their overall e
 
 **`r I(pasteLabel("Figure S", s_figCount, "sf_mfuzzCentroids"))`**: Minimum centroid distance for 2–`r maxClust` cluster cores (*c*).
 
-**`r I(pasteLabel("Figure S", s_figCount, "sf_mfuzzPca"))`**: Classical multidimensional scaling of Euclidean distances between transformed read counts for clustered genes.
+**`r I(pasteLabel("Figure S", s_figCount, "sf_mfuzzPca"))`**: Classical multidimensional scaling (MDS) of Euclidean distances between transformed read counts for clustered genes.
 
 **`r I(pasteLabel("Table S", s_tableCount, "st_libStats"))`**: Library and sequencing statistics.
-
-# References
 
 ***
 
@@ -132,3 +130,7 @@ knitr::kable(t_hypergeom, caption = paste0(
 **`r I(pasteLabel("Figure ", figCount, "f_lmdFigure"))`**. LASER microdissection of meristem samples in the early stages of inflorescences development. Samples were collected from the rachis meristem (**a** and **e**), the primary branch meristem (**b** and **f**), the elongating primary branch meristem and secondary branch meristem (**c** and **g**) and the spikelet meristem (**d** and **h**). Images show the samples before (**a**–**d**) and after (**e**–**h**) dissection.
 
 **`r I(pasteLabel("Figure ", figCount, "f_mfuzzClusters"))`**. Common patterns of expression in the meristem samples. Fuzzy *c*-means clustering of normalised, variance-stabilised read counts was used to recover `r as.character(english::english(c))` common patterns of expression. Each line describes the expression pattern of one gene, with the gene's membership to the cluster represented by the colour of the line. The core values for each cluster are plotted in black.
+
+***
+
+# References (move to before *Tables*)

@@ -408,7 +408,7 @@ def clustering(inputFiles, outputFiles):
 # hypergeometric tests for enrichment of TFs
 #
 @merge([clustering, download_tfdb], 'ruffus/os.hypergeom')
-def tf_hypergeom(inputFiles, outputFiles):
+def hypergeom(inputFiles, outputFiles):
     jobScript = 'src/R/tfHypergeom.R'
     ntasks = '1'
     cpus_per_task = '1'
@@ -461,7 +461,7 @@ def st_libStats(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # Hypergeometric tests table
 #
-@merge(tf_hypergeom, "ruffus/table.t_hypergeom")
+@merge(hypergeom, "ruffus/table.t_hypergeom")
 def t_hypergeom(inputFiles, outputFiles):
     touch(outputFiles)
 
