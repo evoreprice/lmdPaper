@@ -117,6 +117,11 @@ def touch(fname, mode=0o666, dir_fd=None, **kwargs):
         os.utime(f.fileno() if os.utime in os.supports_fd else fname,
             dir_fd=None if os.supports_fd else dir_fd, **kwargs)
 
+
+#---------------------------------------------------------------
+# SETUP TASKS
+#---------------------------------------------------------------
+
 #---------------------------------------------------------------
 # download rice genomes
 #
@@ -217,6 +222,10 @@ def define_os_reads(outputFiles):
         assert os.path.isfile(qualName), "Error: read file " + qualName + " missing"
         print(qualName)
     touch(outputFiles)
+
+#---------------------------------------------------------------
+# ANALYSIS TASKS
+#---------------------------------------------------------------
 
 #---------------------------------------------------------------
 # trim rice reads
@@ -436,6 +445,46 @@ def libStats(inputFiles, outputFiles):
     # update ruffus flag
     print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
     touch(outputFiles)
+    
+
+#---------------------------------------------------------------
+# FIGURES AND TABLES
+#---------------------------------------------------------------
+
+#---------------------------------------------------------------
+# library stats table
+#
+@merge(libStats, "ruffus/table.st_libStats")
+def st_libStats(inputFiles, outputFiles):
+    touch(outputFiles)
+
+#---------------------------------------------------------------
+# Hypergeometric tests table
+#
+@merge(tf_hypergeom, "ruffus/table.t_hypergeom")
+def t_hypergeom(inputFiles, outputFiles):
+    touch(outputFiles)
+
+#---------------------------------------------------------------
+# PCA plot
+#
+@merge([run_deseq2_os, detect_expressed_genes], "ruffus/figure.sf_pca")
+def sf_pca(inputFiles, outputFiles):
+    touch(outputFiles)
+
+#---------------------------------------------------------------
+# Clustering figures
+#
+@merge(clustering, "ruffus/figure.f_mfuzzClusters")
+def f_mfuzzClusters(inputFiles, outputFiles):
+    touch(outputFiles)
+@merge(clustering, "ruffus/figure.sf_mfuzzCentroids")
+def sf_mfuzzCentroids(inputFiles, outputFiles):
+    touch(outputFiles)
+@merge(clustering, "ruffus/figure.sf_mfuzzPca")
+def sf_mfuzzPca(inputFiles, outputFiles):
+    touch(outputFiles)
+
 
 # options for visualising
 pipeline_printout()

@@ -74,8 +74,8 @@ centPlot <- ggplot(centroids, aes(x = x, y = y)) +
   theme_minimal() +
   xlab(expression(Cluster~number~"("*italic(c)*")")) +
   ylab("Minimum centroid distance") +
-  geom_point() +
-  stat_smooth(method = loess, se = FALSE)
+  stat_smooth(method = loess, se = FALSE) +
+  geom_point()
 
 # can try to find inflection points, doesn't work very well.
 points <- seq(2, maxClust, length.out = 10000)

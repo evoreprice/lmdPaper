@@ -9,10 +9,10 @@ extrafont::loadfonts()
 #####################
 
 # https://gist.githubusercontent.com/rmflight/3858973/raw/591ee603ce0996ac407902f7dd59520b35b3702a/tableFigureFuncs.r
-pasteLabel <- function(preText, inObj, objName, insLink=TRUE){
+pasteLabel <- function(preText, inObj, objName, insLink=FALSE){
   objNum <- inObj[objName]
   
-  useText <- paste(preText, objNum, sep=" ")
+  useText <- paste0(preText, objNum)
   if (insLink){
     useText <- paste("[", useText, "](#", objName, ")", sep="")
   }
@@ -27,17 +27,11 @@ incCount <- function(inObj, useName){
   names(inObj)[nObj+1] <- useName
   inObj
 }
+
 figCount <- c("_"=0)
 tableCount <- c("_"=0)
-
-tableCat <- function(inFrame){
-  outText <- paste(names(inFrame), collapse=" | ")
-  outText <- c(outText, paste(rep("---", ncol(inFrame)), collapse=" | "))
-  invisible(apply(inFrame, 1, function(inRow){
-    outText <<- c(outText, paste(inRow, collapse=" | "))
-  }))
-  return(outText)
-}
+s_figCount <- c("_"=0)
+s_tableCount <- c("_"=0)
 
 capwords <- function(s, strict = FALSE) {
   cap <- function(s) paste(toupper(substring(s, 1, 1)),
@@ -50,18 +44,24 @@ capwords <- function(s, strict = FALSE) {
 ### STATS TABLE ###
 ###################
 
-t_libStats <- readRDS('output/quantStats/libStats.Rds')
+st_libStats <- readRDS('output/quantStats/libStats.Rds')
+s_tableCount <- incCount(s_tableCount, "st_libStats")
+
+##################
+### LMD FIGURE ###
+##################
+
+figCount <- incCount(figCount, "f_lmdFigure")
 
 ################
 ### PCA PLOT ###
 ################
 
-# make this for all libraries, not just the final ones
-
 expressedGenes <- readRDS('output/expressedGenes/expressedGenesAll.Rds')
-vst <- readRDS('output/DESeq2/vst.Rds')
+vst <- readRDS('output/DESeq2/vstAll.Rds')
 
 exprVst <- GenomicRanges::assay(vst)[expressedGenes,]
+exprVst <- GenomicRanges::assay(vst)
 pca <- prcomp(t(exprVst))
 percentVar <- pca$sdev^2/sum(pca$sdev^2)
 
@@ -72,15 +72,27 @@ pcaPlotData <- data.frame(
   Stage = GenomicRanges::colData(vst)$stage
 )
 
-f_pca <- ggplot(data = pcaPlotData, aes(x = PCA1, y = PCA2, colour = Stage)) +
+# row index to help with overplotted labels
+pcaPlotData$rIdx <- 1:dim(pcaPlotData)[1]
+opIdx <- pcaPlotData[c('n2r3', 'n4r1'),'rIdx']
+
+sf_pca <- ggplot(data = pcaPlotData,
+                aes(x = PCA1, y = PCA2, colour = Stage, label = label)) +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
   scale_colour_brewer(palette = "Set1", name = 'Stage') +
   guides(colour=guide_legend(title=NULL)) +
   scale_fill_brewer(palette = "Set1", guide = FALSE) +
   xlab(paste0("PC1: ", round(percentVar[1] * 100), "% variance")) +
   ylab(paste0("PC2: ", round(percentVar[2] * 100), "% variance")) +
+  xlim(-50, 77) +
   geom_point(shape = 16, size = 5, alpha = 0.7) +
-  geom_text(aes(x = PCA1, y = PCA2, label = label), hjust = 1.2, show.legend = FALSE)
+  geom_text(data = pcaPlotData[-opIdx,],
+            hjust = 1.2, show.legend = FALSE) +
+  geom_text(data = pcaPlotData[opIdx,],
+            hjust = -0.2, show.legend = FALSE)
+
+s_figCount <- incCount(s_figCount, "sf_pca")
+
 
 #############
 ### Mfuzz ###
@@ -137,16 +149,44 @@ f_mfuzzClusters <- ggplot(plotData, aes(x = Stage, y = `Normalised, transformed 
   geom_line(data = centres, mapping = aes(group = 1), colour = "black", alpha = 0.5) +
   facet_wrap(~ Cluster, ncol = 2)
 
+figCount <- incCount(figCount, "f_mfuzzClusters")
+
 # centroid dis vs. c (for SI)
-f_mfuzzCentroids <- readRDS('output/mfuzz/centPlot.Rds') +
+sf_mfuzzCentroids <- readRDS('output/mfuzz/centPlot.Rds') +
   theme_minimal(base_size = 8, base_family = "Helvetica")
+
+s_figCount <- incCount(s_figCount, "sf_mfuzzCentroids")
 
 # MDS for SI
 vg.mds <- readRDS('output/mfuzz/vg.mds.Rds')
-f_mfuzzPca <- ggplot(vg.mds, aes(x = MDS1, y=MDS2, colour = factor(cluster))) +
+sf_mfuzzPca <- ggplot(vg.mds, aes(x = MDS1, y=MDS2, colour = factor(cluster))) +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
   coord_fixed(ratio = 1) +
   geom_point(aes(size=max.membership),alpha=0.5, shape = 16) +
   scale_colour_brewer(palette = "Set1", name = "Cluster") +
   scale_size_area(guide = FALSE)
+
+s_figCount <- incCount(s_figCount, "sf_mfuzzPca")
+
+#################
+### HYPERGEOM ###
+#################
+
+t_hypergeom <- readRDS('output/mfuzz/sigFamilies.Rds')
+
+# fix p-values. 
+pFix <- function(x) {
+  format.pval(c(0.122, x), digits = 2, eps = 0.001, na.form = "")[-1]
+}
+# just use a for loop, should use *apply() but too complicated
+for (x in colnames(t_hypergeom)) {
+  if (grepl("^\\*p", x)) {
+    t_hypergeom[,x] <- pFix(t_hypergeom[,x])
+  }
+}
+
+# remove NAs
+t_hypergeom[is.na(t_hypergeom)] <- ""
+
+tableCount <- incCount(tableCount, "t_hypergeom")
 

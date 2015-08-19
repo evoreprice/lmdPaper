@@ -81,7 +81,7 @@ if (!file.exists(ddsFile)) {
   quit(save = "no", status = 1)
 }
 dds <- readRDS(ddsFile)
-readsPerLib <- as.data.table(round(colSums(DESeq2::counts(dds))/1000000, 2),
+readsPerLib <- as.data.table(round(colSums(DESeq2::counts(dds))/1000000, 1),
                              keep.rownames = TRUE)
 setnames(readsPerLib, c('lib', 'Reads in genes (M)'))
 

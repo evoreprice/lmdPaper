@@ -39,29 +39,21 @@ source('src/R/figures.R')
 
 ```
 
-``` {r libStats}
-tableCount <- incCount(tableCount, "t_libStats")
+``` {r st_libStats, results = "markup"}
+knitr::kable(st_libStats, caption = paste0(
+  I(pasteLabel("**Table S", s_tableCount, "st_libStats")),
+    "**: Library and sequencing statistics"))
 ```
 
-### `r I(pasteLabel("Table", tableCount, "t_libStats"))`
-
-``` {r t_libStats, results = "markup"}
-knitr::kable(t_libStats, caption = "Library and sequencing statistics")
-```
-
-```{r pca}
-figCount <- incCount(figCount, "f_pca")
-f_pca
+```{r sf_pca}
+print(sf_pca)
 ```
 
 ### Fuzzy *c*-means clustering
 
 ```{r mfuzz}
-figCount <- incCount(figCount, "f_mfuzzCentroids")
-print(f_mfuzzCentroids)
+print(sf_mfuzzCentroids)
 
-figCount <- incCount(figCount, "f_mfuzzPca")
-f_mfuzzPca
+print(sf_mfuzzPca)
 ```
-
 

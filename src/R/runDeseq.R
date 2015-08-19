@@ -21,10 +21,6 @@ starCounts <- do.call(cbind,
                              colClasses = c("character", "integer", rep("NULL", 2))))
 colnames(starCounts) <- gsub("\\..*", "", basename(starFiles))
 
-# remove n1r2 and n2r2 (degraded RNA)
-starCounts$n1r2 <- NULL
-starCounts$n2r2 <- NULL
-
 # generate colData
 sample <- colnames(starCounts)
 sampleToStage <- c(
@@ -39,6 +35,20 @@ batch[batch <= 2] <- 'first'
 batch[!batch == 'first'] <- 'second'
 colData <- data.frame(row.names = sample, stage, batch)
 colData$stage <- factor(colData$stage, levels = sampleToStage)
+
+# ddsAll for qc analysis
+ddsAll <- DESeq2::DESeqDataSetFromMatrix(
+  countData = subset(starCounts, !grepl("^N_", rownames(starCounts))),
+  colData = colData, design = ~ stage + batch)
+ddsAll <- DESeq2::estimateSizeFactors(ddsAll)
+ddsAll <- DESeq2::estimateDispersions(ddsAll)
+vstAll <- DESeq2::varianceStabilizingTransformation(ddsAll)
+
+# remove n1r2 and n2r2 (degraded RNA)
+starCounts$n1r2 <- NULL
+starCounts$n2r2 <- NULL
+colData <- subset(colData,
+                  !(rownames(colData) == 'n1r2' | rownames(colData) == 'n2r2'))
 
 # generate DESeq2 object (exclude the STAR diagnostic lines starting with "N")
 dds <- DESeq2::DESeqDataSetFromMatrix(countData = subset(starCounts, !grepl("^N_", rownames(starCounts))),
@@ -72,6 +82,8 @@ if (!dir.exists(outDir)) {
 
 # SAVE OUTPUT
 
+saveRDS(ddsAll, paste0(outDir, "/ddsAll.Rds"))
+saveRDS(vstAll, paste0(outDir, "/vstAll.Rds"))
 saveRDS(ddsLrt, paste0(outDir, "/ddsLrt.Rds"))
 saveRDS(ddsWald, paste0(outDir, "/ddsWald.Rds"))
 saveRDS(vst, paste0(outDir, "/vst.Rds"))
