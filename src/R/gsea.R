@@ -84,10 +84,15 @@ plotData <- lpTable.melt[gpTable.melt][gageTable.melt]
 # pick which p-value to use
 plotData[`Test statistic` < 0, pval := pl]
 plotData[`Test statistic` > 0, pval := pg]
-plotData[, showPval := pval < 0.1]
+
+# adjust p-values, need un-data-table syntax to avoid segfault. yuck.
+plotData[!is.na(pval), padj := p.adjust(pval, "BH")]
+
+# factor for lazy ggplotting
+plotData[, showPval := padj < 0.1]
 
 # make the pvals pretty
-plotData[, pval := format.pval(c(0.12, pval), digits = 1, eps = 0.001, na.form = '')[-1]]
+plotData[, padj := format.pval(c(0.12, padj), digits = 2, eps = 0.001, na.form = '')[-1]]
 
 # order the y-axis
 plotData[, rn := factor(rn, levels = famOrder)]

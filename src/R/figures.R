@@ -202,7 +202,7 @@ gsea[, Stage := plyr::mapvalues(Stage, "ePBM/SBM", "ePBM/\nSBM")]
 
 heatscale <- rev(RColorBrewer::brewer.pal(6, "RdBu"))
 
-f_gsea <- ggplot(gsea, aes(x = Stage, y = rn, label = pval, fill = `Test\nstatistic`)) +
+f_gsea <- ggplot(gsea, aes(x = Stage, y = rn, label = padj, fill = `Test\nstatistic`)) +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
   xlab(NULL) + ylab(NULL) +
   theme(legend.key.size = grid::unit(1, "lines"),

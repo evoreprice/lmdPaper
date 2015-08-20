@@ -133,6 +133,8 @@ knitr::kable(t_hypergeom, caption = paste0(
 
 **`r I(pasteLabel("Figure ", figCount, "f_mfuzzClusters"))`**. Common patterns of expression in the meristem samples. Fuzzy *c*-means clustering of normalised, variance-stabilised read counts was used to recover `r as.character(english::english(c))` common patterns of expression. Each line describes the expression pattern of one gene, with the gene's membership to the cluster represented by the colour of the line. The core values for each cluster are plotted in black.
 
+**`r I(pasteLabel("Figure ", figCount, "f_gsea"))`**. Geneset enrichment analysis for transcription factor families.  
+
 ***
 
 # References (move to before *Tables*)

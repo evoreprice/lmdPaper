@@ -65,8 +65,7 @@ resultsLong <- merge(reshape2::melt(inClusterPerFamily,
 resultsLong[resultsLong$Number < 2, ]$`p-value` <- NA
 
 # calculate adjusted p-values
-resultsLong$padj <- p.adjust(resultsLong$`p-value`, method = "BH",
-                             n = sum(!is.na(resultsLong$`p-value`)))
+resultsLong$padj <- p.adjust(resultsLong$`p-value`, method = "BH")
 
 # go wide
 padj <- reshape2::dcast(resultsLong, Family ~ Cluster, value.var = 'padj')
