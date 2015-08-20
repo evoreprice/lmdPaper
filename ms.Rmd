@@ -83,11 +83,13 @@ print(f_mfuzzClusters)
 
 Examination of the clustered genes suggested that transcription factors were overrepresented in most clusters (**annotated cluster tables in SI**). To determine whether particular TF families were associated with particular patterns of expression, the enrichment of TF family members in each cluster was calculated using hypergeometric tests. Using the list of transcription factor families available on the Plant Transcription Factor Database (**reference**), a hypergeometric test was carried out if there were at least two members of TF family in a given cluster. After adjustment for multiple comparisons, each cluster had a significant enrichment of at least one TF family (`r I(pasteLabel("Table ", tableCount, "t_hypergeom"))`). For example, members of the ABI3VP1 family were overrepresented in clusters **2** and **4**, both of which contain genes with higher transformed read counts in the rachis meristem than in samples from later stages of development. The MADS family was overrepresented in clusters **6** and **8**, suggesting that they could be involved in both early and late stages of inflorescence development.
 
-+ Clusters including characterised genes
+* Clusters including characterised genes
 
 ## Patterns of expression of transcription families
 
-Because of the enrichment of TF family members in some of the gene expression clusters, geneset-level enrichment analysis (GSEA) was used to compare the levels of expression of TF family members in the meristem samples. **Something like: Consistent with their enrichment in cluster 1 and 6, MADS genes were significantly enriched in the SM/FM samples**. TF families involved in branching were enriched in **which families, which samples**.
+Because of the enrichment of TF family members in some of the gene expression clusters, geneset enrichment analysis (GSEA) was used to provide an overview of TF family expression in the meristem samples (`r I(pasteLabel("Figure ", figCount, "f_gsea"))`). In general, the GSEA results correspond to the hypergeometric tests for transcription factor enrichment in the clusters. For example, SBP transcription factors are enriched in RM and PBM, consistent with their overrepresentation in cluster **6**, which contains genes with higher expression in those meristem types.
+
+TF families involved in branching were enriched in **which families, which samples**. 
 
 ```{r f_gsea}
 print(f_gsea)
@@ -95,9 +97,22 @@ print(f_gsea)
 
 ## MADS genes: comparison of expression & homology in rice, tomato, arabidopsis
 
-The presence of MADS genes was enriched in **some clusters** and their overall expression is enriched in the spikelet meristem sample. These results correspond with previous studies that have established the importance of MADS genes in inflorescence development. The evolution of their expression patterns was 
+There was an overrepresentation of MADS genes in **some clusters** and their overall expression is enriched in the spikelet meristem sample. These results correspond with previous studies that have established the importance of MADS genes in inflorescence development in rice and other plants (**expand**).
 
-+ **Figure**: Similarity tree of MADS proteins with expression values and dN/dS values for each one.
+To investigate the evolution of the MADS family in Angiosperms, their expression values in the dicots *A. thaliana* and *Solanum lycopersicum* and the monocot *O. sativa* were compared to their homology in these species. 
+
+* **Figure**: Similarity tree of MADS proteins with L2FC values between comparable samples (and dN/dS values?) for each one:
++ **rice**: rachis meristem vs. spikelet merisem
++ **arapidospis**: inflorescence meristem vs. floret meristem
++ **tomato**: simpodial meristem vs. floret meristem (need to find list of tomato MADS genes)
++ (could I map the l2fc to the background of the geom_label rectangle? "The fill aesthetic controls the background colour of the label.")
+
+## Comparison with characterised genes
+
+To compare previously reported expression patterns with the results presented here, which were produced with high-throughput sequencing, a selection of studies of corresponding stages of inflorescence development were searched for qualitative *in situ* hyrbridisation data.
+
+* **Table**: our expression calls (yes/no by stage) *vs* in situ reports. Fun times.
+* our in situ results could go here
 
 # Experimental procedures
 
@@ -133,7 +148,7 @@ knitr::kable(t_hypergeom, caption = paste0(
 
 **`r I(pasteLabel("Figure ", figCount, "f_mfuzzClusters"))`**. Common patterns of expression in the meristem samples. Fuzzy *c*-means clustering of normalised, variance-stabilised read counts was used to recover `r as.character(english::english(c))` common patterns of expression. Each line describes the expression pattern of one gene, with the gene's membership to the cluster represented by the colour of the line. The core values for each cluster are plotted in black.
 
-**`r I(pasteLabel("Figure ", figCount, "f_gsea"))`**. Geneset enrichment analysis for transcription factor families.  
+**`r I(pasteLabel("Figure ", figCount, "f_gsea"))`**. Geneset enrichment analysis (GSEA) for transcription factor families. Test statistics were calculated on a matrix of Log~2~(fold change) values between each sample and the other three samples. A positive test statistic indicates enrichment and a negative statistic indicates depletion. Although some test statistics had low *p*-values none were less than 0.10 after Benjamini-Hochberg correction.
 
 ***
 
