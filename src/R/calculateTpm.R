@@ -14,7 +14,7 @@ gtf <- import.gff(gtfFile, format = 'gtf', genome = 'Osativa_204_v7.0', asRanged
 
 # reduce ranges by gene_name (MSU ID), i.e. merge overlapping exons
 grl <- reduce(split(gtf, elementMetadata(gtf)$gene_name))
-reducedGtf <- unlist(grl, use.names = TRUE)
+reducedGtf <- unlist(grl, use.names = FALSE)
 
 # add metadata
 elementMetadata(reducedGtf)$gene_name <- rep(names(grl), elementLengths(grl))
