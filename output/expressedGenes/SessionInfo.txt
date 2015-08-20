@@ -1,6 +1,6 @@
 git branch: master
-git hash: 6316b9f047a90aa121ee02704b9d2902965b48a8
-R version 3.2.1 (2015-06-18)
+git hash: 0f7a48429670a5a7c62e7080d0b0042aa323797d
+R version 3.2.2 (2015-08-14)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 14.04.3 LTS
 
@@ -19,8 +19,8 @@ other attached packages:
 [1] dplyr_0.4.2        ggplot2_1.0.1.9002
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.0       assertthat_0.1    grid_3.2.1        plyr_1.8.3       
- [5] R6_2.1.0          gtable_0.1.2      DBI_0.3.1         magrittr_1.5     
+ [1] Rcpp_0.12.0       assertthat_0.1    grid_3.2.2        plyr_1.8.3       
+ [5] R6_2.1.1          gtable_0.1.2      DBI_0.3.1         magrittr_1.5     
  [9] scales_0.2.5.9003 stringi_0.5-5     lazyeval_0.1.10   reshape2_1.4.1   
-[13] tools_3.2.1       stringr_1.0.0     munsell_0.4.2     parallel_3.2.1   
-[17] colorspace_1.2-6  methods_3.2.1    
+[13] tools_3.2.2       stringr_1.0.0     munsell_0.4.2     parallel_3.2.2   
+[17] colorspace_1.2-6  methods_3.2.2    

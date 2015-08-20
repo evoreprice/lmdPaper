@@ -58,7 +58,7 @@ print(sf_pca)
 print(sf_mfuzzCentroids)
 ```
 
-**`r I(pasteLabel("Figure S", s_figCount, "sf_mfuzzCentroids"))`**: Minimum centroid distance for 2–`r maxClust` cluster cores (*c*). Eight cluster cores were used because the rate of change of the minimum centroid distance over *c* decreases after *c* = 8.
+**`r I(pasteLabel("Figure S", s_figCount, "sf_mfuzzCentroids"))`**: Minimum centroid distance for 2–`r maxClust` cluster cores (*c*). Eight cluster cores were used because the rate of change of the minimum centroid distance over *c* decreases after $c = 8$.
 
 ``` {r sf_mfuzzPca}
 print(sf_mfuzzPca)

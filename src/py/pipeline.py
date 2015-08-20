@@ -446,6 +446,19 @@ def libStats(inputFiles, outputFiles):
     print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
     touch(outputFiles)
     
+#---------------------------------------------------------------
+# Geneset enrichment analysis
+#
+@merge([download_tfdb, run_deseq2_os], 'ruffus/os.gsea')
+def gsea(inputFiles, outputFiles):
+    jobScript = 'src/R/gsea.R'
+    ntasks = '1'
+    cpus_per_task = '1'
+    job_name = 'libStats'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)
 
 #---------------------------------------------------------------
 # FIGURES AND TABLES
@@ -485,6 +498,12 @@ def sf_mfuzzCentroids(inputFiles, outputFiles):
 def sf_mfuzzPca(inputFiles, outputFiles):
     touch(outputFiles)
 
+#---------------------------------------------------------------
+# GSEA plot
+#
+@merge(gsea, "ruffus/figure.f_gsea")
+def f_gsea(inputFiles, outputFiles):
+    touch(outputFiles)
 
 # options for visualising
 pipeline_printout()

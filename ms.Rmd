@@ -81,15 +81,17 @@ To recover common expression patterns in genes detected in the meristem samples,
 print(f_mfuzzClusters)
 ```
 
-Examination of the clustered genes suggested that transcription factor genes were overrepresented in most clusters (**annotated cluster tables in SI**). To determine whether particular TF families were associated with particular patterns of expression, the enrichment of TF family members in each cluster was calculated using hypergeometric tests. Using the list of transcription factor families provided by the Plant TFDB (**reference**), a hypergeometric test was carried out if there were at least two member of TF family in a given cluster. After adjustment for multiple comparisons, each cluster had a significant enrichment of at least one TF family (`r I(pasteLabel("Table ", tableCount, "t_hypergeom"))`). For example, members of the ABI3VP1 family were overrepresented in clusters **2** and **4**, both of which contain genes with higher transformed read counts in the rachis meristem than in samples from later stages of development. The MADS family was overrepresented in clusters **6** and **8**, suggesting that they could be involved in both early and late stages of inflorescence development.
+Examination of the clustered genes suggested that transcription factors were overrepresented in most clusters (**annotated cluster tables in SI**). To determine whether particular TF families were associated with particular patterns of expression, the enrichment of TF family members in each cluster was calculated using hypergeometric tests. Using the list of transcription factor families available on the Plant Transcription Factor Database (**reference**), a hypergeometric test was carried out if there were at least two members of TF family in a given cluster. After adjustment for multiple comparisons, each cluster had a significant enrichment of at least one TF family (`r I(pasteLabel("Table ", tableCount, "t_hypergeom"))`). For example, members of the ABI3VP1 family were overrepresented in clusters **2** and **4**, both of which contain genes with higher transformed read counts in the rachis meristem than in samples from later stages of development. The MADS family was overrepresented in clusters **6** and **8**, suggesting that they could be involved in both early and late stages of inflorescence development.
 
 + Clusters including characterised genes
 
 ## Patterns of expression of transcription families
 
-+ **Figure**: GSEA of transcription factor families
-
 Because of the enrichment of TF family members in some of the gene expression clusters, geneset-level enrichment analysis (GSEA) was used to compare the levels of expression of TF family members in the meristem samples. **Something like: Consistent with their enrichment in cluster 1 and 6, MADS genes were significantly enriched in the SM/FM samples**. TF families involved in branching were enriched in **which families, which samples**.
+
+```{r f_gsea}
+print(f_gsea)
+```
 
 ## MADS genes: comparison of expression & homology in rice, tomato, arabidopsis
 

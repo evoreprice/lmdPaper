@@ -47,6 +47,12 @@ hyperGeomResults <- sapply(1:length(tfdbByFamily), function(i)
          clusterSize, lower.tail = FALSE))
 colnames(hyperGeomResults) <- names(tfdbByFamily)
 
+# what about ALOGs (not TFs)
+ALOG <- c('LOC_Os07g04670', 'LOC_Os02g07030', 'LOC_Os06g46030',
+          'LOC_Os02g41460', 'LOC_Os04g43580', 'LOC_Os10g33780',
+          'LOC_Os02g56610', 'LOC_Os01g61310', 'LOC_Os05g39500', 'LOC_Os05g28040')
+
+
 # combine the results for adjusting p-values
 resultsLong <- merge(reshape2::melt(inClusterPerFamily,
                                     varnames = c("Cluster", "Family"),

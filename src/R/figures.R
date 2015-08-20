@@ -190,3 +190,27 @@ t_hypergeom[is.na(t_hypergeom)] <- ""
 
 tableCount <- incCount(tableCount, "t_hypergeom")
 
+############
+### GSEA ###
+############
+
+gsea <- readRDS('output/gsea/gseaTable.Rds')
+
+# format some labels
+setnames(gsea, old = "Test statistic", new = "Test\nstatistic")
+gsea[, Stage := plyr::mapvalues(Stage, "ePBM/SBM", "ePBM/\nSBM")]
+
+heatscale <- rev(RColorBrewer::brewer.pal(6, "RdBu"))
+
+f_gsea <- ggplot(gsea, aes(x = Stage, y = rn, label = pval, fill = `Test\nstatistic`)) +
+  theme_minimal(base_size = 8, base_family = "Helvetica") +
+  xlab(NULL) + ylab(NULL) +
+  theme(legend.key.size = grid::unit(1, "lines"),
+        axis.text.x = element_text(vjust = 0.5)) +
+  scale_y_discrete(expand = c(0,0)) +
+  scale_x_discrete(expand = c(0,0)) +
+  scale_fill_gradientn(colours = heatscale) +
+  geom_raster() +
+  geom_text(data = gsea[showPval == TRUE], size = 2)
+
+figCount <- incCount(figCount, "f_gsea")
