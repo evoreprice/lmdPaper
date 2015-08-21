@@ -13,6 +13,7 @@ output:
     dev: "CairoPDF"
   word_document:
     fig_caption: yes
+    reference_docx: csl/wordStyles.docx
   pdf_document:
     fig_caption: yes
     keep_tex: yes
@@ -26,7 +27,7 @@ knitr::opts_chunk$set(fig.path='figures/',
                cache.path='cache/',
                dev=c("png", "cairo_pdf"),
                fig.width=3.150,
-               fig.height=6.3,
+               fig.height=8.661,
                fig.align = 'center',
                dpi=300,
                fig.show='hold',
@@ -44,15 +45,13 @@ Authors:
 
 Addresses:
 
-### Running title
+## Running title
 
-### Keywords
+## Keywords
 
-### SRA details for libaries
+## SRA details for libaries
 
 Word count
-
-***
 
 # Summary
 
@@ -77,7 +76,7 @@ At least `r round(min(st_libStats$"Reads (M)"), 0)` million 50-base reads were p
 
 To recover common expression patterns in genes detected in the meristem samples, read counts were transformed using the variance-stabilizing transformation (VST) included in the `DESeq2` package [@Love:2014do]. Expressed genes were ranked by variance, and standardised, VST-transformed read counts for the 25% most-variable genes were clustered using the fuzzy *c*-means algorithm implemented in the `Mfuzz` package [@Futschik:2005vo]. To determine the number of cluster cores (*c*), the minimum distance between cluster centroids, the formation of empty clusters, and PCA plots of cluster members were monitored for clusters produced with *c* values between 2 and `r maxClust` (`r I(pasteLabel("Figures S", s_figCount, "sf_mfuzzCentroids"))` `r I(pasteLabel(" and S", s_figCount, "sf_mfuzzPca"))`), leading to the use of `r as.character(english::english(c))` cluster cores (`r I(pasteLabel("Figure ", figCount, "f_mfuzzClusters"))`). Clusters were recovered that contain genes that gradually decrease or increase in expression during development (clusters **2**, **3**, **6** and **8**), or that are apparently turned on or off in primary and secondary branch meristems (clusters **7** and **4** respectively) along with genes with more complex expression patterns (clusters **1** and **5**).
 
-```{r f_mfuzzClusters, fig.height=6.3}
+```{r f_mfuzzClusters, fig.height = 8.661 / 2}
 print(f_mfuzzClusters)
 ```
 
@@ -91,7 +90,7 @@ Because of the enrichment of TF family members in some of the gene expression cl
 
 TF families involved in branching were enriched in **which families, which samples**. 
 
-```{r f_gsea}
+```{r f_gsea, fig.height = 8.661 / 2}
 print(f_gsea)
 ```
 
@@ -130,8 +129,6 @@ To compare previously reported expression patterns with the results presented he
 
 **`r I(pasteLabel("Table S", s_tableCount, "st_libStats"))`**: Library and sequencing statistics.
 
-***
-
 # Tables
 
 ```{r hypergeom, results = "markup"}
@@ -140,7 +137,13 @@ knitr::kable(t_hypergeom, caption = paste0(
   '**: Transcription factor family enrichment per cluster'))
 ```
 
-***
+```{r pander, results = "asis"}
+pander::set.alignment('left', row.names = 'right')
+pander::set.caption(paste0(
+  I(pasteLabel("**Table ", tableCount, "t_hypergeom")),
+  '**: Transcription factor family enrichment per cluster'))
+pander::pandoc.table(t_hypergeom, split.tables = Inf, emphasize.rownames = FALSE)
+```
 
 # Figure legends
 
@@ -150,6 +153,17 @@ knitr::kable(t_hypergeom, caption = paste0(
 
 **`r I(pasteLabel("Figure ", figCount, "f_gsea"))`**. Geneset enrichment analysis (GSEA) for transcription factor families. Test statistics were calculated on a matrix of Log~2~(fold change) values between each sample and the other three samples. A positive test statistic indicates enrichment and a negative statistic indicates depletion. Although some test statistics had low *p*-values none were less than 0.10 after Benjamini-Hochberg correction.
 
-***
+# `R sessionInfo()` (*hide*)
+
+```{r sessionInfo, results = "asis"}
+pander::pander(sessionInfo())
+git <- c(paste("**git branch:**",system("git rev-parse --abbrev-ref HEAD", intern = TRUE)),
+          paste("**git hash:**", system("git rev-parse HEAD", intern = TRUE)))
+
+for (x in git){cat(x, "\n")}
+
+```
 
 # References (move to before *Tables*)
+
+
