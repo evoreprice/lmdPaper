@@ -84,7 +84,7 @@ Examination of the clustered genes suggested that transcription factors were ove
 
 * Clusters including characterised genes
 
-## Patterns of expression of transcription families
+## Dynamic expression of transcription factor families
 
 Because of the enrichment of TF family members in some of the gene expression clusters, geneset enrichment analysis (GSEA) was used to provide an overview of TF family expression in the meristem samples (`r I(pasteLabel("Figure ", figCount, "f_gsea"))`). In general, the GSEA results correspond to the hypergeometric tests for transcription factor enrichment in the clusters. For example, SBP transcription factors are enriched in RM and PBM, consistent with their overrepresentation in cluster **6**, which contains genes with higher expression in those meristem types.
 
@@ -111,6 +111,9 @@ To investigate the evolution of the MADS family in Angiosperms, their expression
 ## Comparison with characterised genes
 
 To compare previously reported expression patterns with the results presented here, which were produced with high-throughput sequencing, a selection of studies of corresponding stages of inflorescence development were searched for qualitative *in situ* hyrbridisation data.
+
+
+
 
 * **Table**: our expression calls (yes/no by stage) *vs* in situ reports. Fun times.
 * our in situ results could go here
