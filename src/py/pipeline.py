@@ -449,7 +449,7 @@ def libStats(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # Geneset enrichment analysis
 #
-@merge([download_tfdb, run_deseq2_os], 'ruffus/os.gsea')
+@merge([download_tfdb, run_deseq2_os, detect_expressed_genes], 'ruffus/os.gsea')
 def gsea(inputFiles, outputFiles):
     jobScript = 'src/R/gsea.R'
     ntasks = '1'

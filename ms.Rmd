@@ -88,6 +88,8 @@ Examination of the clustered genes suggested that transcription factors were ove
 
 Because of the enrichment of TF family members in some of the gene expression clusters, geneset enrichment analysis (GSEA) was used to provide an overview of TF family expression in the meristem samples (`r I(pasteLabel("Figure ", figCount, "f_gsea"))`). In general, the GSEA results correspond to the hypergeometric tests for transcription factor enrichment in the clusters. For example, SBP transcription factors are enriched in RM and PBM, consistent with their overrepresentation in cluster **6**, which contains genes with higher expression in those meristem types.
 
+The patterns are not completely representative of all members of each gene family. For example, there are several MADS genes that have lower expression in the SM than in the RM, but expressed MADS genes were detected at a higher level overall in SM. Nevertheless, there are some notable modes of expression shared between different TF families. Several TF families, including bZIP and ABI3VP1, are strongly expressed in RM and lower in the other meristem types. Another group incluiding Squamosa binding proteins and Jumonji transcription factors is more weakly expressed in the RM but enriched in the PBM, suggesting a switch of expression between these two meristem types. Correspondingly, the difference between the RM and PBM samples was the most remarkable in the GSEA.
+
 TF families involved in branching were enriched in **which families, which samples**. 
 
 ```{r f_gsea, fig.height = 8.661 / 2}
@@ -151,7 +153,7 @@ pander::pandoc.table(t_hypergeom, split.tables = Inf, emphasize.rownames = FALSE
 
 **`r I(pasteLabel("Figure ", figCount, "f_mfuzzClusters"))`**. Common patterns of expression in the meristem samples. Fuzzy *c*-means clustering of normalised, variance-stabilised read counts was used to recover `r as.character(english::english(c))` common patterns of expression. Each line describes the expression pattern of one gene, with the gene's membership to the cluster represented by the colour of the line. The core values for each cluster are plotted in black.
 
-**`r I(pasteLabel("Figure ", figCount, "f_gsea"))`**. Geneset enrichment analysis (GSEA) for transcription factor families. Test statistics were calculated on a matrix of Log~2~(fold change) values between each sample and the other three samples. A positive test statistic indicates enrichment and a negative statistic indicates depletion. Although some test statistics had low *p*-values none were less than 0.10 after Benjamini-Hochberg correction.
+**`r I(pasteLabel("Figure ", figCount, "f_gsea"))`**. Geneset enrichment analysis (GSEA) for transcription factor families. Test statistics were calculated on a matrix of Log~2~(fold change) values for expressed TF family members between each sample and the other three samples. A positive test statistic indicates enrichment and a negative statistic indicates depletion. Although some test statistics had low *p*-values none were lower than 0.10 after Benjamini-Hochberg correction.
 
 # `R sessionInfo()` (*hide*)
 

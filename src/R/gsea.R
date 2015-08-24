@@ -25,6 +25,14 @@ if (!file.exists(tfdbFile)) {
 }
 tfdb <- readRDS(tfdbFile)
 
+# load expressed genes
+exprGenFile <- "output/expressedGenes/expressedGenesAll.Rds"
+if (!file.exists(exprGenFile)) {
+  cat("exprGenFile file not found, exiting\n", file = stderr())
+  quit(save = "no", status = 1)
+}
+expressedGenes <- readRDS(exprGenFile)
+
 # one-by-one comparisons of each stage to all other stages using contrast
 # vectors like this: cv <- c(0,1,1,-1,-1,0,0). Repeat for each level of stage
 stage <- levels(dds$stage)
@@ -47,8 +55,10 @@ getRes <- function(x) {
 lfcFrame <- sapply(stage, getRes)
 rownames(lfcFrame) <- rownames(counts(dds))
 
-# run gage on the data.frame and extract test statistics
-res <- gage(lfcFrame, gsets = split(tfdb$Protein.ID, tfdb$Family),
+# run gage on the expressed TFDB genes and extract test statistics
+tfdb.expressed <- tfdb[Protein.ID %in% expressedGenes]
+
+res <- gage(lfcFrame, gsets = split(tfdb.expressed$Protein.ID, tfdb.expressed$Family),
             samp = NULL, ref = NULL)
 gageFrame <- res$stats
 gageFrame <- gageFrame[, stage]
