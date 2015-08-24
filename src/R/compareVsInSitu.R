@@ -2,7 +2,6 @@
 
 library(data.table)
 
-
 # load zhang file
 zhangFile <- "data/zhangGenes.tab"
 if (!file.exists(zhangFile)) {
@@ -21,41 +20,49 @@ if (!file.exists(exprGenFile)) {
 }
 expressedGenesByLibrary <- readRDS(exprGenFile)
 
-# split the zhang genes expression field
+# split the zhang genes expression field.
 trim <- function(x) {gsub("^\\s+|\\s+$", "", x)}
-idVsExp <- zhangGenes[, .(
-  meristem = toupper(trim(unlist(strsplit(geneExp, "[,]"))))
-  ), by = msuId]
-setkey(idVsExp, 'msuId')
+zhangGenes[, geneExp := toupper(trim(unlist(strsplit(geneExp, ",", fixed = TRUE)))),
+           by = msuId]
+
+# remove some columns that we don't need for this plot
+zhangGenes[,c("geneName", "geneFunction", "geneEvidence"):= NULL]
 
 # get the LOCs that have expression we're interested in
 RM <- c("IM", "RM")
 PBM <- c("BM", "PBM")
 SBM <- c("BM", "SBM")
-SM <- c("SM", "FM")
+SM <- c("SM")
+FM <- c("FM")
+tissues <- unique(c(RM, PBM, SBM, SM))
+expZhangGenes <- zhangGenes[geneExp %in% tissues]
 
-RMt <- idVsExp[meristem %in% RM, .(msuId = unique(msuId), RM = TRUE)]
-PBMt <- idVsExp[meristem %in% PBM, .(msuId = unique(msuId), PBM = TRUE)]
-SBMt <- idVsExp[meristem %in% SBM, .(msuId = unique(msuId), SBM = TRUE)]
-SMt <- idVsExp[meristem %in% SM, .(msuId = unique(msuId), SM = TRUE)]
+# make a truth table for the zhang genes
+expZhangGenes[,RMz := geneExp %in% RM]
+expZhangGenes[,PBMz := geneExp %in% PBM]
+expZhangGenes[,SBMz := geneExp %in% SBM]
+expZhangGenes[,SMz := geneExp %in% SM]
+expZhangGenes[,FMz := geneExp %in% FM]
 
-# this is nasty
-merge(RMt, merge(PBMt, merge(SBMt, SMt, all = TRUE), all = TRUE), all = TRUE)
+# find out if we called these genes expressed (2 out of 3 libraries per stage)
+egbl <- data.table(msuId = unique(unlist(expressedGenesByLibrary)), key = "msuId")
+egbl <- cbind(egbl, egbl[, lapply(expressedGenesByLibrary, function(x) msuId %in% x)])
+egbl <- egbl[, .(
+  RMr = sum(n1r1,n1r3, n1r4) > 1,
+  PBMr = sum(n2r1,n2r3, n2r4) > 1,
+  SBMr = sum(n3r1,n3r2, n3r3) > 1,
+  SMr = sum(n4r1,n4r2, n1r3) > 1
+  ), by = msuId]
 
+##################
+### UP TO HERE ###
+##################
 
+# todo: fix multiple lines for zhangGene truth table (just use "OR")
 
-inSituResults <- idVsExp[meristem %in% tissues]
-
-newtab <- inSituResults[, .(msuId = unique(msuId))]
-
-
-inSituResults[,expressed := TRUE]
-
-
-
-# cast to wide
-reshape2::dcast(inSituResults, msuId ~ meristem, value.var = "expressed")
-
+# join 
+isVsRs <- egbl[expZhangGenes]
+isVsRs
 
 # how is this going to be plotted?
 randLab <- function(i) {paste0(sample(letters, 3, replace = FALSE), collapse = "")}
