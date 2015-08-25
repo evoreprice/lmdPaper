@@ -112,7 +112,7 @@ To investigate the evolution of the MADS family in Angiosperms, their expression
 
 To compare previously reported expression patterns with the results presented here, which were produced with high-throughput sequencing, a selection of studies of corresponding stages of inflorescence development were searched for qualitative *in situ* hyrbridisation data.
 
-```{r f_reviewInSitu, fig.height = 8.661 / 3}
+```{r f_reviewInSitu, fig.height = 8.661 / 4}
 print(f_reviewInSitu)
 ```
 

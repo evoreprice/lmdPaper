@@ -75,7 +75,7 @@ egbl.melt[, stage := sub("r\\d+", "", sample)]
 egbl.melt[, stage := plyr::mapvalues(stage, from = c("n1", "n2", "n3", "n4"),
                                      to = c("RM", "PBM", "SBM", "SM"))]
 geneCalls <- data.table(reshape2::dcast(egbl.melt, msuId ~ stage, value.var = "call",
-                                        fun.aggregate = function(x) sum(x) > 2), key = "msuId")
+                                        fun.aggregate = function(x) sum(x) > 1), key = "msuId")
 # add a fake "FM" column to check if we are getting a lot of genes in the SM sample
 geneCalls[, FM := SM]
 
