@@ -27,8 +27,12 @@ at <- unique(tfdbRaw[Species == "Arabidopsis thaliana" , .(
   Family
 )])
 
+# list of family vs. category
+famCat <- unique(tfdbRaw["Oryza sativa subsp. japonica",.(Family, Category)])
+
 # output
 saveRDS(os, 'data/tfdb/os.Rds')
 saveRDS(at, 'data/tfdb/at.Rds')
+saveRDS(famCat, 'data/tfdb/famCat.Rds')
 
 quit(save = "no", status = 0)

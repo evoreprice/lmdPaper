@@ -195,10 +195,19 @@ tableCount <- incCount(tableCount, "t_hypergeom")
 ############
 
 gsea <- readRDS('output/gsea/gseaTable.Rds')
+famCat <- readRDS("data/tfdb/famCat.Rds")
 
 # format some labels
 setnames(gsea, old = "Test statistic", new = "Test\nstatistic")
 gsea[, Stage := plyr::mapvalues(Stage, "ePBM/SBM", "ePBM/\nSBM")]
+
+# separate by TF / other proteins
+setkey(famCat, 'Family')
+setkey(gsea, 'rn')
+gsea[, Category := famCat[gsea][,Category]]
+gsea[, Category := plyr::mapvalues(Category, from = c("TF", "Other"),
+                       to = c("Transcription factors", "Other regulators"))]
+gsea[, Category := factor(Category, levels = c("Transcription factors", "Other regulators"))]
 
 heatscale <- rev(RColorBrewer::brewer.pal(6, "RdBu"))
 
@@ -210,6 +219,7 @@ f_gsea <- ggplot(gsea, aes(x = Stage, y = rn, label = padj, fill = `Test\nstatis
   scale_y_discrete(expand = c(0,0)) +
   scale_x_discrete(expand = c(0,0)) +
   scale_fill_gradientn(colours = heatscale) +
+  facet_grid(Category ~ ., scales = "free_y", space = "free_y") +
   geom_raster() +
   geom_text(data = gsea[showPval == TRUE], size = 2)
 
@@ -230,7 +240,7 @@ f_reviewInSitu <- ggplot(compare, aes(x = stage, y = id, colour = as.factor(comp
         axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
         panel.grid = element_blank()) +
   xlab(NULL) + ylab(NULL) +
-  coord_fixed(ratio = 1) +
+#  coord_fixed(ratio = 1) +
   scale_colour_manual(values = colours, na.value = NA,
                       labels = labels, name = NULL) +
   geom_point(size = 1) +
