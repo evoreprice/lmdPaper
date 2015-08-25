@@ -10,7 +10,6 @@ if (!file.exists(zhangFile)) {
 }
 zhangGenes <- data.table(read.table(zhangFile, sep = "\t", header = TRUE,
                                     stringsAsFactors = FALSE))
-setkey(zhangGenes, 'msuId')
 
 # load expressed genes
 exprGenFile <- "output/expressedGenes/expressedGenesByLibrary.Rds"
@@ -22,11 +21,9 @@ expressedGenesByLibrary <- readRDS(exprGenFile)
 
 # split the zhang genes expression field.
 trim <- function(x) {gsub("^\\s+|\\s+$", "", x)}
-zhangGenes[, geneExp := toupper(trim(unlist(strsplit(geneExp, ",", fixed = TRUE)))),
-           by = msuId]
-
-# remove some columns that we don't need for this plot
-zhangGenes[,c("geneName", "geneFunction", "geneEvidence"):= NULL]
+zhangGenes <- zhangGenes[,.(
+  geneExp = trim(unlist(strsplit(geneExp, "[,]")))
+  ), by = c('msuId', 'zhangRef', 'plotLabel')]
 
 # get the LOCs that have expression we're interested in
 RM <- c("IM", "RM")
@@ -48,7 +45,7 @@ expZhangGenes[,FM := geneExp %in% FM]
 setkey(expZhangGenes, "msuId", "zhangRef")
 expZhangGenes <- expZhangGenes[, .(
   plotLabel = unique(plotLabel),
-  geneExp = paste(geneExp, collapse = " | "),
+  geneExp = paste(unique(geneExp), collapse = " | "),
   RM = any(RM),
   PBM = any(PBM),
   SBM = any(SBM),

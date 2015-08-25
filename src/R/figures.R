@@ -219,25 +219,31 @@ figCount <- incCount(figCount, "f_gsea")
 ### COMPARE IN SITU ###
 #######################
 
-compare <- readRDS('output/compare/')
+compare <- readRDS('output/compare/compare.Rds')
 
 # test plot
 colours <- RColorBrewer::brewer.pal(3, "Set1")[c(2,1,3)]
 labels <- c("1" = "Detected\nin both", "2" = "Only detected\nby in situ", "3" = "Only detected by\nRNA-sequencing")
-ggplot(plotData.long, aes(x = stage, y = id, colour = as.factor(compare))) +
+f_reviewInSitu <- ggplot(compare, aes(x = stage, y = id, colour = as.factor(compare))) +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
   theme(axis.text.y = element_blank(),
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
         panel.grid = element_blank()) +
   xlab(NULL) + ylab(NULL) +
+  coord_fixed(ratio = 1) +
   scale_colour_manual(values = colours, na.value = NA,
-                      labels = labels) +
+                      labels = labels, name = NULL) +
   geom_point(size = 1) +
   scale_x_discrete(labels = c("", "RM", "PBM", "SBM", "SM", "FM", ""),
                    limits = c("id", "RM", "PBM", "SBM", "SM", "FM", "zhangRef"),
-                   expand = c(0,-0.5)) +
+                   expand = c(2,0)) +
   # map one label to 1.5 and hjust to the left
-  geom_text(mapping = aes(x = 1.9, y = id, label = plotLabel),
-            hjust = 1, colour = "black", size = 2, fontface = "italic") +
+  geom_text(mapping = aes(x = 1.5, y = id, label = plotLabel),
+            hjust = 1, colour = "black", size = 2, fontface = "italic",
+            family = "Helvetica") +
   # map the other to max + 0.5 and hjust to the right
-  geom_text(mapping = aes(x = 6.1, y = id, label = zhangRef),
-            hjust = 0, colour = "black", size = 2, fontface = "plain") 
+  geom_text(mapping = aes(x = 6.5, y = id, label = zhangRef),
+            hjust = 0, colour = "black", size = 2, fontface = "plain",
+            family = "Helvetica") 
+f_reviewInSitu
+figCount <- incCount(figCount, "f_reviewInSitu")
