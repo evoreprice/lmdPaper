@@ -224,6 +224,15 @@ def define_os_reads(outputFiles):
     touch(outputFiles)
 
 #---------------------------------------------------------------
+# define zhang in situ data
+#
+@originate(['ruffus/os.insitu'])
+def define_review_inSituDB(outputFiles):
+    pathToFile = 'data/zhangGenes.tab'
+    assert os.path.isfile(pathToFile), "Error: in situ data file " + qualName + " missing"
+    touch(outputFiles)
+
+#---------------------------------------------------------------
 # ANALYSIS TASKS
 #---------------------------------------------------------------
 
@@ -454,11 +463,22 @@ def gsea(inputFiles, outputFiles):
     jobScript = 'src/R/gsea.R'
     ntasks = '1'
     cpus_per_task = '1'
-    job_name = 'libStats'
+    job_name = 'gsea'
     jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
     # update ruffus flag
     print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
     touch(outputFiles)
+
+#---------------------------------------------------------------
+# Compare published TF data
+#
+@merge([detect_expressed_genes, define_zhang_inSitu], 'ruffus/os.compare')
+def compare_inSitus(inputFiles, outputFiles):
+    jobScript = 'src/R/compareVsInSitu.R'
+    ntasks = '1'
+    cpus_per_task = '1'
+    job_name = 'compare'
+
 
 #---------------------------------------------------------------
 # FIGURES AND TABLES
@@ -504,6 +524,17 @@ def sf_mfuzzPca(inputFiles, outputFiles):
 @merge(gsea, "ruffus/figure.f_gsea")
 def f_gsea(inputFiles, outputFiles):
     touch(outputFiles)
+
+#---------------------------------------------------------------
+# in situ comparison plot
+#
+@merge(compare_inSitus, "ruffus/figure.f_reviewInSitu")
+def f_reviewInSitu(inputFiles, outputFiles):
+    touch(outputFiles)
+
+
+
+
 
 # options for visualising
 pipeline_printout()

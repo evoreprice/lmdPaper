@@ -108,7 +108,6 @@ plotData[, padj := format.pval(c(0.12, padj), digits = 2, eps = 0.001, na.form =
 plotData[, rn := factor(rn, levels = famOrder)]
 
 # MAKE OUTPUT FOLDER
-
 outDir <- "output/gsea"
 if (!dir.exists(outDir)) {
   dir.create(outDir)

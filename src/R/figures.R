@@ -214,3 +214,30 @@ f_gsea <- ggplot(gsea, aes(x = Stage, y = rn, label = padj, fill = `Test\nstatis
   geom_text(data = gsea[showPval == TRUE], size = 2)
 
 figCount <- incCount(figCount, "f_gsea")
+
+#######################
+### COMPARE IN SITU ###
+#######################
+
+compare <- readRDS('output/compare/')
+
+# test plot
+colours <- RColorBrewer::brewer.pal(3, "Set1")[c(2,1,3)]
+labels <- c("1" = "Detected\nin both", "2" = "Only detected\nby in situ", "3" = "Only detected by\nRNA-sequencing")
+ggplot(plotData.long, aes(x = stage, y = id, colour = as.factor(compare))) +
+  theme_minimal(base_size = 8, base_family = "Helvetica") +
+  theme(axis.text.y = element_blank(),
+        panel.grid = element_blank()) +
+  xlab(NULL) + ylab(NULL) +
+  scale_colour_manual(values = colours, na.value = NA,
+                      labels = labels) +
+  geom_point(size = 1) +
+  scale_x_discrete(labels = c("", "RM", "PBM", "SBM", "SM", "FM", ""),
+                   limits = c("id", "RM", "PBM", "SBM", "SM", "FM", "zhangRef"),
+                   expand = c(0,-0.5)) +
+  # map one label to 1.5 and hjust to the left
+  geom_text(mapping = aes(x = 1.9, y = id, label = plotLabel),
+            hjust = 1, colour = "black", size = 2, fontface = "italic") +
+  # map the other to max + 0.5 and hjust to the right
+  geom_text(mapping = aes(x = 6.1, y = id, label = zhangRef),
+            hjust = 0, colour = "black", size = 2, fontface = "plain") 

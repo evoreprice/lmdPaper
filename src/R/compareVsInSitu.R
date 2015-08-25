@@ -101,53 +101,21 @@ plotData.long[call.rs & call.z, compare := 1]
 plotData.long[!call.rs & call.z, compare := 2]
 plotData.long[call.rs & !call.z, compare := 3]
 
-# test plot
-colours <- RColorBrewer::brewer.pal(3, "Set1")[c(2,1,3)]
-labels <- c("1" = "Detected\nin both", "2" = "Only detected\nby in situ", "3" = "Only detected by\nRNA-sequencing")
-ggplot(plotData.long, aes(x = stage, y = id, colour = as.factor(compare))) +
-  theme_minimal(base_size = 8, base_family = "Helvetica") +
-  theme(axis.text.y = element_blank(),
-        panel.grid = element_blank()) +
-  xlab(NULL) + ylab(NULL) +
-  scale_colour_manual(values = colours, na.value = NA,
-                      labels = labels) +
-  geom_point(size = 1) +
-  scale_x_discrete(labels = c("", "RM", "PBM", "SBM", "SM", "FM", ""),
-                   limits = c("id", "RM", "PBM", "SBM", "SM", "FM", "zhangRef"),
-                   expand = c(0,-0.5)) +
-  # map one label to 1.5 and hjust to the left
-  geom_text(mapping = aes(x = 1.9, y = id, label = plotLabel),
-            hjust = 1, colour = "black", size = 2, fontface = "italic") +
-  # map the other to max + 0.5 and hjust to the right
-  geom_text(mapping = aes(x = 6.1, y = id, label = zhangRef),
-            hjust = 0, colour = "black", size = 2, fontface = "plain") 
 
+# MAKE OUTPUT FOLDER
+outDir <- "output/compare"
+if (!dir.exists(outDir)) {
+  dir.create(outDir)
+}
 
-# how is this going to be plotted?
-randLab <- function(i) {paste0(sample(letters, 3, replace = FALSE), collapse = "")}
-pd <- data.frame(id = 1:10,
-                 value1 = sample(c(TRUE, FALSE), size = 10, replace = TRUE),
-                 value2 = sample(c(TRUE, FALSE), size = 10, replace = TRUE),
-                 label = sapply(1:10, randLab))
-pd.melt <- reshape2::melt(pd, id.vars = c('id', 'label'))
+# SAVE OUTPUT
+saveRDS(plotData.long, paste0(outDir, "/compare.Rds"))
 
-# hack ggplot
+# SAVE LOGS
+sInf <- c(paste("git branch:",system("git rev-parse --abbrev-ref HEAD", intern = TRUE)),
+          paste("git hash:", system("git rev-parse HEAD", intern = TRUE)),
+          capture.output(sessionInfo()))
+logLocation <- paste0(outDir, "/SessionInfo.txt")
+writeLines(sInf, logLocation)
 
-# mappings as normal
-ggplot(pd.melt, aes(x = variable, y = id, fill = value)) +
-  theme_minimal() +
-  theme(axis.text = element_blank(),
-        panel.grid = element_blank()) +
-  xlab(NULL) + ylab(NULL) +
-  # make a custom scale specifying the labels and the breaks (breaks == columns
-  # in the df). Negative expand to shrink label columns
-  scale_x_discrete(labels = c("", "T1", "T2", ""),
-                   limits = c("id", "value1", "value2", "label"),
-                   expand = c(0,-0.4)) + 
-  geom_raster() +
-  # map one label to max + 0.5 and hjust to the right
-  geom_text(mapping = aes(x = 3.5, y = id, label = label), hjust = -0.1) +
-  # map the other label to 1.5 and hjust to the left
-  geom_text(mapping = aes(x = 1.5, y = id, label = id), hjust = 1.1)
-
-
+quit(save = "no", status = 0)
