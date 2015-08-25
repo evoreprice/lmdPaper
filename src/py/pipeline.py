@@ -472,13 +472,16 @@ def gsea(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # Compare published TF data
 #
-@merge([detect_expressed_genes, define_zhang_inSitu], 'ruffus/os.compare')
+@merge([detect_expressed_genes, define_review_inSituDB], 'ruffus/os.compare')
 def compare_inSitus(inputFiles, outputFiles):
     jobScript = 'src/R/compareVsInSitu.R'
     ntasks = '1'
     cpus_per_task = '1'
     job_name = 'compare'
-
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)
 
 #---------------------------------------------------------------
 # FIGURES AND TABLES
