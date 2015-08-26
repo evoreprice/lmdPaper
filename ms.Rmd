@@ -66,31 +66,39 @@ Word count
 
 # Results and Discussion
 
-To investigate gene expression during inflorescence development, LASER microdissection (LMD) was used to collect meristematic tissues from the rachis meristem (RM), primary branch meristem (PBM), elongating primary branch meristem and secondary branch meristem (ePBM/SBM) and spikelet meristem (SM) (`r I(pasteLabel("Figure ", figCount, "f_lmdFigure"))`). RNA from the meristem samples was isolated, amplified and used for the production of a sequencing library. **need area cut numbers**. RNA input for library preparation was between `r min(st_libStats$"Yield (ng)")` and `r max(st_libStats$"Yield (ng)")` ng and the average RNA integrity number was `r round(mean(st_libStats$"RIN"), 1)` (`r I(pasteLabel("Table S", s_tableCount, "st_libStats"))`). Initially, two biological replicates were prepared for each stage, but after performing a principal components analysis (PCA) on transformed expression values two libraries that were made from degraded RNA were excluded from the analysis (`r I(pasteLabel("Figure S", s_figCount, "sf_pca"))`). Following this, further samples were prepared to provide a total of three biological replicates with intact RNA (RIN ≥ 7) for each meristem type.
+To investigate gene expression during inflorescence development, LASER microdissection (LMD) was used to collect meristematic tissues from the rachis meristem (RM), primary branch meristem (PBM), elongating primary branch meristem and secondary branch meristem (ePBM/SBM) and spikelet meristem (SM) (`r I(pasteLabel("Figure ", figCount, "f_lmdFigure"))`). RNA from the meristem samples was isolated, amplified and used for the production of a sequencing library. **Need area cut +/- number of panicles used for each library from Israr**. RNA input for library preparation was between `r min(st_libStats$"Yield (ng)")` and `r max(st_libStats$"Yield (ng)")` ng and the average RNA integrity number was `r round(mean(st_libStats$"RIN"), 1)` (`r I(pasteLabel("Table S", s_tableCount, "st_libStats"))`). Initially, two biological replicates were prepared for each stage, but after performing a principal components analysis (PCA) on transformed expression values two libraries that were made from degraded RNA were excluded from the analysis (`r I(pasteLabel("Figure S", s_figCount, "sf_pca"))`). Following this, further samples were prepared to provide a total of three biological replicates with intact RNA (RIN ≥ 7) for each meristem type.
 
 ![](data/lmdFigure.pdf)
 
-At least `r round(min(st_libStats$"Reads (M)"), 0)` million 50-base reads were produced from each library, yielding between `r round(min(st_libStats$"Reads in genes (M)", na.rm = TRUE), 0)` and `r round(max(st_libStats$"Reads in genes (M)", na.rm = TRUE), 0)` million reads that mapped to genes after removal of reads likely to have originated from rRNA and tRNA. Using cutoffs calculated from the 95^th^ percentile of distributions of expression values estimated from intergenic regions for each library (*i.e*. reads that were not generated from genes), `r length(unique(readRDS("output/expressedGenes/expressedGenesAll.Rds")))` unique genes were detected in at least one of the libraries.
+At least `r round(min(st_libStats$"Reads (M)"), 0)` million 50-base reads were produced from each library, yielding between `r round(min(st_libStats$"Reads in genes (M)", na.rm = TRUE), 0)` and `r round(max(st_libStats$"Reads in genes (M)", na.rm = TRUE), 0)` million reads that mapped to genes after removal of reads likely to have originated from rRNA and tRNA. Using cutoffs calculated from the 95^th^ percentile of distributions of expression values estimated from intergenic regions for each library (*i.e*. reads that were not generated from genes), `r length(unique(readRDS("output/expressedGenes/expressedGenesAll.Rds")))` unique genes were detected in at least one of the libraries. As a preliminary quality check, the qualitative expression patterns of a selection of genes were compared with patterns that had previously been reported by *in situ* hybridisation (currently `r I(pasteLabel("Figure ", figCount, "f_reviewInSitu"))`, **move figure to supporting table**).
+
+```{r f_reviewInSitu, fig.height = 8.661 / 4}
+print(f_reviewInSitu)
+```
+
+(**our in situ results could go here or in SI**)
 
 ##  Patterns of gene expression during inflorescence development
 
-To recover common expression patterns in genes detected in the meristem samples, read counts were transformed using the variance-stabilizing transformation (VST) included in the `DESeq2` package [@Love:2014do]. Expressed genes were ranked by variance, and standardised, VST-transformed read counts for the 25% most-variable genes were clustered using the fuzzy *c*-means algorithm implemented in the `Mfuzz` package [@Futschik:2005vo]. To determine the number of cluster cores (*c*), the minimum distance between cluster centroids, the formation of empty clusters, and PCA plots of cluster members were monitored for clusters produced with *c* values between 2 and `r maxClust` (`r I(pasteLabel("Figures S", s_figCount, "sf_mfuzzCentroids"))` `r I(pasteLabel(" and S", s_figCount, "sf_mfuzzPca"))`), leading to the use of `r as.character(english::english(c))` cluster cores (`r I(pasteLabel("Figure ", figCount, "f_mfuzzClusters"))`). Clusters were recovered that contain genes that gradually decrease or increase in expression during development (clusters **2**, **3**, **6** and **8**), or that are apparently turned on or off in primary and secondary branch meristems (clusters **7** and **4** respectively) along with genes with more complex expression patterns (clusters **1** and **5**).
+To recover common expression patterns in genes detected in the meristem samples, read counts were transformed using the variance-stabilizing transformation (VST) included in the `DESeq2` package [@Love:2014do]. Expressed genes were ranked by variance, and standardised, VST-transformed read counts for the 25% most-variable genes were clustered using the fuzzy *c*-means algorithm implemented in the `Mfuzz` package [@Futschik:2005vo]. To determine the number of cluster cores (*c*), the minimum distance between cluster centroids, the formation of empty clusters, and PCA plots of cluster members were monitored for clusters produced with *c* values between 2 and `r maxClust` (`r I(pasteLabel("Figures S", s_figCount, "sf_mfuzzCentroids"))` `r I(pasteLabel(" and S", s_figCount, "sf_mfuzzPca"))`), leading to the use of `r as.character(english::english(c))` cluster cores (`r I(pasteLabel("Figure ", figCount, "f_mfuzzClusters"))`). Clusters were recovered that contain genes that gradually decrease or increase in expression during development (clusters **x**, **x**, **x** and **x**), or that are apparently turned on or off in primary and secondary branch meristems (clusters **x** and **x** respectively) along with genes with more complex expression patterns (clusters **x** and **x**).
 
 ```{r f_mfuzzClusters, fig.height = 8.661 / 2}
 print(f_mfuzzClusters)
 ```
 
-Examination of the clustered genes suggested that transcription factors were overrepresented in most clusters (**annotated cluster tables in SI**). To determine whether particular TF families were associated with particular patterns of expression, the enrichment of TF family members in each cluster was calculated using hypergeometric tests. Using the list of transcription factor families available on the Plant Transcription Factor Database (**reference**), a hypergeometric test was carried out if there were at least two members of TF family in a given cluster. After adjustment for multiple comparisons, each cluster had a significant enrichment of at least one TF family (`r I(pasteLabel("Table ", tableCount, "t_hypergeom"))`). For example, members of the ABI3VP1 family were overrepresented in clusters **2** and **4**, both of which contain genes with higher transformed read counts in the rachis meristem than in samples from later stages of development. The MADS family was overrepresented in clusters **6** and **8**, suggesting that they could be involved in both early and late stages of inflorescence development.
+Examination of the clustered genes suggested that transcription factors were overrepresented in most clusters (**annotated cluster tables in SI**). To determine whether particular TF families were associated with particular patterns of expression, the enrichment of TF family members in each cluster was calculated using hypergeometric tests. Using the list of transcription factor and other transcriptional regulator families available on the Plant Transcription Factor Database (**reference**), a hypergeometric test was carried out if there were at least two members of one family in a given cluster. After adjustment for multiple comparisons, each cluster had a significant enrichment of at least one family (`r I(pasteLabel("Table ", tableCount, "t_hypergeom"))`). For example, members of the ABI3VP1 family were overrepresented in clusters **x** and **x**, both of which contain genes with higher transformed read counts in the rachis meristem than in samples from later stages of development. The MADS family was overrepresented in clusters **x** and **x**, suggesting that they could be involved in both early and late stages of inflorescence development.
 
-* Clusters including characterised genes
+**Discussion: which clusters have genes that are already candidates for panicle branching?**
 
 ## Dynamic expression of transcription factor families
 
-Because of the enrichment of TF family members in some of the gene expression clusters, geneset enrichment analysis (GSEA) was used to provide an overview of TF family expression in the meristem samples (`r I(pasteLabel("Figure ", figCount, "f_gsea"))`). In general, the GSEA results correspond to the hypergeometric tests for transcription factor enrichment in the clusters. For example, SBP transcription factors are enriched in RM and PBM, consistent with their overrepresentation in cluster **6**, which contains genes with higher expression in those meristem types.
+Because of the enrichment of TF family members in some of the gene expression clusters, geneset enrichment analysis (GSEA) was used to provide an overview of expression of transcription factors and other regulators in the meristem samples (`r I(pasteLabel("Figure ", figCount, "f_gsea"))`). In general, the GSEA results correspond to the hypergeometric tests for transcription factor enrichment in the clusters. For example, SBP transcription factors are enriched in RM and PBM, consistent with their overrepresentation in cluster **x**, which contains genes with higher expression in those meristem types.
 
-The patterns are not completely representative of all members of each gene family. For example, there are several MADS genes that have lower expression in the SM than in the RM, but expressed MADS genes were detected at a higher level overall in SM. Nevertheless, there are some notable modes of expression shared between different TF families. Several TF families, including bZIP and ABI3VP1, are strongly expressed in RM and lower in the other meristem types. Another group incluiding Squamosa binding proteins and Jumonji transcription factors is more weakly expressed in the RM but enriched in the PBM, suggesting a switch of expression between these two meristem types. Correspondingly, the most pronounced difference in the GSEA was that between the RM and PBM samples.
+**cluster y-axis of GSEA plot w/in protein type**
 
-TF families involved in branching were enriched in **which families, which samples**. 
+These patterns are not intended to represent each member of each gene family. For example, there are several MADS genes that have lower expression in the SM than in the RM, but expressed MADS genes were detected at a higher level overall in SM. Despite this caveat, there are some notable modes of expression shared between different families that may indicate roles in inflorescence development. In the GSEA, the most pronounced change in expression appears to occur between the RM and branch meristem samples. Several families (including TUBBY-like, GROWTH-REGULATING FACTOR, bZIP and ABI3VP1 TF genes and Aux/IAA genes) are strongly expressed in RM and lower in the other meristem types. Another group, including mTERF, MYB, SBP and FHA TF genes and SET, PHD and Jumonji regulator genes, is enrinched in one or both of the PBM and ePBM/SBM samples but depleted or not enriched in the RM samples.
+
+**Discussion: In which samples were TF families involved in branching enriched?**
 
 ```{r f_gsea, fig.height = 8.661 / 2}
 print(f_gsea)
@@ -107,17 +115,6 @@ To investigate the evolution of the MADS family in Angiosperms, their expression
 + **arapidospis**: inflorescence meristem vs. floret meristem
 + **tomato**: simpodial meristem vs. floret meristem (need to find list of tomato MADS genes)
 + (could I map the l2fc to the background of the geom_label rectangle? "The fill aesthetic controls the background colour of the label.")
-
-## Comparison with characterised genes
-
-To compare previously reported expression patterns with the results presented here, which were produced with high-throughput sequencing, a selection of studies of corresponding stages of inflorescence development were searched for qualitative *in situ* hyrbridisation data.
-
-```{r f_reviewInSitu, fig.height = 8.661 / 4}
-print(f_reviewInSitu)
-```
-
-* **Table**: our expression calls (yes/no by stage) *vs* in situ reports. Fun times.
-* our in situ results could go here
 
 # Experimental procedures
 
@@ -137,17 +134,11 @@ print(f_reviewInSitu)
 
 # Tables
 
-```{r hypergeom, results = "markup"}
-knitr::kable(t_hypergeom, caption = paste0(
-  I(pasteLabel("**Table ", tableCount, "t_hypergeom")),
-  '**: Transcription factor family enrichment per cluster'))
-```
-
 ```{r pander, results = "asis"}
 pander::set.alignment('left', row.names = 'right')
 pander::set.caption(paste0(
   I(pasteLabel("**Table ", tableCount, "t_hypergeom")),
-  '**: Transcription factor family enrichment per cluster'))
+  "**: Transcription factor and transcriptional regulator family enrichment per cluster, including the number of family members (*n*), number expressed in the whole dataset (*n*~expr~) and number and adjusted *p*-value for each cluster, for families that had at least two members in any one cluster."))
 pander::pandoc.table(t_hypergeom, split.tables = Inf, emphasize.rownames = FALSE)
 ```
 
