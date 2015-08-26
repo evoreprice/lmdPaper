@@ -4,6 +4,9 @@ title: Genome-wide changes in expression during inflorescence architecture devel
 csl: csl/the-plant-journal.csl
 header-includes: \usepackage{graphicx}
 output:
+  word_document:
+    fig_caption: yes
+    reference_docx: csl/wordStyles.docx
   BiocStyle::html_document:
     fig_caption: yes
     force_captions: yes
@@ -11,9 +14,6 @@ output:
     keep_md: yes
     number_sections: yes
     dev: "CairoPDF"
-  word_document:
-    fig_caption: yes
-    reference_docx: csl/wordStyles.docx
   pdf_document:
     fig_caption: yes
     keep_tex: yes
@@ -76,7 +76,7 @@ At least `r round(min(st_libStats$"Reads (M)"), 0)` million 50-base reads were p
 print(f_reviewInSitu)
 ```
 
-(**our in situ results could go here or in SI**)
+**Our in situ results could go here or in SI**
 
 ##  Patterns of gene expression during inflorescence development
 
@@ -94,19 +94,17 @@ Examination of the clustered genes suggested that transcription factors were ove
 
 Because of the enrichment of TF family members in some of the gene expression clusters, geneset enrichment analysis (GSEA) was used to provide an overview of expression of transcription factors and other regulators in the meristem samples (`r I(pasteLabel("Figure ", figCount, "f_gsea"))`). In general, the GSEA results correspond to the hypergeometric tests for transcription factor enrichment in the clusters. For example, SBP transcription factors are enriched in RM and PBM, consistent with their overrepresentation in cluster **x**, which contains genes with higher expression in those meristem types.
 
-**cluster y-axis of GSEA plot w/in protein type**
+```{r f_gsea, fig.height = 8.661 / 2}
+print(f_gsea)
+```
 
 These patterns are not intended to represent each member of each gene family. For example, there are several MADS genes that have lower expression in the SM than in the RM, but expressed MADS genes were detected at a higher level overall in SM. Despite this caveat, there are some notable modes of expression shared between different families that may indicate roles in inflorescence development. In the GSEA, the most pronounced change in expression appears to occur between the RM and branch meristem samples. Several families (including TUBBY-like, GROWTH-REGULATING FACTOR, bZIP and ABI3VP1 TF genes and Aux/IAA genes) are strongly expressed in RM and lower in the other meristem types. Another group, including mTERF, MYB, SBP and FHA TF genes and SET, PHD and Jumonji regulator genes, is enrinched in one or both of the PBM and ePBM/SBM samples but depleted or not enriched in the RM samples.
 
 **Discussion: In which samples were TF families involved in branching enriched?**
 
-```{r f_gsea, fig.height = 8.661 / 2}
-print(f_gsea)
-```
-
 ## MADS genes: comparison of expression & homology in rice, tomato, arabidopsis
 
-There was an overrepresentation of MADS genes in **some clusters** and their overall expression is enriched in the spikelet meristem sample. These results correspond with previous studies that have established the importance of MADS genes in inflorescence development in rice and other plants (**expand**).
+There was an overrepresentation of MADS genes in clusters **xyz** and their overall expression is enriched in the spikelet meristem sample. These results correspond with previous studies that have established the importance of MADS genes in inflorescence development in rice and other plants (**expand**).
 
 To investigate the evolution of the MADS family in Angiosperms, their expression values in the dicots *A. thaliana* and *Solanum lycopersicum* and the monocot *O. sativa* were compared to their homology in these species. 
 
@@ -117,6 +115,18 @@ To investigate the evolution of the MADS family in Angiosperms, their expression
 + (could I map the l2fc to the background of the geom_label rectangle? "The fill aesthetic controls the background colour of the label.")
 
 # Experimental procedures
+
+## Plant material and sampling
+
+*Oryza sativa* ssp. japonica cv. Nipponbare plants were grown in a growth chamber at 70% relative humidity at 30°C during the day and 26°C at night. After 7 weeks in long day conditions (LD; 14 hours light and 10 hours darkness) plants were transferred to short day conditions (SD; 10 hours light and 14 hours darkness) to induce floral transition. Inflorescence meristems were harvested from 6 to 14 days after the change of photoperiod **under which microscope?**.
+
+## Tissue embedding, LASER microdissection and sequencing
+
+Each inflorescence was harvested in 2 mL ice-cold 3:1 ethanol:acetic acid fixative solution, infiltrated **filtered?** twice under a mild vacuum for 15 minutes and stored for 20 hours in fresh fixative at 4°C. The following steps of tissue embedding for dissection were performed as described by @Mantegazza:2014di. Tissues were cut into 8 µm sections on an RM2155 or RM2255 microtome (Leica) and dissected on a LMD6000 or LMD7000 LASER dissector (Leica). RNA was amplified using the ARCTURUS PicoPure RNA Isolation Kit (ThermoFisher) and assayed on a 2100 Bioanalyzer with the RNA 6000 Pico Kit (Agilent) before amplification and cDNA synthesis with the Ovation RNA-Seq System V2 (NuGEN). Library preparation with **which kit** and 50-base single-end sequencing on the HiSeq 2000 platform (Illumina) were performed by IGA Technology Services (Udine, Italy).
+
+## Data analyses
+
+Analysis of the sequenced libraries was carried out with custom `bash`, `R` (**ref**) and `python` (**ref**) scripts. All of the code used for the analysis and to generate figures and tables for this report, along with the versions and paramaters of the software used, are available on GitHub (https://github.com/evoreprice/lmdPaper). Briefly, adaptor trimming was performed with `cutadapt` (**ref**) and reads were mapped to the MSUv7 genome (**ref**) using `rna-star` (**ref**) in 2-pass mode with annotations. Differential expression analysis to calculate L~2~FC values and transformed read counts was performed with the `DESeq2` package (**ref**).
 
 # Accession Numbers
 
