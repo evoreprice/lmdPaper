@@ -24,6 +24,12 @@ if (!file.exists(tfdbFile)) {
   quit(save = "no", status = 1)
 }
 tfdb <- readRDS(tfdbFile)
+famCatFile <- "data/tfdb/famCat.Rds"
+if (!file.exists(famCatFile)) {
+  cat("famCat file not found, exiting\n", file = stderr())
+  quit(save = "no", status = 1)
+}
+famCat <- readRDS(famCatFile)
 
 # load expressed genes
 exprGenFile <- "output/expressedGenes/expressedGenesAll.Rds"
@@ -64,8 +70,14 @@ gageFrame <- res$stats
 gageFrame <- gageFrame[, stage]
 gageFrame <- gageFrame[complete.cases(gageFrame), ]
 
-# get the family order for the plot
-famOrder <- rownames(gageFrame)[hclust(dist(gageFrame))$order]
+# get the family order for the plot. Cluster on TFs and others separately since
+# they will be facetted in the plot.
+tfFrame <- gageFrame[(rownames(gageFrame) %in% famCat[Category == 'TF', Family]),]
+tfOrder <- rownames(tfFrame)[hclust(dist(tfFrame))$order]
+otherFrame <- gageFrame[(rownames(gageFrame) %in% famCat[Category == 'Other', Family]),]
+otherOrder <- rownames(otherFrame)[hclust(dist(otherFrame))$order]
+
+famOrder <- c(tfOrder, otherOrder)
 
 # make p-value data.frames
 greaterP <- res$greater
