@@ -88,14 +88,12 @@ calcTpm <- function(x){
 tpm <- sapply(colnames(counts), calcTpm)
 
 # MAKE OUTPUT FOLDER
-
 outDir <- "output/tpm"
 if (!dir.exists(outDir)) {
   dir.create(outDir)
 }
 
 # SAVE OUTPUT
-
 saveRDS(tpm, paste0(outDir, "/tpm.Rds"))
 saveRDS(gtfLength, paste0(outDir, "/gtfLength.Rds"))
 saveRDS(effLength, paste0(outDir, "/effLength.Rds"))

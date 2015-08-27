@@ -77,7 +77,7 @@ pcaPlotData$rIdx <- 1:dim(pcaPlotData)[1]
 opIdx <- pcaPlotData[c('n2r3', 'n4r1'),'rIdx']
 
 sf_pca <- ggplot(data = pcaPlotData,
-                aes(x = PCA1, y = PCA2, colour = Stage, label = label)) +
+                 aes(x = PCA1, y = PCA2, colour = Stage, label = label)) +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
   scale_colour_brewer(palette = "Set1", name = 'Stage') +
   guides(colour=guide_legend(title=NULL)) +
@@ -103,24 +103,66 @@ c1 <- readRDS('output/mfuzz/c1.Rds')
 memCutoff <- 0.5
 
 # get clusters and membership
-cluster <- data.table(id = names(c1$cluster), Cluster = c1$cluster, Membership = apply(c1$membership, 1, max), key = "id")
+cluster <- data.table(id = names(c1$cluster), Cluster = c1$cluster,
+                      Membership = apply(c1$membership, 1, max), key = "id")
 
 # get standardised VST counts
-exprs <- data.table(Biobase::exprs(expressionMatrix), keep.rownames = TRUE, key = "rn")
+exprs <- data.table(Biobase::exprs(expressionMatrix), keep.rownames = TRUE)
+exprs[,id := rn][, rn := NULL]
+setkey(exprs, "id")
 
-# set up cluster labels
-numGenes <- cluster[Membership > memCutoff, .(number = length(id)), by = Cluster]
-setkey(numGenes, 'Cluster')
-clustLabels <- numGenes[, paste0("Cluster ", Cluster, "\n(", number, " genes)")]
+plotData.wide <- exprs[cluster[Membership > memCutoff]]
+plotData.wide[, number := length(id), by = Cluster]
+plotData.wide[, label := factor(paste0("Cluster ", Cluster, "\n(", number, " genes)"))]
 
-# merge clusters with expression values
-plotData.wide <- cluster[exprs]
+# relevel clusters
+centres.wide <- data.table(c1$centers)
+
+# re-order the cluster for the plot
+centres.wide[, Cluster := paste("Cluster", 1:nrow(centres.wide))]
+
+# find the changes between RM and PBM and PBM and SM for each cluster
+centres.wide[, c("n1n2", "n2n4") :=
+               list(PBM - RM,
+                    SM - PBM)]
+# divide these changes into categories
+centres.wide[, c("dn1n2", "dn2n4") :=
+               list(c('dec', 'small', 'inc')[cut(n1n2, breaks = c(-Inf, -0.5, 0.5, Inf))],
+                    c('dec', 'small', 'inc')[cut(n2n4, breaks = c(-Inf, -1, 1, Inf))])]               
+
+# first, show gradual increase / decrease
+centres.wide[dn1n2 == dn2n4, cOrder := c(1,2)[order(RM)]]
+
+# next, big changes in n1n2 but small in n2n4
+centres.wide[dn2n4 == 'small', cOrder := c(3,4)[order(RM)]]
+
+# small changes in n1n2, then large change
+centres.wide[dn1n2 == 'small', cOrder := c(5,6)[order(RM)]]
+
+# complex patterns 
+centres.wide[!dn1n2 == dn2n4 & !dn1n2 == "small" & !dn2n4 == "small",
+             cOrder := c(7,8)[order(SM)]]
+
+# order any leftovers on RM
+if (any(is.na(centres.wide[, cOrder]))) {
+  orderMax <- max(centres.wide[,cOrder], na.rm = TRUE)
+  centres.wide[is.na(cOrder), cOrder := c((orderMax + 1):nrow(centres.wide))]
+}
+
+# relevel the clusters by cOrder
+plotData.wide[, label :=
+                factor(label, levels = levels(label)[order(centres.wide[,cOrder])])]
+
+# add label to centres.wide
+setkey(centres.wide, 'cOrder')
+centres.wide[, label := plotData.wide[, levels(label)]]
+centres.wide[, label := factor(label, levels = label)]
 
 # make long
-plotData <- reshape2::melt(plotData.wide[ Membership > memCutoff ], id.vars = c('id', 'Cluster', 'Membership'), variable.name = 'Stage', value.name = "Normalised, transformed read counts")
-
-# add cluster labels
-plotData[, Cluster := plyr::mapvalues(as.factor(Cluster), seq(1, length(unique(Cluster))), clustLabels)]
+plotData <- reshape2::melt(plotData.wide,
+                           id.vars = c("id", "Cluster", "Membership", "label", "number"),
+                           variable.name = "Stage",
+                           value.name = "Normalised, transformed read counts")
 
 # fix stage label
 plotData[, Stage := plyr::mapvalues(Stage, "ePBM.SBM", "ePBM/SBM")]
@@ -128,9 +170,11 @@ plotData[, Stage := plyr::mapvalues(Stage, "ePBM.SBM", "ePBM/SBM")]
 # set up heatscale
 heatscale <- RColorBrewer::brewer.pal(n = 6, name = "YlOrRd")
 
-# add centres
-centres.wide <- data.table(c1$centers, Cluster = clustLabels)
-centres <- reshape2::melt(centres.wide, id.vars = 'Cluster', variable.name = 'Stage', value.name = "Normalised, transformed read counts")
+# add centres to plot
+centres <- reshape2::melt(centres.wide, id.vars = 'label',
+                          measure.vars = c("RM", "PBM", "ePBM.SBM", "SM"),
+                          variable.name = 'Stage',
+                          value.name = "Normalised, transformed read counts")
 centres[, Stage := plyr::mapvalues(Stage, "ePBM.SBM", "ePBM/SBM")]
 
 # number of clusters (for text)
@@ -138,8 +182,9 @@ c <- length(unique(c1$cluster))
 maxClust <- readRDS('output/mfuzz/maxClust.Rds')
 
 # main cluster figure
-f_mfuzzClusters <- ggplot(plotData, aes(x = Stage, y = `Normalised, transformed read counts`,
-                                        colour = Membership, group = id)) +
+f_mfuzzClusters <- ggplot(plotData,
+                          aes(x = Stage, y = `Normalised, transformed read counts`,
+                              colour = Membership, group = id)) +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
         legend.key.size = grid::unit(1, "lines")) +
@@ -147,9 +192,15 @@ f_mfuzzClusters <- ggplot(plotData, aes(x = Stage, y = `Normalised, transformed 
   scale_colour_gradientn(colours = heatscale, limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
   geom_line(alpha = 0.8) +
   geom_line(data = centres, mapping = aes(group = 1), colour = "black", alpha = 0.5) +
-  facet_wrap(~ Cluster, ncol = 2)
+  facet_wrap("label", ncol = 2)
 
 figCount <- incCount(figCount, "f_mfuzzClusters")
+
+# function for inserting cluster number in text
+getClusterName <- function(deln1n2, deln2n4){
+  as.numeric(centres.wide[dn1n2 == deln1n2 & dn2n4 == deln2n4,
+                          sub(".*(\\d+).*", "\\1", Cluster)])
+}
 
 # centroid dis vs. c (for SI)
 sf_mfuzzCentroids <- readRDS('output/mfuzz/centPlot.Rds') +
@@ -206,7 +257,7 @@ setkey(famCat, 'Family')
 setkey(gsea, 'rn')
 gsea[, Category := famCat[gsea][,Category]]
 gsea[, Category := plyr::mapvalues(Category, from = c("TF", "Other"),
-                       to = c("Transcription factors", "Other regulators"))]
+                                   to = c("Transcription factors", "Other regulators"))]
 gsea[, Category := factor(Category, levels = c("Transcription factors", "Other regulators"))]
 
 heatscale <- rev(RColorBrewer::brewer.pal(6, "RdBu"))
@@ -240,7 +291,7 @@ f_reviewInSitu <- ggplot(compare, aes(x = stage, y = id, colour = as.factor(comp
         axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
         panel.grid = element_blank()) +
   xlab(NULL) + ylab(NULL) +
-#  coord_fixed(ratio = 1) +
+  #  coord_fixed(ratio = 1) +
   scale_colour_manual(values = colours, na.value = NA,
                       labels = labels, name = NULL) +
   geom_point(size = 1) +

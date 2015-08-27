@@ -84,7 +84,7 @@ infl <- c(FALSE, diff(diff(pred) > 0) != 0)
 centPlotWithPoints <- centPlot +
   geom_point(data = data.frame(x = points[infl], y = pred[infl]), colour = 'red')
 
-# we will go with 6 clusters
+# we will go with 8 clusters
 c <- 8
 memCutoff <- 0.5
 
@@ -92,6 +92,7 @@ memCutoff <- 0.5
 set.seed(1)
 c1 <- mfuzz(vg.s, c = c, m = m1)
 clusters <- acore(vg.s, c1, min.acore = memCutoff)
+setkey(centres, "cOrder")
 
 # annotate the clusters for output
 

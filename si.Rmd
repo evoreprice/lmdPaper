@@ -24,8 +24,6 @@ bibliography: bib/test.bib
 knitr::opts_chunk$set(fig.path='figures/',
                cache.path='cache/',
                dev=c("png", "cairo_pdf"),
-               fig.width=6.614,
-               fig.height=6.614,
                fig.align = 'center',
                dpi=300,
                fig.show='hold',
