@@ -4,9 +4,6 @@ title: Genome-wide changes in expression during inflorescence architecture devel
 csl: csl/the-plant-journal.csl
 header-includes: \usepackage{graphicx}
 output:
-  word_document:
-    fig_caption: yes
-    reference_docx: csl/wordStyles.docx
   BiocStyle::html_document:
     fig_caption: yes
     force_captions: yes
@@ -14,6 +11,9 @@ output:
     keep_md: yes
     number_sections: yes
     dev: "CairoPDF"
+  word_document:
+    fig_caption: yes
+    reference_docx: csl/wordStyles.docx
   pdf_document:
     fig_caption: yes
     keep_tex: yes
@@ -70,13 +70,9 @@ To investigate gene expression during inflorescence development, LASER microdiss
 
 ![](data/lmdFigure.pdf)
 
-At least `r round(min(st_libStats$"Reads (M)"), 0)` million 50-base reads were produced from each library, yielding between `r round(min(st_libStats$"Reads in genes (M)", na.rm = TRUE), 0)` and `r round(max(st_libStats$"Reads in genes (M)", na.rm = TRUE), 0)` million reads that mapped to genes after excluding reads likely to have originated from rRNA and tRNA. Using strict cutoffs for gene expression, `r length(unique(readRDS("output/expressedGenes/expressedGenesAll.Rds")))` unique genes were detected in at least one of the libraries. As a preliminary quality check, the qualitative expression patterns of a selection of genes were compared with patterns that had previously been reported by *in situ* hybridisation (currently `r I(pasteLabel("Figure ", figCount, "f_reviewInSitu"))`, **move figure to supporting table**).
+At least `r round(min(st_libStats$"Reads (M)"), 0)` million 50-base reads were produced from each library, yielding between `r round(min(st_libStats$"Reads in genes (M)", na.rm = TRUE), 0)` and `r round(max(st_libStats$"Reads in genes (M)", na.rm = TRUE), 0)` million reads that mapped to genes after excluding reads likely to have originated from rRNA and tRNA. Using strict cutoffs for gene expression, `r length(unique(readRDS("output/expressedGenes/expressedGenesAll.Rds")))` unique genes were detected in at least one of the libraries. As a preliminary quality check, the qualitative expression patterns of a selection of genes were compared with patterns that had previously been reported by *in situ* hybridisation (`r I(pasteLabel("Table S", s_tableCount, "st_reviewInSitu"))`).
 
-```{r f_reviewInSitu, fig.height = 8.661 / 4}
-print(f_reviewInSitu)
-```
-
-**Our in situ results could go here or in SI**
+**Our in situ results could go here (or in SI).**
 
 ##  Patterns of gene expression during inflorescence development
 
@@ -86,13 +82,14 @@ To recover common expression patterns in genes detected in the meristem samples,
 print(f_mfuzzClusters)
 ```
 
-Examination of the clustered genes suggested that transcription factors were overrepresented in most clusters (**annotated cluster tables in SI**). To determine whether particular TF families were associated with particular patterns of expression, the enrichment of TF family members in each cluster was calculated using hypergeometric tests. Using the list of transcription factor and other transcriptional regulator families available on the Plant Transcription Factor Database (**reference**), a hypergeometric test was carried out if there were at least two members of one family in a given cluster. After adjustment for multiple comparisons, each cluster had a significant enrichment of at least one family (`r I(pasteLabel("Table ", tableCount, "t_hypergeom"))`). For example, members of the ABI3VP1 family were overrepresented in clusters **x** and **x**, both of which contain genes with higher transformed read counts in the rachis meristem than in samples from later stages of development. The MADS family was overrepresented in clusters **x** and **x**, suggesting that they could be involved in both early and late stages of inflorescence development. **run clustering script again and check these statements!!!***
+Examination of the clustered genes suggested that transcription factors were overrepresented in most clusters (**annotated cluster tables in SI**). To determine whether particular TF families were associated with particular patterns of expression, the enrichment of TF family members in each cluster was calculated using hypergeometric tests. Using the list of transcription factor and other transcriptional regulator families available on the Plant Transcription Factor Database (**reference**), a hypergeometric test was carried out if there were at least two members of one family in a given cluster. After adjustment for multiple comparisons, each cluster had a significant enrichment of at least one family (`r I(pasteLabel("Table ", tableCount, "t_hypergeom"))`). Cluster `r getClusterName('inc', 'small')`, containing genes that are more highly expressed in the PBM–SM samples than in the RM sample, has an enrichment of Homeobox and basic helix-loop-helix TFs whereas the cluster with the complementary pattern (cluster `r getClusterName('dec', 'small')`) is enriched for ABI3VP1 and G2-like TFs. MADS TFs and TRAF genes were overreprsented among genes that have low expression in the SM and PBM but higher expression in the RM (cluster `r getClusterName('small', 'inc')`) and bHLH, SBP and C2C2-GATA TFs were overreprented among genes with the inverse pattern (cluster `r getClusterName('small', 'dec')`)
 
+**Discussion: what might these patterns mean biologically?**
 **Discussion: which clusters have genes that are already candidates for panicle branching?**
 
 ## Dynamic expression of transcription factor families
 
-Because of the enrichment of TF family members in some of the gene expression clusters, geneset enrichment analysis (GSEA) was used to provide an overview of expression of transcription factors and other regulators in the meristem samples (`r I(pasteLabel("Figure ", figCount, "f_gsea"))`). In general, the GSEA results correspond to the hypergeometric tests for transcription factor enrichment in the clusters. For example, SBP transcription factors are enriched in RM and PBM, consistent with their overrepresentation in cluster **x**, which contains genes with higher expression in those meristem types.
+Because of the enrichment of TF family members in some of the gene expression clusters, geneset enrichment analysis (GSEA) was used to provide an overview of expression of transcription factors and other regulators in the meristem samples (`r I(pasteLabel("Figure ", figCount, "f_gsea"))`). In general, the GSEA results correspond to the hypergeometric tests for transcription factor enrichment in the clusters. For example, SBP transcription factors are enriched in RM and PBM, consistent with their overrepresentation in cluster `r getClusterName('small', 'dec')`, which contains genes with higher expression in those meristem types.
 
 ```{r f_gsea, fig.height = 8.661 / 2}
 print(f_gsea)
@@ -136,13 +133,15 @@ Briefly, adaptor trimming was performed with `cutadapt` [@Martin:2011eu] and rea
 
 # Short legends for Supporting Information
 
+**`r I(pasteLabel("Table S", s_tableCount, "st_libStats"))`**: Library and sequencing statistics.
+
+**`r I(pasteLabel("Table S", s_tableCount, "st_reviewInSitu"))`**: Comparison of the dataset with published *in situ* expression profiles.
+
 **`r I(pasteLabel("Figure S", s_figCount, "sf_pca"))`**: Principal components analysis of transformed read counts for each library.
 
 **`r I(pasteLabel("Figure S", s_figCount, "sf_mfuzzCentroids"))`**: Minimum centroid distance for 2–`r maxClust` cluster cores (*c*).
 
 **`r I(pasteLabel("Figure S", s_figCount, "sf_mfuzzPca"))`**: Classical multidimensional scaling (MDS) of Euclidean distances between transformed read counts for clustered genes.
-
-**`r I(pasteLabel("Table S", s_tableCount, "st_libStats"))`**: Library and sequencing statistics.
 
 # Tables
 
@@ -174,5 +173,3 @@ for (x in git){cat(x, "\n")}
 ```
 
 # References (move to before *Tables*)
-
-

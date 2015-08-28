@@ -73,5 +73,3 @@ print(sf_mfuzzPca)
 **`r I(pasteLabel("Figure S", s_figCount, "sf_mfuzzPca"))`**: Classical multidimensional scaling (MDS) of Euclidean distances between transformed read counts for clustered genes. Genes are coloured by the cluster to which they were assigned. The separation of genes by cluster on the MDS plot supports the use of eight clusters.
 
 # References for supporting information
-
-labels <- c("1" = "Detected\nin both", "2" = "Only detected\nby in situ", "3" = "Only detected by\nRNA-sequencing")
