@@ -47,6 +47,38 @@ capwords <- function(s, strict = FALSE) {
 st_libStats <- readRDS('output/quantStats/libStats.Rds')
 s_tableCount <- incCount(s_tableCount, "st_libStats")
 
+#######################
+### COMPARE IN SITU ###
+#######################
+
+compare <- readRDS('output/compare/compare.Rds')
+setkey(compare, "zhangRef")
+
+# convert zhangRef to citekey (these papers were mined from zhang paper manually)
+citekeys <- structure(c("@Ikeda:2007ja", "@Li:2011es", "@Ren:2013jv", "@Suzaki:2004ib", 
+                        "@Chu:2006fw", "@Lee:2012hj", "@Yoshida:2013ff", "@Xue:2008ki", 
+                        "@Ashikari:2005eg", "@Yan:2011hw", "@Li:2013iq", "@Yoshida:2012fg", 
+                        "@Kurakawa:2007go", "@Lee:2012hj", "@Lee:2007cj", "@Gao:2010iz", 
+                        "@IkedaKawakatsu:2012co", "@Horigome:2009gt", "@Lee:2007cj", 
+                        "@Jiao:2010ft", "@Miura:2010it"),
+                      .Names = c("56", "85", "118", 
+                                 "129", "21", "82", "154", "148", "3", "150", "86", "153", "78", 
+                                 "82", "83", "48", "59", "54", "83", "68", "100"))
+compare[, Reference := citekeys[as.character(zhangRef)]]
+
+# SI table
+st_reviewInSitu <- data.table(reshape2::dcast(compare, msuId + Reference ~ stage,
+                                              value.var = 'compare'))
+st_reviewInSitu[, `Gene symbol` :=
+                  oryzr::LocToGeneName(msuId, plotLabels = FALSE)$symbols,
+                by = msuId]
+setnames(st_reviewInSitu, old = "msuId", new = "MSU identifier")
+setcolorder(st_reviewInSitu, neworder =
+              c('Gene symbol', 'MSU identifier', 'RM', 'PBM', 'SBM', 'SM', 'FM',
+                'Reference'))
+setkey(st_reviewInSitu, "Gene symbol")
+s_tableCount <- incCount(s_tableCount, "st_reviewInSitu")
+
 ##################
 ### LMD FIGURE ###
 ##################
@@ -275,62 +307,3 @@ f_gsea <- ggplot(gsea, aes(x = Stage, y = rn, label = padj, fill = `Test\nstatis
   geom_text(data = gsea[showPval == TRUE], size = 2)
 
 figCount <- incCount(figCount, "f_gsea")
-
-#######################
-### COMPARE IN SITU ###
-#######################
-
-compare <- readRDS('output/compare/compare.Rds')
-setkey(compare, "zhangRef")
-
-# convert zhangRef to citekey (these papers were mined from zhang paper manually)
-citekeys <- structure(c("@Ikeda:2007ja", "@Li:2011es", "@Ren:2013jv", "@Suzaki:2004ib", 
-                        "@Chu:2006fw", "@Lee:2012hj", "@Yoshida:2013ff", "@Xue:2008ki", 
-                        "@Ashikari:2005eg", "@Yan:2011hw", "@Li:2013iq", "@Yoshida:2012fg", 
-                        "@Kurakawa:2007go", "@Lee:2012hj", "@Lee:2007cj", "@Gao:2010iz", 
-                        "@IkedaKawakatsu:2012co", "@Horigome:2009gt", "@Lee:2007cj", 
-                        "@Jiao:2010ft", "@Miura:2010it"),
-                      .Names = c("56", "85", "118", 
-                                 "129", "21", "82", "154", "148", "3", "150", "86", "153", "78", 
-                                 "82", "83", "48", "59", "54", "83", "68", "100"))
-compare[, Reference := citekeys[as.character(zhangRef)]]
-
-# SI table
-st_reviewInSitu <- data.table(reshape2::dcast(compare, msuId + Reference ~ stage,
-                                              value.var = 'compare'))
-st_reviewInSitu[, `Gene symbol` :=
-                  oryzr::LocToGeneName(msuId, plotLabels = FALSE)$symbols,
-                by = msuId]
-setnames(st_reviewInSitu, old = "msuId", new = "MSU identifier")
-setcolorder(st_reviewInSitu, neworder =
-              c('Gene symbol', 'MSU identifier', 'RM', 'PBM', 'SBM', 'SM', 'FM',
-                'Reference'))
-setkey(st_reviewInSitu, "Gene symbol")
-s_tableCount <- incCount(s_tableCount, "st_reviewInSitu")
-
-# test plot
-colours <- RColorBrewer::brewer.pal(3, "Set1")[c(2,1,3)]
-labels <- c("1" = "Detected\nin both", "2" = "Only detected\nby in situ", "3" = "Only detected by\nRNA-sequencing")
-f_reviewInSitu <- ggplot(compare, aes(x = stage, y = id, colour = as.factor(compare))) +
-  theme_minimal(base_size = 8, base_family = "Helvetica") +
-  theme(axis.text.y = element_blank(),
-        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
-        panel.grid = element_blank()) +
-  xlab(NULL) + ylab(NULL) +
-  #  coord_fixed(ratio = 1) +
-  scale_colour_manual(values = colours, na.value = NA,
-                      labels = labels, name = NULL) +
-  geom_point(size = 1) +
-  scale_x_discrete(labels = c("", "RM", "PBM", "SBM", "SM", "FM", ""),
-                   limits = c("id", "RM", "PBM", "SBM", "SM", "FM", "zhangRef"),
-                   expand = c(2,0)) +
-  # map one label to 1.5 and hjust to the left
-  geom_text(mapping = aes(x = 1.5, y = id, label = plotLabel),
-            hjust = 1, colour = "black", size = 2, fontface = "italic",
-            family = "Helvetica") +
-  # map the other to max + 0.5 and hjust to the right
-  geom_text(mapping = aes(x = 6.5, y = id, label = zhangRef),
-            hjust = 0, colour = "black", size = 2, fontface = "plain",
-            family = "Helvetica") 
-f_reviewInSitu
-figCount <- incCount(figCount, "f_reviewInSitu")

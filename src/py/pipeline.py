@@ -531,8 +531,8 @@ def f_gsea(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # in situ comparison plot
 #
-@merge(compare_inSitus, "ruffus/figure.f_reviewInSitu")
-def f_reviewInSitu(inputFiles, outputFiles):
+@merge(compare_inSitus, "ruffus/table.st_reviewInSitu")
+def st_reviewInSitu(inputFiles, outputFiles):
     touch(outputFiles)
 
 
