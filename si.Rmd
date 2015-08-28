@@ -16,7 +16,7 @@ output:
     fig_caption: yes
     keep_tex: yes
     number_sections: yes
-bibliography: bib/test.bib
+bibliography: bib/papersLib.bib
 ---
 
 ```{r Setup, include=FALSE, results="hide", warning=FALSE}
@@ -63,3 +63,15 @@ print(sf_mfuzzPca)
 ```
 
 **`r I(pasteLabel("Figure S", s_figCount, "sf_mfuzzPca"))`**: Classical multidimensional scaling (MDS) of Euclidean distances between transformed read counts for clustered genes. Genes are coloured by the cluster to which they were assigned. The separation of genes by cluster on the MDS plot supports the use of eight clusters.
+
+# References for SI (citations will be included in *in situ* table)
+
+`r pander::pander(list("85: @Li:2011es", "118: @Ren:2013jv", "129: @Suzaki:2004ib", 
+    "21: @Chu:2006fw", "82: @Lee:2012hj", "154: @Yoshida:2013ff", "148: @Xue:2008ki", 
+    "3: @Ashikari:2005eg", "150: @Yan:2011hw", "86: @Li:2013iq", "153: @Yoshida:2012fg", 
+    "78: @Kurakawa:2007go", "82: @Lee:2012hj", "83: @Lee:2007cj", "48: @Gao:2010iz", 
+    "59: @IkedaKawakatsu:2012co", "54: @Horigome:2009gt", "83: @Lee:2007cj", 
+    "68: @Jiao:2010ft", "100: @Miura:2010it"))`
+
+
+

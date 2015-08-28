@@ -34,6 +34,12 @@ FM <- c("FM")
 tissues <- unique(c(RM, PBM, SBM, SM, FM))
 expZhangGenes <- zhangGenes[geneExp %in% tissues]
 
+############
+### TODO ###
+############
+
+# add genes not in zhang review here
+
 # make a truth table for the zhang genes
 expZhangGenes[,RM := geneExp %in% RM]
 expZhangGenes[,PBM := geneExp %in% PBM]
