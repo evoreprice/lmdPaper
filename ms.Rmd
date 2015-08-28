@@ -4,6 +4,9 @@ title: Genome-wide changes in expression during inflorescence architecture devel
 csl: csl/the-plant-journal.csl
 header-includes: \usepackage{graphicx}
 output:
+  word_document:
+    fig_caption: yes
+    reference_docx: csl/wordStyles.docx
   BiocStyle::html_document:
     fig_caption: yes
     force_captions: yes
@@ -11,9 +14,6 @@ output:
     keep_md: yes
     number_sections: yes
     dev: "CairoPDF"
-  word_document:
-    fig_caption: yes
-    reference_docx: csl/wordStyles.docx
   pdf_document:
     fig_caption: yes
     keep_tex: yes

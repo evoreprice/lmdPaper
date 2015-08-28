@@ -281,6 +281,32 @@ figCount <- incCount(figCount, "f_gsea")
 #######################
 
 compare <- readRDS('output/compare/compare.Rds')
+setkey(compare, "zhangRef")
+
+# convert zhangRef to citekey (these papers were mined from zhang paper manually)
+citekeys <- structure(c("@Ikeda:2007ja", "@Li:2011es", "@Ren:2013jv", "@Suzaki:2004ib", 
+                        "@Chu:2006fw", "@Lee:2012hj", "@Yoshida:2013ff", "@Xue:2008ki", 
+                        "@Ashikari:2005eg", "@Yan:2011hw", "@Li:2013iq", "@Yoshida:2012fg", 
+                        "@Kurakawa:2007go", "@Lee:2012hj", "@Lee:2007cj", "@Gao:2010iz", 
+                        "@IkedaKawakatsu:2012co", "@Horigome:2009gt", "@Lee:2007cj", 
+                        "@Jiao:2010ft", "@Miura:2010it"),
+                      .Names = c("56", "85", "118", 
+                                 "129", "21", "82", "154", "148", "3", "150", "86", "153", "78", 
+                                 "82", "83", "48", "59", "54", "83", "68", "100"))
+compare[, Reference := citekeys[as.character(zhangRef)]]
+
+# SI table
+st_reviewInSitu <- data.table(reshape2::dcast(compare, msuId + Reference ~ stage,
+                                              value.var = 'compare'))
+st_reviewInSitu[, `Gene symbol` :=
+                  oryzr::LocToGeneName(msuId, plotLabels = FALSE)$symbols,
+                by = msuId]
+setnames(st_reviewInSitu, old = "msuId", new = "MSU identifier")
+setcolorder(st_reviewInSitu, neworder =
+              c('Gene symbol', 'MSU identifier', 'RM', 'PBM', 'SBM', 'SM', 'FM',
+                'Reference'))
+setkey(st_reviewInSitu, "Gene symbol")
+s_tableCount <- incCount(s_tableCount, "st_reviewInSitu")
 
 # test plot
 colours <- RColorBrewer::brewer.pal(3, "Set1")[c(2,1,3)]

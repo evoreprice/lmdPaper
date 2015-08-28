@@ -37,13 +37,21 @@ source('src/R/figures.R')
 
 ```
 
-
-**`r I(pasteLabel("Table S", s_tableCount, "st_libStats"))`**: Library and sequencing statistics.
-
-``` {r st_libStats, results = "markup"}
-knitr::kable(st_libStats, caption = paste0(
+``` {r st_libStats, results = "asis"}
+pander::set.alignment('left', row.names = 'right')
+pander::set.caption(paste0(
   I(pasteLabel("**Table S", s_tableCount, "st_libStats")),
-    "**: Library and sequencing statistics"))
+  "**: Library and sequencing statistics."))
+pander::pandoc.table(st_libStats, split.tables = Inf, emphasize.rownames = FALSE, missing = "")
+```
+
+```{r st_reviewInSitu, results = "asis"}
+pander::set.alignment('left', row.names = 'right')
+pander::set.caption(paste0(
+  I(pasteLabel("**Table S", s_tableCount, "st_reviewInSitu")),
+  "**: Comparison of the dataset with published *in situ* expression profiles. For each tissue, a '1' indicates that the gene was detected by both methods, a '2' indicates that the gene was detected by *in situ* hybridisation but not by RNA sequencing and a '3' indicates that the gene was detected by RNA sequencing but not reported as expressed by *in situ*. The last category is not informative because *in situ* analysis for the stage in question may have been omitted from the publication. A blank cell indicates that the gene was not detected by either method."))
+pander::pandoc.table(st_reviewInSitu, split.tables = Inf, emphasize.rownames = FALSE,
+                     emphasize.cols = c(1,2), missing = "")
 ```
 
 ```{r sf_pca}
@@ -64,14 +72,6 @@ print(sf_mfuzzPca)
 
 **`r I(pasteLabel("Figure S", s_figCount, "sf_mfuzzPca"))`**: Classical multidimensional scaling (MDS) of Euclidean distances between transformed read counts for clustered genes. Genes are coloured by the cluster to which they were assigned. The separation of genes by cluster on the MDS plot supports the use of eight clusters.
 
-# References for SI (citations will be included in *in situ* table)
+# References for supporting information
 
-`r pander::pander(list("85: @Li:2011es", "118: @Ren:2013jv", "129: @Suzaki:2004ib", 
-    "21: @Chu:2006fw", "82: @Lee:2012hj", "154: @Yoshida:2013ff", "148: @Xue:2008ki", 
-    "3: @Ashikari:2005eg", "150: @Yan:2011hw", "86: @Li:2013iq", "153: @Yoshida:2012fg", 
-    "78: @Kurakawa:2007go", "82: @Lee:2012hj", "83: @Lee:2007cj", "48: @Gao:2010iz", 
-    "59: @IkedaKawakatsu:2012co", "54: @Horigome:2009gt", "83: @Lee:2007cj", 
-    "68: @Jiao:2010ft", "100: @Miura:2010it"))`
-
-
-
+labels <- c("1" = "Detected\nin both", "2" = "Only detected\nby in situ", "3" = "Only detected by\nRNA-sequencing")
