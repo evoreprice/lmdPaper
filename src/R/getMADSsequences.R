@@ -22,8 +22,8 @@ madsPeptides[organism_name == "Osativa", synonyms := oryzr::LocToGeneName(gene_n
 # set up names for un-named genes and add "At" or "Os" for ambiguous genes
 madsPeptides[, name := synonyms ]
 madsPeptides[name == '', name := NA]
-madsPeptides[!is.na(name) & organism_name == "Osativa", name := paste("Os", name)]
-madsPeptides[!is.na(name) & organism_name == "Athaliana", name := paste("At", name)]
+madsPeptides[!is.na(name) & organism_name == "Osativa", name := paste0("Os_", name)]
+madsPeptides[!is.na(name) & organism_name == "Athaliana", name := paste0("At_", name)]
 madsPeptides[is.na(name), name := gene_name1]
 
 # make a list of lines for writing
