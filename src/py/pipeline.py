@@ -208,15 +208,15 @@ def download_tfdb(outputFiles):
     touch(outputFiles)
 
 #---------------------------------------------------------------
-# download Peking Uni TFDB
+# download MADS peptides
 #
-@originate(['ruffus/puTfdb.data'])
+@originate(['ruffus/madsPeptides.data'])
 
-def download_pu_tfdb(outputFiles):
-    jobScript = 'src/R/tomatoTFDB.R'
+def get_mads_peptides(outputFiles):
+    jobScript = 'src/R/getMADSsequences.R'
     ntasks = '1'
     cpus_per_task = '1'
-    job_name = 'puTFDB'
+    job_name = 'madsPept'
     jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
     # update ruffus flag
     print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")

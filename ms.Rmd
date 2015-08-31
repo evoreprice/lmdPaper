@@ -127,6 +127,10 @@ Analysis of the sequenced libraries was carried out with custom `bash` and `R` s
 
 Briefly, adaptor trimming was performed with `cutadapt` [@Martin:2011eu] and reads were mapped with the MSUv7 genome and annotation [@Kawahara:2013gh; @Ouyang:2007il] downloaded from Phytozome 10.3 [@Goodstein:2012ho] using `STAR` [@Dobin:2012fg] in 2-pass mode . The `'quantMode'` argument of `STAR` was used for read counting. rRNA and tRNA contamination was estimated using `htseq-count` [@Anders:2014gf] to count the number of reads that mapped to regions annotated as tRNA or rRNA on the Rap-DB (**ref**) or to regions where reads simulated with `wgsim` (https://github.com/lh3/wgsim) from rRNA sequences in the TIGR Plant Repeats Database [@Ouyang:2004ia] also mapped. Differential expression analysis to calculate Log~2~ fold change (L~2~FC) values and transformed read counts was performed with the `DESeq2` package [@Love:2014do]. To determine a strict cutoff for unexpressed genes, expression values in transcripts per million were calculathged for each gene [@Li:2010cl; @Wagner:2012jf]. These values were compared to pseudo-expression values calculated from intergenic regions of the genome, using intervals of a similar size distrubution to those used for calculating the 'genic' expression values. For each library, the cutoff was placed at the 95^th^ percentile of the distribution of intergenic expression values. Transformed counts and L~2~FC values from expressed genes were used for soft clustering with the `Mfuzz` package [@Kumar:2007uw] and geneset enrichment analysis with the `gage` package [@Luo:2009kp] respectively. All plots were produced with the `ggplot2` package [@Wickham:2009tn].
 
+### Comparative analysis of MADS family
+
+The primary sequences of *Arabidopsis thaliana*, *Solanum lycopersicum* and *Oryza sativa* MADS proteins were downloaded by querying Phytozome 10.3 [@Goodstein:2012ho] for the PANTHER family PTHR11945 ('MADS BOX PROTEIN') via the biomaRt interface (**refs: PANTHER/BIOMART**).
+
 # Accession Numbers
 
 # Acknowledgements

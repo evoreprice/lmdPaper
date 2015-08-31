@@ -2,41 +2,6 @@
 
 library(data.table)
 
-# load TFDBs
-
-osTFDBfile <- "data/tfdb/os.Rds"
-if (!file.exists(osTFDBfile)) {
-  cat("osTFDBfile file not found, exiting\n", file = stderr())
-  quit(save = "no", status = 1)
-}
-
-atTFDBfile <- "data/tfdb/at.Rds"
-if (!file.exists(atTFDBfile)) {
-  cat("atTFDBfile file not found, exiting\n", file = stderr())
-  quit(save = "no", status = 1)
-}
-
-slTFDBfile <- "data/tfdb/puTfdbSl.Rds"
-if (!file.exists(slTFDBfile)) {
-  cat("slTFDBfile file not found, exiting\n", file = stderr())
-  quit(save = "no", status = 1)
-}
-
-osTfdb <- readRDS(osTFDBfile)
-atTfdb <- readRDS(atTFDBfile)
-slTfdb <- data.table(readRDS(slTFDBfile))
-slTfdb[,c("plantTFDB_id", "data_source") := NULL]
-setnames(slTfdb, names(osTfdb))
-
-# strip transcript numbers from at and sl
-atTfdb[,Protein.ID := sub("\\.\\d+$", "", Protein.ID)]
-slTfdb[,Protein.ID := sub("\\.\\d+$", "", Protein.ID)]
-
-# get MADS identifiers
-osMads <- osTfdb[Family == "MADS", Protein.ID]
-atMads <- atTfdb[Family == "MADS", Protein.ID]
-slMads <- slTfdb[Family == "MIKC", Protein.ID]
-
 # set up biomaRt for phytozome
 phytozome <- biomaRt::useMart(biomart = 'phytozome_mart', dataset = "phytozome")
 
@@ -63,8 +28,21 @@ madsPeptides[is.na(name), name := gene_name1]
 
 # make a list of lines for writing
 madsLines <- c(apply(madsPeptides, 1, function(x)
-c(paste0(">", x["name"]), x["peptide_sequence"], "")))
+  c(paste0(">", x["name"]), x["peptide_sequence"], "")))
 
+# MAKE OUTPUT FOLDER
+outDir <- "output/madsComp/clustal"
+if (!dir.exists(outDir)) {
+  dir.create(outDir)
+}
 
+writeLines(madsLines, paste0(outDir, "/madsPeptides.fasta"))
 
-writeLines(madsLines, "output/test.fasta")
+# SAVE LOGS
+sInf <- c(paste("git branch:",system("git rev-parse --abbrev-ref HEAD", intern = TRUE)),
+          paste("git hash:", system("git rev-parse HEAD", intern = TRUE)),
+          capture.output(sessionInfo()))
+logLocation <- paste0(outDir, "/SessionInfo.txt")
+writeLines(sInf, logLocation)
+
+quit(save = "no", status = 0)
