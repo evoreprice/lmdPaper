@@ -19,6 +19,10 @@ madsPeptides <- madsPeptides[transcript_name == primaryTx]
 # add oryzr gene symbols to synonyms
 madsPeptides[organism_name == "Osativa", synonyms := oryzr::LocToGeneName(gene_name1)$symbols]
 
+madsPeptides[synonyms == 'MADS50']
+madsPeptides[synonyms == 'MADS61']
+madsPeptides[synonyms == 'MADS59']
+
 # set up names for un-named genes and add "At" or "Os" for ambiguous genes
 madsPeptides[, name := synonyms ]
 madsPeptides[name == '', name := NA]
