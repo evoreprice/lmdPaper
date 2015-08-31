@@ -37,6 +37,7 @@ if (!dir.exists(outDir)) {
 }
 
 writeLines(madsLines, paste0(outDir, "/madsPeptides.fasta"))
+saveRDS(madsPeptides, paste0(outDir, "/madsPeptides.Rds"))
 
 # SAVE LOGS
 sInf <- c(paste("git branch:",system("git rev-parse --abbrev-ref HEAD", intern = TRUE)),
