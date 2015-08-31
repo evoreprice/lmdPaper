@@ -499,6 +499,20 @@ def compare_inSitus(inputFiles, outputFiles):
     touch(outputFiles)
 
 #---------------------------------------------------------------
+# clustal-align MADS peptides
+#
+@transform(get_mads_peptides, suffix(".data"), ".alignment")
+def align_mads_peptides(inputFiles, outputFiles):
+    jobScript = 'src/sh/alignMadsPeptides.R'
+    ntasks = '1'
+    cpus_per_task = '1'
+    job_name = 'clustal'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)
+
+#---------------------------------------------------------------
 # FIGURES AND TABLES
 #---------------------------------------------------------------
 
