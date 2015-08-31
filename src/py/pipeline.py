@@ -503,7 +503,7 @@ def compare_inSitus(inputFiles, outputFiles):
 #
 @transform(get_mads_peptides, suffix(".data"), ".alignment")
 def align_mads_peptides(inputFiles, outputFiles):
-    jobScript = 'src/sh/alignMadsPeptides.R'
+    jobScript = 'src/sh/alignMadsPeptides.sh'
     ntasks = '1'
     cpus_per_task = '1'
     job_name = 'clustal'
