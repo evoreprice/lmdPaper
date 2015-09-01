@@ -566,8 +566,6 @@ def st_reviewInSitu(inputFiles, outputFiles):
 
 
 
-
-
 # options for visualising
 pipeline_printout()
 pipeline_printout_graph("ruffus/flowchart." + slurm_jobid + ".pdf", "pdf")
