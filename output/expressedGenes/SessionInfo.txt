@@ -1,5 +1,5 @@
 git branch: master
-git hash: 0f7a48429670a5a7c62e7080d0b0042aa323797d
+git hash: c93d75de96868352e161542acd41f358952e5c98
 R version 3.2.2 (2015-08-14)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 14.04.3 LTS
@@ -16,11 +16,11 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  base     
 
 other attached packages:
-[1] dplyr_0.4.2        ggplot2_1.0.1.9002
+[1] data.table_1.9.4   dplyr_0.4.2        ggplot2_1.0.1.9002
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.0       assertthat_0.1    grid_3.2.2        plyr_1.8.3       
- [5] R6_2.1.1          gtable_0.1.2      DBI_0.3.1         magrittr_1.5     
- [9] scales_0.2.5.9003 stringi_0.5-5     lazyeval_0.1.10   reshape2_1.4.1   
-[13] tools_3.2.2       stringr_1.0.0     munsell_0.4.2     parallel_3.2.2   
-[17] colorspace_1.2-6  methods_3.2.2    
+ [1] Rcpp_0.12.0      assertthat_0.1   chron_2.3-47     grid_3.2.2      
+ [5] plyr_1.8.3       R6_2.1.1         gtable_0.1.2     DBI_0.3.1       
+ [9] magrittr_1.5     scales_0.3.0     stringi_0.5-5    lazyeval_0.1.10 
+[13] reshape2_1.4.1   tools_3.2.2      stringr_1.0.0    munsell_0.4.2   
+[17] parallel_3.2.2   colorspace_1.2-6 methods_3.2.2   

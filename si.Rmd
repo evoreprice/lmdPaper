@@ -60,6 +60,12 @@ print(sf_pca)
 
 **`r I(pasteLabel("Figure S", s_figCount, "sf_pca"))`**: Principal components analysis of transformed read counts for each library. The two libraries made from degraded RNA did not cluster with other libraries (see `r I(pasteLabel("Table S", s_tableCount, "st_libStats"))`), suggesting that the use of degraded RNA had an effect on the quantification of read counts. For this reason these two libraries were not included in subsequent analyses.
 
+```{r sf_isGenesTpm, fig.height = 14}
+print(sf_isGenesTpm)
+```
+
+**`r I(pasteLabel("Figure S", s_figCount, "sf_isGenesTpm"))`**: Expression patterns of genes compared to *in situ* results.
+
 ```{r sf_mfuzzCentroids}
 print(sf_mfuzzCentroids)
 ```

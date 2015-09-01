@@ -1,5 +1,5 @@
 git branch: master
-git hash: 0a95bc5c22d7f3d37977b3c8cee747c125537910
+git hash: c93d75de96868352e161542acd41f358952e5c98
 R version 3.2.2 (2015-08-14)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 14.04.3 LTS
@@ -19,8 +19,8 @@ attached base packages:
 other attached packages:
  [1] data.table_1.9.4          DESeq2_1.8.1             
  [3] RcppArmadillo_0.5.400.2.0 Rcpp_0.12.0              
- [5] GenomicRanges_1.20.5      GenomeInfoDb_1.4.2       
- [7] IRanges_2.2.7             S4Vectors_0.6.3          
+ [5] GenomicRanges_1.20.6      GenomeInfoDb_1.4.2       
+ [7] IRanges_2.2.7             S4Vectors_0.6.4          
  [9] BiocGenerics_0.14.0       gage_2.18.0              
 
 loaded via a namespace (and not attached):
@@ -30,14 +30,14 @@ loaded via a namespace (and not attached):
 [10] XML_3.98-1.3         foreign_0.8-66       DBI_0.3.1           
 [13] BiocParallel_1.2.20  RColorBrewer_1.1-2   lambda.r_1.1.7      
 [16] plyr_1.8.3           stringr_1.0.0        zlibbioc_1.14.0     
-[19] Biostrings_2.36.3    munsell_0.4.2        gtable_0.1.2        
+[19] Biostrings_2.36.4    munsell_0.4.2        gtable_0.1.2        
 [22] futile.logger_1.4.1  latticeExtra_0.6-26  Biobase_2.28.0      
 [25] geneplotter_1.46.0   AnnotationDbi_1.30.1 proto_0.3-10        
-[28] acepack_1.3-3.3      xtable_1.7-4         scales_0.2.5.9003   
+[28] acepack_1.3-3.3      xtable_1.7-4         scales_0.3.0        
 [31] Hmisc_3.16-0         graph_1.46.0         annotate_1.46.1     
 [34] XVector_0.8.0        gridExtra_2.0.0      ggplot2_1.0.1.9002  
 [37] png_0.1-7            stringi_0.5-5        grid_3.2.2          
 [40] tools_3.2.2          magrittr_1.5         RSQLite_1.0.0       
 [43] Formula_1.2-1        cluster_2.0.3        futile.options_1.0.0
 [46] httr_1.0.0           R6_2.1.1             rpart_4.1-10        
-[49] nnet_7.3-10         
+[49] nnet_7.3-11         

@@ -86,8 +86,46 @@ setkey(tpm, "MSU identifier")
 
 genes <- st_reviewInSitu[,.(`MSU identifier`, `Gene symbol`)]
 setkey(genes, "MSU identifier")
+genes <- unique(genes)
+genTpm <- tpm[genes]
+genTpm.long <- reshape2::melt(genTpm, id.vars = c('MSU identifier', 'Gene symbol'),
+                                variable.name = "lib", value.name = "Expression (TPM)")
 
-plotData <- tpm[genes]
+# expression calls for these genes by library
+expGenTT <- data.table(readRDS('output/expressedGenes/expGenTT.Rds'), key = "id")
+expGenTT.wide <- expGenTT[genTpm[,`MSU identifier`]]
+expGenTT.long <- reshape2::melt(expGenTT.wide, id.vars = "id",
+                                variable.name = "lib", value.name = "expressed")
+
+setkey(genTpm.long, "MSU identifier", "lib")
+setkey(expGenTT.long, "id", "lib")
+
+plotData <- expGenTT.long[genTpm.long]
+
+# add stage names from deseq2
+colData <- data.table(as.data.frame(GenomicRanges::colData(
+  readRDS('output/DESeq2/ddsLrt.Rds'))), keep.rownames = TRUE)
+plotData[, stage := colData[rn == as.character(lib), stage]]
+
+# add replicate number to colour points
+plotData[, replicate := sub(".*(\\d+)", "\\1", lib)]
+
+# format gene name for the plot
+plotData[, name:= oryzr::LocToGeneName(id)$symbols, by = id]
+plotData[!is.na(name), label := paste(name, "·", id)]
+plotData[is.na(name), label := id]
+
+# draw it
+sf_isGenesTpm <- ggplot(plotData, aes(x = stage, y = `Expression (TPM)`, colour = replicate, shape = expressed)) +
+  theme_minimal(base_size = 8, base_family = "Helvetica") +
+  theme(strip.text = element_text(face = "italic")) +
+  xlab(NULL) +
+  scale_color_brewer(palette = "Set1") + 
+  stat_smooth(aes(group = label), method = "loess", se = FALSE, colour = "grey") + 
+  geom_point() +
+  facet_wrap(~ label, scales = "free_y", ncol = 3)
+#sf_isGenesTpm
+figCount <- incCount(s_figCount, "sf_isGenesTpm")
 
 ##################
 ### LMD FIGURE ###
