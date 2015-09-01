@@ -79,6 +79,16 @@ setcolorder(st_reviewInSitu, neworder =
 setkey(st_reviewInSitu, "Gene symbol")
 s_tableCount <- incCount(s_tableCount, "st_reviewInSitu")
 
+# tpm plots of some/all of these genes
+tpm <- data.table(readRDS('output/tpm/tpm.Rds'), keep.rownames = TRUE)
+setnames(tpm, 'rn', "MSU identifier")
+setkey(tpm, "MSU identifier")
+
+genes <- st_reviewInSitu[,.(`MSU identifier`, `Gene symbol`)]
+setkey(genes, "MSU identifier")
+
+plotData <- tpm[genes]
+
 ##################
 ### LMD FIGURE ###
 ##################

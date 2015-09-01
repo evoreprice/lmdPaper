@@ -2,6 +2,7 @@
 
 library(ggplot2)
 library(dplyr)
+library(data.table)
 
 ### SETUP ----------------------------------------------------------------------
 
@@ -96,6 +97,12 @@ expressedGenesByLibrary <- lapply(levels(q95.plot$lib), function(libName)
   subset(dnaTpm.plot, type == 'Genic' & lib == libName & tpm > cutoffs[libName])$id)
 names(expressedGenesByLibrary) <- levels(q95.plot$lib)
 
+# expressed genes truth table
+tt <- data.table(dnaTpm.plot)[type == 'Genic']
+tt[, expressed := tpm > cutoffs[lib], by = id]
+expGenTT <- reshape2::dcast(tt, id ~ lib, value.var = "expressed")
+
+# list of expressed genes
 expressedGenes <- unique(do.call(c, expressedGenesByLibrary))
 
 # what are the real cutoffs in the tpm calculations performed *without* the shuffled GTF?
@@ -113,6 +120,7 @@ saveRDS(p, paste0(outDir, "/realAndShuffledTpmDistributions.ggplot2.Rds"))
 saveRDS(expressedGenesByLibrary, paste0(outDir, "/expressedGenesByLibrary.Rds"))
 saveRDS(expressedGenes, paste0(outDir, "/expressedGenesAll.Rds"))
 saveRDS(realTpmCutoffs, paste0(outDir, "/tpmCutoffs.Rds"))
+saveRDS(expGenTT, paste0(outDir, "/expGenTT.Rds"))
 
 # SAVE LOGS
 sInf <- c(paste("git branch:",system("git rev-parse --abbrev-ref HEAD", intern = TRUE)),

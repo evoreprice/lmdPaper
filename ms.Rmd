@@ -4,6 +4,9 @@ title: Genome-wide changes in expression during inflorescence architecture devel
 csl: csl/the-plant-journal.csl
 header-includes: \usepackage{graphicx}
 output:
+  word_document:
+    fig_caption: yes
+    reference_docx: csl/wordStyles.docx
   BiocStyle::html_document:
     fig_caption: yes
     force_captions: yes
@@ -11,9 +14,6 @@ output:
     keep_md: yes
     number_sections: yes
     dev: "CairoPDF"
-  word_document:
-    fig_caption: yes
-    reference_docx: csl/wordStyles.docx
   pdf_document:
     fig_caption: yes
     keep_tex: yes
@@ -41,9 +41,12 @@ source('src/R/figures.R')
 
 ```
 
-Authors:
+Thomas W.R. Harrop^§^[^1], Israr Ud Din^¶^[^1], Veronica Gregis^¶^, Michela Osnato^¶^, Stefan Jouannic^§^, Hélène Adam^§^ and Martin Kater^¶^
 
-Addresses:
+[^1]: These authors contributed equally to this work.
+
+| ^§^ Institut de Recherche pour le Développement (IRD), 911 Avenue Agropolis, 34394 Montpellier, France.
+| ^¶^ Università degli Studi di Milano, Via Celoria 26, 20133 Milano, Italy.
 
 ## Running title
 
@@ -51,7 +54,7 @@ Addresses:
 
 ## SRA details for libaries
 
-Word count
+## Word count
 
 # Summary
 
@@ -84,8 +87,8 @@ print(f_mfuzzClusters)
 
 Examination of the clustered genes suggested that transcription factors were overrepresented in most clusters (**annotated cluster tables in SI**). To determine whether particular TF families were associated with particular patterns of expression, the enrichment of TF family members in each cluster was calculated using hypergeometric tests. Using the list of transcription factor and other transcriptional regulator families available on the Plant Transcription Factor Database (**reference for http://plntfdb.bio.uni-potsdam.de/v3.0/**), a hypergeometric test was carried out if there were at least two members of one family in a given cluster. After adjustment for multiple comparisons, each cluster had a significant enrichment of at least one family (`r I(pasteLabel("Table ", tableCount, "t_hypergeom"))`). Cluster `r getClusterName('inc', 'small')`, containing genes that are more highly expressed in the PBM–SM samples than in the RM sample, has an enrichment of Homeobox and basic helix-loop-helix TFs whereas the cluster with the complementary pattern (cluster `r getClusterName('dec', 'small')`) is enriched for ABI3VP1 and G2-like TFs. MADS TFs and TRAF genes were overreprsented among genes that have low expression in the SM and PBM but higher expression in the RM (cluster `r getClusterName('small', 'inc')`) and bHLH, SBP and C2C2-GATA TFs were overreprented among genes with the inverse pattern (cluster `r getClusterName('small', 'dec')`)
 
-**Discussion: what might these patterns mean biologically?**
-**Discussion: which clusters have genes that are already candidates for panicle branching?**
+|**Discussion: what might these patterns mean biologically?**
+|**Discussion: which clusters have genes that are already candidates for panicle branching?**
 
 ## Dynamic expression of transcription factor families
 
@@ -129,7 +132,7 @@ Briefly, adaptor trimming was performed with `cutadapt` [@Martin:2011eu] and rea
 
 ### Comparative analysis of MADS family
 
-The primary sequences of *Arabidopsis thaliana*, *Solanum lycopersicum* and *Oryza sativa* MADS proteins were downloaded by querying Phytozome 10.3 [@Goodstein:2012ho] for the PANTHER family PTHR11945 ('MADS BOX PROTEIN') via the biomaRt interface (**refs: PANTHER/BIOMART**).
+The primary sequences of *Arabidopsis thaliana*, *Solanum lycopersicum* and *Oryza sativa* MADS proteins were downloaded by querying Phytozome 10.3 [@Goodstein:2012ho] for the PANTHER family PTHR11945 ('MADS BOX PROTEIN') via the `biomaRt` interface (**refs: PANTHER/BIOMART**).
 
 # Accession Numbers
 
