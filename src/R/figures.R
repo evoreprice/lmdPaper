@@ -68,29 +68,6 @@ citekeys <- structure(c("@Ikeda:2007ja", "@Li:2011es", "@Ren:2013jv", "@Suzaki:2
                                  "78", "82", "83", "48", "59", "54", "83", "68", "100", "55", "73", 
                                  "75", "84", "108", "131", "165", "991", "992", "993", "994", "995", 
                                  "996", "997", "998", "999"))
-
-
-# which citekeys do I need to add?
-unique(compare[!zhangRef %in% names(citekeys), zhangRef])
-
-citekeys["55"] <- "**zhang55**"
-citekeys["73"] <- "**zhang73**"
-citekeys["75"] <- "@Komatsu:2003iu"
-citekeys["84"] <- "@Li:2010ks"
-citekeys["108"] <- "**zhang108**"
-citekeys["131"] <- "**zhang131**"
-citekeys["165"] <- "@Zhu:2010je"
-citekeys["991"] <- "**m.Lopez-Dee1999**"
-citekeys["992"] <- "**m.Yadav2007**"
-citekeys["993"] <- "**m.Nagasawa2003**"
-citekeys["994"] <- "**m.Yun2013**"
-citekeys["995"] <- "**m.Duan2012**"
-citekeys["996"] <- "**m.Ohmori2009**"
-citekeys["997"] <- "**m.Dreni2007**"
-citekeys["998"] <- "**m.Cui2010**"
-citekeys["999"] <- "**m.Fornara2004**"
-
-
 compare[, Reference := citekeys[as.character(zhangRef)]]
 
 # SI table
