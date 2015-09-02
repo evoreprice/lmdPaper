@@ -71,12 +71,12 @@ resultsLong$padj <- p.adjust(resultsLong$`p-value`, method = "BH")
 padj <- reshape2::dcast(resultsLong, Family ~ Cluster, value.var = 'padj')
 rownames(padj) <- padj$Family
 padj$Family <- NULL
-colnames(padj) <- paste0("C~", sub(".*(\\d+).*", "\\1", colnames(padj)),"~\n*p*~adj~")
+colnames(padj) <- paste0("C~", sub(".*(\\d+).*", "\\1", colnames(padj)),"~ *p*~adj~")
 
 Number <- reshape2::dcast(resultsLong, Family ~ Cluster, value.var = 'Number')
 rownames(Number) <- Number$Family
 Number$Family <- NULL
-colnames(Number) <- paste0("C~", sub(".*(\\d+).*", "\\1", colnames(Number)),"~\n*n*")
+colnames(Number) <- paste0("C~", sub(".*(\\d+).*", "\\1", colnames(Number)),"~ *n*")
 
 # remove columns that don't have p-values
 keep <- apply(padj, 1, function(x) !all(is.na(x)))

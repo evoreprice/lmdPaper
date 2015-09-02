@@ -328,7 +328,7 @@ pFix <- function(x) {
 }
 # just use a for loop, should use *apply() but too complicated
 for (x in colnames(t_hypergeom)) {
-  if (grepl("^\\*p", x)) {
+  if (grepl("adj", x)) {
     t_hypergeom[,x] <- pFix(t_hypergeom[,x])
   }
 }
