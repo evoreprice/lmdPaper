@@ -10,12 +10,13 @@ output:
     keep_md: yes
     number_sections: yes
     dev: "CairoPDF"
-  word_document:
-    fig_caption: yes
   pdf_document:
     fig_caption: yes
     keep_tex: yes
     number_sections: yes
+    dev: "CairoPDF"
+  word_document:
+    fig_caption: yes
 bibliography: bib/papersLib.bib
 ---
 
@@ -27,30 +28,34 @@ knitr::opts_chunk$set(fig.path='figures/',
                fig.align = 'center',
                dpi=300,
                fig.show='hold',
+               fig.height = 3.150,
+               fig.width = 3.150,
                cache=FALSE,
                echo=FALSE,
                results="hide",
                message=FALSE,
                warning=FALSE)
 
+pander::panderOptions("table.caption.prefix", "")
+
 source('src/R/figures.R')
 
 ```
 
 ``` {r st_libStats, results = "asis"}
-pander::set.alignment('left', row.names = 'right')
 pander::set.caption(paste0(
   I(pasteLabel("**Table S", s_tableCount, "st_libStats")),
   "**: Library and sequencing statistics."))
-pander::pandoc.table(st_libStats, split.tables = Inf, emphasize.rownames = FALSE, missing = "")
+pander::pandoc.table(st_libStats, split.tables = Inf, missing = "", round = 1, emphasize.strong.cols = 1,
+                     justify = c("right", rep("center", length(names(st_libStats)) - 1)))
 ```
 
 ```{r st_reviewInSitu, results = "asis"}
-pander::set.alignment('left', row.names = 'right')
 pander::set.caption(paste0(
   I(pasteLabel("**Table S", s_tableCount, "st_reviewInSitu")),
-  "**: Comparison of the dataset with published *in situ* expression profiles. For each tissue, a '1' indicates that the gene was detected by both methods, a '2' indicates that the gene was detected by *in situ* hybridisation but not by RNA sequencing and a '3' indicates that the gene was detected by RNA sequencing but not reported as expressed by *in situ*. The last category is not informative because *in situ* analysis for the stage in question may have been omitted from the publication. A blank cell indicates that the gene was not detected by either method."))
-pander::pandoc.table(st_reviewInSitu, split.tables = Inf, emphasize.rownames = FALSE,
+  "**: Comparison of the dataset with published *in situ* expression profiles. '×' indicates that the gene was detected by both methods, '+' indicates that the gene was detected by *in situ* hybridisation but not by RNA sequencing and '·' indicates that the gene was detected by RNA sequencing but expression was not reported by *in situ*. The last category is not intended to be informative, because it relies on negative or unreported results. A blank cell indicates that the gene was not detected by either method."))
+pander::pandoc.table(st_reviewInSitu, split.tables = Inf,
+                     justify = c("right", rep("centre", length(names(st_reviewInSitu)) - 2), "left"),
                      emphasize.cols = c(1,2), missing = "")
 ```
 
@@ -58,19 +63,19 @@ pander::pandoc.table(st_reviewInSitu, split.tables = Inf, emphasize.rownames = F
 print(sf_pca)
 ```
 
-**`r I(pasteLabel("Figure S", s_figCount, "sf_pca"))`**: Principal components analysis of transformed read counts for each library. The two libraries made from degraded RNA did not cluster with other libraries (see `r I(pasteLabel("Table S", s_tableCount, "st_libStats"))`), suggesting that the use of degraded RNA had an effect on the quantification of read counts. For this reason these two libraries were not included in subsequent analyses.
+**`r I(pasteLabel("Figure S", s_figCount, "sf_pca"))`**: Principal components analysis of transformed read counts for each library. The two libraries made from degraded RNA did not cluster with other libraries (see `r I(pasteLabel("Table S", s_tableCount, "st_libStats"))`), suggesting that the use of degraded RNA affected quantification of expression. For this reason these two libraries were not included in subsequent analyses.
 
-```{r sf_isGenesTpm, fig.height = 14}
+```{r sf_isGenesTpm, fig.height = 8.661, fig.width = 6.614}
 print(sf_isGenesTpm)
 ```
 
-**`r I(pasteLabel("Figure S", s_figCount, "sf_isGenesTpm"))`**: Expression patterns of genes compared to *in situ* results.
+**`r I(pasteLabel("Figure S", s_figCount, "sf_isGenesTpm"))`**: Quantitative expression values for the genes that were compared to published *in situ* results. The expression value in transcripts per million is shown on the *x*-axis. Points are coloured by replicate, and plotted as a triangle if the gene was above the expression cutoff or a circle otherwise. Although four replicates were produced from each of the RM and PBM, only three replicates for each stage are included in the analysis (see Results). 
 
 ```{r sf_mfuzzCentroids}
 print(sf_mfuzzCentroids)
 ```
 
-**`r I(pasteLabel("Figure S", s_figCount, "sf_mfuzzCentroids"))`**: Minimum centroid distance for 2–`r maxClust` cluster cores (*c*). Eight cluster cores were used because the rate of change of the minimum centroid distance over *c* decreases after $c = 8$.
+**`r I(pasteLabel("Figure S", s_figCount, "sf_mfuzzCentroids"))`**: Minimum centroid distance for 2–`r maxClust` cluster cores (*c*). Eight cluster cores were used because the rate of change of the minimum centroid distance over *c* decreases after *c* = 8.
 
 ``` {r sf_mfuzzPca}
 print(sf_mfuzzPca)

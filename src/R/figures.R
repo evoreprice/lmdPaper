@@ -47,102 +47,6 @@ capwords <- function(s, strict = FALSE) {
 st_libStats <- readRDS('output/quantStats/libStats.Rds')
 s_tableCount <- incCount(s_tableCount, "st_libStats")
 
-#######################
-### COMPARE IN SITU ###
-#######################
-
-compare <- readRDS('output/compare/compare.Rds')
-setkey(compare, "zhangRef")
-
-# convert zhangRef to citekey (these papers were mined from zhang paper manually)
-citekeys <- structure(c("@Ikeda:2007ja", "@Li:2011es", "@Ren:2013jv", "@Suzaki:2004ib", 
-                        "@Chu:2006fw", "@Lee:2012hj", "@Yoshida:2013ff", "@Xue:2008ki", "@Ashikari:2005eg", 
-                        "@Yan:2011hw", "@Li:2013iq", "@Yoshida:2012fg", "@Kurakawa:2007go", 
-                        "@Lee:2012hj", "@Lee:2007cj", "@Gao:2010iz", "@IkedaKawakatsu:2012co", 
-                        "@Horigome:2009gt", "@Lee:2007cj", "@Jiao:2010ft", "@Miura:2010it", 
-                        "**zhang55**", "**zhang73**", "@Komatsu:2003iu", "@Li:2010ks", "**zhang108**", 
-                        "**zhang131**", "@Zhu:2010je", "**m.Lopez-Dee1999**", "**m.Yadav2007**", 
-                        "**m.Nagasawa2003**", "**m.Yun2013**", "**m.Duan2012**", "**m.Ohmori2009**", 
-                        "**m.Dreni2007**", "**m.Cui2010**", "**m.Fornara2004**"),
-                      .Names = c("56", "85", "118", "129", "21", "82", "154", "148", "3", "150", "86", "153", 
-                                 "78", "82", "83", "48", "59", "54", "83", "68", "100", "55", "73", 
-                                 "75", "84", "108", "131", "165", "991", "992", "993", "994", "995", 
-                                 "996", "997", "998", "999"))
-compare[, Reference := citekeys[as.character(zhangRef)]]
-
-# SI table
-st_reviewInSitu <- data.table(reshape2::dcast(compare, msuId + Reference ~ stage,
-                                              value.var = 'compare'))
-
-# deal with genes that have the same expression pattern in >1 report
-st_reviewInSitu <- st_reviewInSitu[, .(
-  Reference = paste(Reference, collapse = ", "))
-  , by = c("msuId", "RM", "PBM", "SBM", "SM", "FM")]
-
-st_reviewInSitu[, `Gene symbol` :=
-                  oryzr::LocToGeneName(msuId, plotLabels = FALSE)$symbols,
-                by = msuId]
-setnames(st_reviewInSitu, old = "msuId", new = "MSU identifier")
-setcolorder(st_reviewInSitu, neworder =
-              c('Gene symbol', 'MSU identifier', 'RM', 'PBM', 'SBM', 'SM', 'FM',
-                'Reference'))
-setkey(st_reviewInSitu, "Gene symbol")
-s_tableCount <- incCount(s_tableCount, "st_reviewInSitu")
-
-# tpm plots of some/all of these genes
-tpm <- data.table(readRDS('output/tpm/tpm.Rds'), keep.rownames = TRUE)
-setnames(tpm, 'rn', "MSU identifier")
-setkey(tpm, "MSU identifier")
-
-genes <- st_reviewInSitu[,.(`MSU identifier`, `Gene symbol`)]
-setkey(genes, "MSU identifier")
-genes <- unique(genes)
-genTpm <- tpm[genes]
-genTpm.long <- reshape2::melt(genTpm, id.vars = c('MSU identifier', 'Gene symbol'),
-                                variable.name = "lib", value.name = "Expression (TPM)")
-
-# expression calls for these genes by library
-expGenTT <- data.table(readRDS('output/expressedGenes/expGenTT.Rds'), key = "id")
-expGenTT.wide <- expGenTT[genTpm[,`MSU identifier`]]
-expGenTT.long <- reshape2::melt(expGenTT.wide, id.vars = "id",
-                                variable.name = "lib", value.name = "expressed")
-
-setkey(genTpm.long, "MSU identifier", "lib")
-setkey(expGenTT.long, "id", "lib")
-
-plotData <- expGenTT.long[genTpm.long]
-
-# add stage names from deseq2
-colData <- data.table(as.data.frame(GenomicRanges::colData(
-  readRDS('output/DESeq2/ddsLrt.Rds'))), keep.rownames = TRUE)
-plotData[, stage := colData[rn == as.character(lib), stage]]
-
-# add replicate number to colour points
-plotData[, replicate := sub(".*(\\d+)", "\\1", lib)]
-
-# format gene name for the plot
-plotData[, name:= oryzr::LocToGeneName(id)$symbols, by = id]
-plotData[!is.na(name), label := paste(name, "·", id)]
-plotData[is.na(name), label := id]
-
-# draw it
-sf_isGenesTpm <- ggplot(plotData, aes(x = stage, y = `Expression (TPM)`, colour = replicate, shape = expressed)) +
-  theme_minimal(base_size = 8, base_family = "Helvetica") +
-  theme(strip.text = element_text(face = "italic")) +
-  xlab(NULL) +
-  scale_color_brewer(palette = "Set1") + 
-  stat_smooth(aes(group = label), method = "loess", se = FALSE, colour = "grey") + 
-  geom_point() +
-  facet_wrap(~ label, scales = "free_y", ncol = 3)
-#sf_isGenesTpm
-figCount <- incCount(s_figCount, "sf_isGenesTpm")
-
-##################
-### LMD FIGURE ###
-##################
-
-figCount <- incCount(figCount, "f_lmdFigure")
-
 ################
 ### PCA PLOT ###
 ################
@@ -175,14 +79,117 @@ sf_pca <- ggplot(data = pcaPlotData,
   xlab(paste0("PC1: ", round(percentVar[1] * 100), "% variance")) +
   ylab(paste0("PC2: ", round(percentVar[2] * 100), "% variance")) +
   xlim(-50, 77) +
-  geom_point(shape = 16, size = 5, alpha = 0.7) +
-  geom_text(data = pcaPlotData[-opIdx,],
+  geom_point(shape = 16, size = 2, alpha = 0.7) +
+  geom_text(data = pcaPlotData[-opIdx,], size = 2,
             hjust = 1.2, show.legend = FALSE) +
-  geom_text(data = pcaPlotData[opIdx,],
+  geom_text(data = pcaPlotData[opIdx,], size = 2,
             hjust = -0.2, show.legend = FALSE)
 
 s_figCount <- incCount(s_figCount, "sf_pca")
 
+
+#######################
+### COMPARE IN SITU ###
+#######################
+
+compare <- readRDS('output/compare/compare.Rds')
+setkey(compare, "zhangRef")
+
+# convert zhangRef to citekey (these papers were mined from zhang paper manually)
+citekeys <- structure(c("@Ikeda:2007ja", "@Li:2011es", "@Ren:2013jv", "@Suzaki:2004ib", 
+                        "@Chu:2006fw", "@Lee:2012hj", "@Yoshida:2013ff", "@Xue:2008ki", 
+                        "@Ashikari:2005eg", "@Yan:2011hw", "@Li:2013iq", "@Yoshida:2012fg", 
+                        "@Kurakawa:2007go", "@Lee:2012hj", "@Lee:2007cj", "@Gao:2010iz", 
+                        "@IkedaKawakatsu:2012co", "@Horigome:2009gt", "@Lee:2007cj", 
+                        "@Jiao:2010ft", "@Miura:2010it", "**zhang55**", "**zhang73**", 
+                        "@Komatsu:2003iu", "@Li:2010ks", "**zhang108**", "**zhang131**", 
+                        "@Zhu:2010je", "**m.Lopez-Dee1999**", "**m.Yadav2007**", "**m.Nagasawa2003**", 
+                        "**m.Yun2013**", "**m.Duan2012**", "**m.Ohmori2009**", "**m.Dreni2007**", 
+                        "**m.Cui2010**", "**m.Fornara2004**", "**m.Komatsu2009**"),
+                      .Names = c("56","85", "118", "129", "21", "82", "154", "148", "3", "150", "86", 
+                                 "153", "78", "82", "83", "48", "59", "54", "83", "68", "100", 
+                                 "55", "73", "75", "84", "108", "131", "165", "991", "992", "993", 
+                                 "994", "995", "996", "997", "998", "999", "990"))
+
+compare[, Reference := citekeys[as.character(zhangRef)]]
+
+# SI table
+st_reviewInSitu <- data.table(reshape2::dcast(compare, msuId + Reference ~ stage,
+                                              value.var = 'compare'))
+
+# deal with genes that have the same expression pattern in >1 report
+st_reviewInSitu <- st_reviewInSitu[, .(
+  Reference = paste(Reference, collapse = ", "))
+  , by = c("msuId", "RM", "PBM", "SBM", "SM", "FM")]
+
+st_reviewInSitu[, `Gene symbol` :=
+                  oryzr::LocToGeneName(msuId, plotLabels = FALSE)$symbols,
+                by = msuId]
+setnames(st_reviewInSitu, old = "msuId", new = "MSU identifier")
+setcolorder(st_reviewInSitu, neworder =
+              c('Gene symbol', 'MSU identifier', 'RM', 'PBM', 'SBM', 'SM', 'FM',
+                'Reference'))
+setkey(st_reviewInSitu, "Gene symbol")
+s_tableCount <- incCount(s_tableCount, "st_reviewInSitu")
+
+# tpm plots of some/all of these genes
+tpm <- data.table(readRDS('output/tpm/tpm.Rds'), keep.rownames = TRUE)
+setnames(tpm, 'rn', "MSU identifier")
+setkey(tpm, "MSU identifier")
+
+genes <- st_reviewInSitu[,.(`MSU identifier`, `Gene symbol`)]
+setkey(genes, "MSU identifier")
+genes <- unique(genes)
+genTpm <- tpm[genes]
+genTpm.long <- reshape2::melt(genTpm, id.vars = c('MSU identifier', 'Gene symbol'),
+                                variable.name = "lib", value.name = "Expression (transcripts per million)")
+
+# expression calls for these genes by library
+expGenTT <- data.table(readRDS('output/expressedGenes/expGenTT.Rds'), key = "id")
+expGenTT.wide <- expGenTT[genTpm[,`MSU identifier`]]
+expGenTT.long <- reshape2::melt(expGenTT.wide, id.vars = "id",
+                                variable.name = "lib", value.name = "expressed")
+
+setkey(genTpm.long, "MSU identifier", "lib")
+setkey(expGenTT.long, "id", "lib")
+
+plotData <- expGenTT.long[genTpm.long]
+
+# add stage names from deseq2
+colData <- data.table(as.data.frame(GenomicRanges::colData(
+  readRDS('output/DESeq2/ddsLrt.Rds'))), keep.rownames = TRUE)
+plotData[, stage := colData[rn == as.character(lib), stage]]
+
+# add replicate number to colour points
+plotData[, Replicate := sub(".*(\\d+)", "\\1", lib)]
+
+# format gene name and stage for the plot
+plotData[, name:= oryzr::LocToGeneName(id)$symbols, by = id]
+plotData[!is.na(name), label := paste(name, "·", id)]
+plotData[is.na(name), label := id]
+plotData[, stage := plyr::mapvalues(stage, "ePBM/SBM", "ePBM/\nSBM")]
+
+# order the plots
+setkey(plotData, "name")
+plotData[, label := factor(label, levels = unique(label))]
+
+# draw it
+sf_isGenesTpm <- ggplot(plotData, aes(x = stage, y = `Expression (transcripts per million)`, colour = Replicate, shape = expressed)) +
+  theme_minimal(base_size = 8, base_family = "Helvetica") +
+  theme(strip.text = element_text(face = "italic")) +
+  xlab(NULL) +
+  scale_color_brewer(palette = "Set1") +
+  guides(shape = FALSE, size = FALSE) +
+  stat_smooth(aes(group = label), method = "loess", se = FALSE, colour = "grey", size = 0.5) + 
+  geom_point(size = 1, alpha = 0.8) +
+  facet_wrap(~ label, scales = "free_y", ncol = 4)
+s_figCount <- incCount(s_figCount, "sf_isGenesTpm")
+
+##################
+### LMD FIGURE ###
+##################
+
+figCount <- incCount(figCount, "f_lmdFigure")
 
 #############
 ### Mfuzz ###
@@ -305,7 +312,7 @@ sf_mfuzzPca <- ggplot(vg.mds, aes(x = MDS1, y=MDS2, colour = factor(cluster))) +
   coord_fixed(ratio = 1) +
   geom_point(aes(size=max.membership),alpha=0.5, shape = 16) +
   scale_colour_brewer(palette = "Set1", name = "Cluster") +
-  scale_size_area(guide = FALSE)
+  scale_size_area(guide = FALSE, max_size = 2)
 
 s_figCount <- incCount(s_figCount, "sf_mfuzzPca")
 

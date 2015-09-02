@@ -4,9 +4,6 @@ title: Genome-wide changes in expression during inflorescence architecture devel
 csl: csl/the-plant-journal.csl
 header-includes: \usepackage{graphicx}
 output:
-  word_document:
-    fig_caption: yes
-    reference_docx: csl/wordStyles.docx
   BiocStyle::html_document:
     fig_caption: yes
     force_captions: yes
@@ -14,6 +11,9 @@ output:
     keep_md: yes
     number_sections: yes
     dev: "CairoPDF"
+  word_document:
+    fig_caption: yes
+    reference_docx: csl/wordStyles.docx
   pdf_document:
     fig_caption: yes
     keep_tex: yes
@@ -36,6 +36,8 @@ knitr::opts_chunk$set(fig.path='figures/',
                results="hide",
                message=FALSE,
                warning=FALSE)
+
+pander::panderOptions("table.caption.prefix", "")
 
 source('src/R/figures.R')
 
@@ -69,11 +71,11 @@ Thomas W.R. Harrop^§^[^1], Israr Ud Din^¶^[^1], Veronica Gregis^¶^, Michela O
 
 # Results and Discussion
 
-To investigate gene expression during inflorescence development, LASER microdissection (LMD) was used to collect meristematic tissues from the rachis meristem (RM), primary branch meristem (PBM), elongating primary branch meristem and secondary branch meristem (ePBM/SBM) and spikelet meristem (SM) (`r I(pasteLabel("Figure ", figCount, "f_lmdFigure"))`). RNA from the meristem samples was isolated, amplified and used for the production of a sequencing library. **Need area cut +/- number of panicles used for each library from Israr**. RNA input for library preparation was between `r min(st_libStats$"Yield (ng)")` and `r max(st_libStats$"Yield (ng)")` ng and the average RNA integrity number was `r round(mean(st_libStats$"RIN"), 1)` (`r I(pasteLabel("Table S", s_tableCount, "st_libStats"))`). Initially, two biological replicates were prepared for each stage, but after performing a principal components analysis (PCA) on transformed expression values two libraries that were made from degraded RNA were excluded from the analysis (`r I(pasteLabel("Figure S", s_figCount, "sf_pca"))`). Following this, further samples were prepared to provide a total of three biological replicates with intact RNA (RIN ≥ 7) for each meristem type.
+To investigate gene expression during inflorescence development, LASER microdissection (LMD) was used to collect meristematic tissues from the rachis meristem (RM), primary branch meristem (PBM), elongating primary branch meristem and secondary branch meristem (ePBM/SBM) and spikelet meristem (SM) (`r I(pasteLabel("Figure ", figCount, "f_lmdFigure"))`). RNA isolated from the meristem samples was amplified and used to produce cDNA libraries for sequencing. **Need area cut +/- number of panicles used for each library from Israr**. RNA input for library preparation was between `r min(st_libStats$"Yield (ng)")` and `r max(st_libStats$"Yield (ng)")` ng and the average RNA integrity number was `r round(mean(st_libStats$"RIN"), 1)` (`r I(pasteLabel("Table S", s_tableCount, "st_libStats"))`). Initially, two biological replicates were prepared for each stage, but after performing a principal components analysis (PCA) on transformed expression values, two libraries that were produced from degraded RNA were excluded from the analysis (`r I(pasteLabel("Figure S", s_figCount, "sf_pca"))`). Following this, further samples were prepared to provide a total of three biological replicates with intact RNA (RIN ≥ 7) for each meristem type.
 
 ![](data/lmdFigure.pdf)
 
-At least `r round(min(st_libStats$"Reads (M)"), 0)` million 50-base reads were produced from each library, yielding between `r round(min(st_libStats$"Reads in genes (M)", na.rm = TRUE), 0)` and `r round(max(st_libStats$"Reads in genes (M)", na.rm = TRUE), 0)` million reads that mapped to genes after excluding reads likely to have originated from rRNA and tRNA. Using strict cutoffs for gene expression, `r length(unique(readRDS("output/expressedGenes/expressedGenesAll.Rds")))` unique genes were detected in at least one of the libraries. As a preliminary quality check, the qualitative expression patterns of a selection of genes were compared with patterns that had previously been reported by *in situ* hybridisation (`r I(pasteLabel("Table S", s_tableCount, "st_reviewInSitu"))`).
+At least `r round(min(st_libStats$"Reads (M)"), 0)` million 50-base reads were produced from each library, yielding between `r round(min(st_libStats$"Reads in genes (M)", na.rm = TRUE), 0)` and `r round(max(st_libStats$"Reads in genes (M)", na.rm = TRUE), 0)` million reads that mapped to genes after excluding reads likely to have originated from rRNA and tRNA. Using strict cutoffs for gene expression, `r length(unique(readRDS("output/expressedGenes/expressedGenesAll.Rds")))` unique genes were detected in at least one of the libraries. As a preliminary quality check, the qualitative and quantitative expression of a selection of genes were compared with patterns that had previously been reported by *in situ* hybridisation (`r I(pasteLabel("Table S", s_tableCount, "st_reviewInSitu"))` and `r I(pasteLabel("Figure S", s_figCount, "sf_isGenesTpm"))`).
 
 **Our in situ results could go here (or in SI).**
 
@@ -85,7 +87,7 @@ To recover common expression patterns in expressed genes, read counts were trans
 print(f_mfuzzClusters)
 ```
 
-Examination of the clustered genes suggested that transcription factors were overrepresented in most clusters (**annotated cluster tables in SI**). To determine whether particular TF families were associated with particular patterns of expression, the enrichment of TF family members in each cluster was calculated using hypergeometric tests. Using the list of transcription factor and other transcriptional regulator families available on the Plant Transcription Factor Database (**reference for http://plntfdb.bio.uni-potsdam.de/v3.0/**), a hypergeometric test was carried out if there were at least two members of one family in a given cluster. After adjustment for multiple comparisons, each cluster had a significant enrichment of at least one family (`r I(pasteLabel("Table ", tableCount, "t_hypergeom"))`). Cluster `r getClusterName('inc', 'small')`, containing genes that are more highly expressed in the PBM–SM samples than in the RM sample, has an enrichment of Homeobox and basic helix-loop-helix TFs whereas the cluster with the complementary pattern (cluster `r getClusterName('dec', 'small')`) is enriched for ABI3VP1 and G2-like TFs. MADS TFs and TRAF genes were overreprsented among genes that have low expression in the SM and PBM but higher expression in the RM (cluster `r getClusterName('small', 'inc')`) and bHLH, SBP and C2C2-GATA TFs were overreprented among genes with the inverse pattern (cluster `r getClusterName('small', 'dec')`)
+Examination of the clustered genes suggested that transcription factors were overrepresented in most clusters (**annotated cluster tables in SI**). To determine whether particular TF families were associated with particular patterns of expression, the enrichment of TF family members in each cluster was calculated using hypergeometric tests. Using the list of transcription factor and other transcriptional regulator families available on the Plant Transcription Factor Database [@PerezRodriguez:2010co], a hypergeometric test was carried out if there were at least two members of one family in a given cluster. After adjustment for multiple comparisons, each cluster had a significant enrichment of at least one family (`r I(pasteLabel("Table ", tableCount, "t_hypergeom"))`). Cluster `r getClusterName('inc', 'small')`, containing genes that are more highly expressed in the PBM–SM samples than in the RM sample, has an enrichment of Homeobox and basic helix-loop-helix TFs whereas the cluster with the complementary pattern (cluster `r getClusterName('dec', 'small')`) is enriched for ABI3VP1 and G2-like TFs. MADS TFs and TRAF genes were overreprsented among genes that have low expression in the SM and PBM but higher expression in the RM (cluster `r getClusterName('small', 'inc')`) and bHLH, SBP and C2C2-GATA TFs were overreprented among genes with the inverse pattern (cluster `r getClusterName('small', 'dec')`)
 
 |**Discussion: what might these patterns mean biologically?**
 |**Discussion: which clusters have genes that are already candidates for panicle branching?**
@@ -118,7 +120,7 @@ To investigate the evolution of the MADS family in Angiosperms, their expression
 
 ## Plant material and sampling
 
-*Oryza sativa* ssp. japonica cv. Nipponbare plants were grown in a growth chamber at 70% relative humidity at 30°C during the day and 26°C at night. After 7 weeks in long day conditions (LD; 14 hours light and 10 hours darkness) plants were transferred to short day conditions (SD; 10 hours light and 14 hours darkness) to induce floral transition. Inflorescence meristems were harvested from 6 to 14 days after the change of photoperiod.
+*Oryza sativa* ssp. japonica cv. Nipponbare plants were grown in a growth chamber with 70% relative humidity at 30°C during the day and 26°C at night. After 7 weeks in long day conditions (LD; 14 hours light and 10 hours darkness) plants were transferred to short day conditions (SD; 10 hours light and 14 hours darkness) to induce floral transition. Inflorescence meristems were harvested from 6 to 14 days after the change of photoperiod.
 
 ## Tissue embedding, LASER microdissection and sequencing
 
@@ -128,7 +130,7 @@ Each inflorescence was harvested in 2 mL ice-cold 3:1 ethanol:acetic acid fixati
 
 Analysis of the sequenced libraries was carried out with custom `bash` and `R` scripts [@RALanguageandEn:2015wf], which were arranged into a pipeline using the `ruffus` package for `python3` [@Goodstadt:2010jp]. All of the code used for the analysis and to generate text, figures and tables for this report, along with the versions and paramaters of the software used, are available with revision history in a public GitHub repository at https://github.com/evoreprice/lmdPaper.
 
-Briefly, adaptor trimming was performed with `cutadapt` [@Martin:2011eu] and reads were mapped with the MSUv7 genome and annotation [@Kawahara:2013gh; @Ouyang:2007il] downloaded from Phytozome 10.3 [@Goodstein:2012ho] using `STAR` [@Dobin:2012fg] in 2-pass mode . The `'quantMode'` argument of `STAR` was used for read counting. rRNA and tRNA contamination was estimated using `htseq-count` [@Anders:2014gf] to count the number of reads that mapped to regions annotated as tRNA or rRNA on the Rap-DB (**ref**) or to regions where reads simulated with `wgsim` (https://github.com/lh3/wgsim) from rRNA sequences in the TIGR Plant Repeats Database [@Ouyang:2004ia] also mapped. Differential expression analysis to calculate Log~2~ fold change (L~2~FC) values and transformed read counts was performed with the `DESeq2` package [@Love:2014do]. To determine a strict cutoff for unexpressed genes, expression values in transcripts per million were calculathged for each gene [@Li:2010cl; @Wagner:2012jf]. These values were compared to pseudo-expression values calculated from intergenic regions of the genome, using intervals of a similar size distrubution to those used for calculating the 'genic' expression values. For each library, the cutoff was placed at the 95^th^ percentile of the distribution of intergenic expression values. Transformed counts and L~2~FC values from expressed genes were used for soft clustering with the `Mfuzz` package [@Kumar:2007uw] and geneset enrichment analysis with the `gage` package [@Luo:2009kp] respectively. All plots were produced with the `ggplot2` package [@Wickham:2009tn].
+Briefly, adaptor trimming was performed with `cutadapt` [@Martin:2011eu] and reads were mapped against the MSUv7 genome and annotation [@Kawahara:2013gh; @Ouyang:2007il] downloaded from Phytozome 10.3 [@Goodstein:2012ho] using `STAR` [@Dobin:2012fg] in 2-pass mode. The `'quantMode'` argument of `STAR` was used for read counting. rRNA and tRNA contamination was estimated using `htseq-count` [@Anders:2014gf] to count the number of reads that mapped to regions annotated as tRNA or rRNA on the Rap-DB (**ref**) or to regions where reads simulated with `wgsim` (https://github.com/lh3/wgsim) from rRNA sequences in the TIGR Plant Repeats Database [@Ouyang:2004ia] also mapped. Differential expression analysis to calculate Log~2~ fold change (L~2~FC) values and transformed read counts was performed with the `DESeq2` package [@Love:2014do]. To determine a strict cutoff for unexpressed genes, expression values in transcripts per million were calculated for each gene [@Li:2010cl; @Wagner:2012jf]. These values were compared to pseudo-expression values calculated from intergenic regions of the genome, using intervals of a similar size distrubution to those used for calculating the 'genic' expression values. For each library, the cutoff was placed at the 95^th^ percentile of the distribution of intergenic expression values. Transformed counts and L~2~FC values from expressed genes were used for soft clustering with the `Mfuzz` package [@Kumar:2007uw] and geneset enrichment analysis with the `gage` package [@Luo:2009kp] respectively. All plots were produced with the `ggplot2` package [@Wickham:2009tn].
 
 ### Comparative analysis of MADS family
 
@@ -146,6 +148,8 @@ The primary sequences of *Arabidopsis thaliana*, *Solanum lycopersicum* and *Ory
 
 **`r I(pasteLabel("Figure S", s_figCount, "sf_pca"))`**: Principal components analysis of transformed read counts for each library.
 
+**`r I(pasteLabel("Figure S", s_figCount, "sf_isGenesTpm"))`**: Quantitative expression values for the genes that were compared to published *in situ* results.
+
 **`r I(pasteLabel("Figure S", s_figCount, "sf_mfuzzCentroids"))`**: Minimum centroid distance for 2–`r maxClust` cluster cores (*c*).
 
 **`r I(pasteLabel("Figure S", s_figCount, "sf_mfuzzPca"))`**: Classical multidimensional scaling (MDS) of Euclidean distances between transformed read counts for clustered genes.
@@ -153,20 +157,20 @@ The primary sequences of *Arabidopsis thaliana*, *Solanum lycopersicum* and *Ory
 # Tables
 
 ```{r pander, results = "asis"}
-pander::set.alignment('left', row.names = 'right')
+pander::set.alignment('center', row.names = 'right')
 pander::set.caption(paste0(
   I(pasteLabel("**Table ", tableCount, "t_hypergeom")),
-  "**: Transcription factor and transcriptional regulator family enrichment per cluster, including the number of family members (*n*), number expressed in the whole dataset (*n*~expr~) and number and adjusted *p*-value for each cluster, for families that had at least two members in any one cluster."))
+  "**: Transcription factor and transcriptional regulator family enrichment for families that had at least two members in any one cluster, including the number of family members (*n*), number expressed in the whole dataset (*n*~expr~) and number and adjusted *p*-value for each cluster."))
 pander::pandoc.table(t_hypergeom, split.tables = Inf, emphasize.rownames = FALSE)
 ```
 
 # Figure legends
 
-**`r I(pasteLabel("Figure ", figCount, "f_lmdFigure"))`**. LASER microdissection of meristem samples in the early stages of inflorescences development. Samples were collected from the rachis meristem (**a** and **e**), the primary branch meristem (**b** and **f**), the elongating primary branch meristem and secondary branch meristem (**c** and **g**) and the spikelet meristem (**d** and **h**). Images show the samples before (**a**–**d**) and after (**e**–**h**) dissection.
+**`r I(pasteLabel("Figure ", figCount, "f_lmdFigure"))`**. LASER microdissection of meristem samples in the early stages of inflorescence development. Samples were collected from the rachis meristem (**a** and **e**), the primary branch meristem (**b** and **f**), the elongating primary branch meristem and secondary branch meristem (**c** and **g**) and the spikelet meristem (**d** and **h**). Images show the samples before (**a**–**d**) and after (**e**–**h**) dissection.
 
 **`r I(pasteLabel("Figure ", figCount, "f_mfuzzClusters"))`**. Common patterns of gene expression in developing inflorescences. Fuzzy *c*-means clustering of normalised, variance-stabilised read counts was used to recover `r as.character(english::english(c))` common patterns of expression. Each line describes the expression pattern of one gene, with the gene's membership to the cluster represented by the colour of the line. The core values for each cluster are plotted in black. The ordering of the panels in the plot was rearranged to enable side-by-side comparison of complementary clusters.
 
-**`r I(pasteLabel("Figure ", figCount, "f_gsea"))`**. Geneset enrichment analysis (GSEA) for transcription factor and other transcriptional regulator families. Test statistics were calculated on a matrix of Log~2~(fold change) values between each sample and the other three samples for expressed family members. A positive test statistic indicates enrichment and a negative statistic indicates depletion. Although some test statistics had low *p*-values none were lower than 0.10 after Benjamini-Hochberg correction.
+**`r I(pasteLabel("Figure ", figCount, "f_gsea"))`**. Geneset enrichment analysis (GSEA) for transcription factor and other transcriptional regulator families. Test statistics were calculated on a matrix of Log~2~ fold change values between each sample and the other three samples for expressed family members. A positive test statistic indicates enrichment and a negative statistic indicates depletion. Although some test statistics had low *p*-values none were lower than 0.10 after Benjamini-Hochberg correction.
 
 # `R sessionInfo()` (*hide*)
 

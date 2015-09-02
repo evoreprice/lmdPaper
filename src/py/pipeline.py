@@ -558,11 +558,15 @@ def f_gsea(inputFiles, outputFiles):
     touch(outputFiles)
 
 #---------------------------------------------------------------
-# in situ comparison plot
+# in situ comparisons
 #
 @merge(compare_inSitus, "ruffus/table.st_reviewInSitu")
 def st_reviewInSitu(inputFiles, outputFiles):
     touch(outputFiles)
+@merge([compare_inSitus, calculate_tpm, run_deseq2_os], "ruffus/figure.sf_isGenesTpm")
+def sf_isGenesTpm(inputFiles, outputFiles):
+    touch(outputFiles)
+
 
 
 
