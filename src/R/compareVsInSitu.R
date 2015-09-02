@@ -19,8 +19,16 @@ if (!file.exists(exprGenFile)) {
 }
 expressedGenesByLibrary <- readRDS(exprGenFile)
 
+# check for deseq2 output
+ddsFile <- 'output/DESeq2/ddsLrt.Rds'
+if (!file.exists(ddsFile)) {
+  cat("ddsFile file not found, exiting\n", file = stderr())
+  quit(save = "no", status = 1)
+}
+dds <- readRDS(ddsFile)
+
 # split the zhang genes expression field.
-trim <- function(x) {gsub("^\\s+|\\s+$", "", x)}
+ trim <- function(x) {gsub("^\\s+|\\s+$", "", x)}
 zhangGenes <- zhangGenes[,.(
   geneExp = trim(unlist(strsplit(geneExp, "[,]")))
   ), by = c('msuId', 'zhangRef', 'plotLabel')]
@@ -34,11 +42,14 @@ FM <- c("FM")
 tissues <- unique(c(RM, PBM, SBM, SM, FM))
 expZhangGenes <- zhangGenes[geneExp %in% tissues]
 
-############
-### TODO ###
-############
-
-# add genes not in zhang review here
+# make sure we have numerical, non-NA refs for each record
+if (dim(expZhangGenes[!is.numeric(zhangRef) | is.na(zhangRef)])[1] > 0) {
+  sink(file = stderr())
+  cat("ERROR: non-numerical or NA reference detected. Check refs.\n")
+  expZhangGenes[!is.numeric(zhangRef) | is.na(zhangRef)]
+  sink()
+  quit(save = "no", status = 1)
+}
 
 # make a truth table for the zhang genes
 expZhangGenes[,RM := geneExp %in% RM]
@@ -62,7 +73,7 @@ expZhangGenes <- expZhangGenes[, .(
 # add another ID column for genes with more than one reference and order it on plot labels
 setkey(expZhangGenes, "msuId", "zhangRef")
 expZhangGenes[, id := paste0("id", 1:dim(unique(expZhangGenes))[1])]
-expZhangGenes[,id := factor(id, levels = rev(id[order(expZhangGenes[, plotLabel])]))]
+expZhangGenes[, id := factor(id, levels = rev(id[order(expZhangGenes[, plotLabel])]))]
 
 # melt
 expZhangGenes.melt <- reshape2::melt(
@@ -70,40 +81,43 @@ expZhangGenes.melt <- reshape2::melt(
   measure.vars = c("RM", "PBM", "SBM", "SM", "FM"), variable.name = "stage",
   value.name = "call.z")
 
-# find out if we called these genes expressed (2 out of 3 libraries per stage)
-egbl <- data.table(msuId = unique(unlist(expressedGenesByLibrary)), key = "msuId")
-egbl <- cbind(egbl, egbl[, lapply(expressedGenesByLibrary, function(x) msuId %in% x)])
+# compare this to the expressed genes truth table
+expGenTT.wide <- data.table(readRDS("output/expressedGenes/expGenTT.Rds"))
+expGenTT <- reshape2::melt(expGenTT.wide, id.vars = "id", variable.name = "lib", value.name = "expressed")
 
-# melt and dcast to sum logicals
-egbl.melt <- reshape2::melt(egbl, id.vars = "msuId", variable.name = "sample",
-                            value.name = "call")
-egbl.melt[, stage := sub("r\\d+", "", sample)]
-egbl.melt[, stage := plyr::mapvalues(stage, from = c("n1", "n2", "n3", "n4"),
-                                     to = c("RM", "PBM", "SBM", "SM"))]
-geneCalls <- data.table(reshape2::dcast(egbl.melt, msuId ~ stage, value.var = "call",
-                                        fun.aggregate = function(x) sum(x) > 1), key = "msuId")
-# add a fake "FM" column to check if we are getting a lot of genes in the SM sample
-geneCalls[, FM := SM]
+# add stage names from deseq2, but map "ePBM/SBM" to "SBM"
+colData <- data.table(as.data.frame(GenomicRanges::colData(
+  readRDS('output/DESeq2/ddsLrt.Rds'))), keep.rownames = TRUE)
+expGenTT[, stage := colData[rn == as.character(lib), stage]]
+expGenTT[, stage := plyr::mapvalues(stage, "ePBM/SBM", "SBM")]
 
-# melt geneCalls and join
-geneCalls.melt <- reshape2::melt(geneCalls, id.vars = "msuId",
-                                 variable.name = "stage", value.name = "call.rs")
-setkey(geneCalls.melt, "msuId", "stage")
+# call a gene expressed if it's detected in > 1 library per stage
+expGenTT[, call.rs := sum(expressed) > 1, by = c("id", "stage")]
+
+# collapse by stage + id
+setkey(expGenTT, "id", "stage")
+expGenCalls <- unique(expGenTT)
+expGenCalls[, c("expressed", "lib") := NULL ]
+
+# add a fake FM column for a quick comparo
+expGenCalls <-  rbind(expGenCalls, expGenCalls[stage == "SM", .(id, stage = "FM", call.rs)])
+
+# rename and sort for easy join
+expGenCalls[,msuId := id][, id := NULL]
+setkey(expGenCalls, "msuId", "stage")
 setkey(expZhangGenes.melt, "msuId", "stage")
 
-plotData.long <- geneCalls.melt[expZhangGenes.melt]
+# join
+plotData.long <- expGenCalls[expZhangGenes.melt]
 
-# fix NAs
-plotData.long[is.na(call.rs), call.rs := FALSE]
 # set levels of stage
 plotData.long[, stage := factor(stage, levels = c("RM", "PBM", "SBM", "SM", "FM"))]
 
-# add column to compare in situ vs. rnaseq. 1 = both, 2 = in situ only, 3 =
+# add column to compare in situ vs. rnaseq. × = both, + = in situ only, · =
 # rnaseq only
-plotData.long[call.rs & call.z, compare := 1]
-plotData.long[!call.rs & call.z, compare := 2]
-plotData.long[call.rs & !call.z, compare := 3]
-
+plotData.long[call.rs & call.z, compare := "×"]
+plotData.long[!call.rs & call.z, compare := "+"]
+plotData.long[call.rs & !call.z, compare := "·"]
 
 # MAKE OUTPUT FOLDER
 outDir <- "output/compare"

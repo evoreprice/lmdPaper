@@ -56,19 +56,52 @@ setkey(compare, "zhangRef")
 
 # convert zhangRef to citekey (these papers were mined from zhang paper manually)
 citekeys <- structure(c("@Ikeda:2007ja", "@Li:2011es", "@Ren:2013jv", "@Suzaki:2004ib", 
-                        "@Chu:2006fw", "@Lee:2012hj", "@Yoshida:2013ff", "@Xue:2008ki", 
-                        "@Ashikari:2005eg", "@Yan:2011hw", "@Li:2013iq", "@Yoshida:2012fg", 
-                        "@Kurakawa:2007go", "@Lee:2012hj", "@Lee:2007cj", "@Gao:2010iz", 
-                        "@IkedaKawakatsu:2012co", "@Horigome:2009gt", "@Lee:2007cj", 
-                        "@Jiao:2010ft", "@Miura:2010it"),
-                      .Names = c("56", "85", "118", 
-                                 "129", "21", "82", "154", "148", "3", "150", "86", "153", "78", 
-                                 "82", "83", "48", "59", "54", "83", "68", "100"))
+                        "@Chu:2006fw", "@Lee:2012hj", "@Yoshida:2013ff", "@Xue:2008ki", "@Ashikari:2005eg", 
+                        "@Yan:2011hw", "@Li:2013iq", "@Yoshida:2012fg", "@Kurakawa:2007go", 
+                        "@Lee:2012hj", "@Lee:2007cj", "@Gao:2010iz", "@IkedaKawakatsu:2012co", 
+                        "@Horigome:2009gt", "@Lee:2007cj", "@Jiao:2010ft", "@Miura:2010it", 
+                        "**zhang55**", "**zhang73**", "@Komatsu:2003iu", "@Li:2010ks", "**zhang108**", 
+                        "**zhang131**", "@Zhu:2010je", "**m.Lopez-Dee1999**", "**m.Yadav2007**", 
+                        "**m.Nagasawa2003**", "**m.Yun2013**", "**m.Duan2012**", "**m.Ohmori2009**", 
+                        "**m.Dreni2007**", "**m.Cui2010**", "**m.Fornara2004**"),
+                      .Names = c("56", "85", "118", "129", "21", "82", "154", "148", "3", "150", "86", "153", 
+                                 "78", "82", "83", "48", "59", "54", "83", "68", "100", "55", "73", 
+                                 "75", "84", "108", "131", "165", "991", "992", "993", "994", "995", 
+                                 "996", "997", "998", "999"))
+
+
+# which citekeys do I need to add?
+unique(compare[!zhangRef %in% names(citekeys), zhangRef])
+
+citekeys["55"] <- "**zhang55**"
+citekeys["73"] <- "**zhang73**"
+citekeys["75"] <- "@Komatsu:2003iu"
+citekeys["84"] <- "@Li:2010ks"
+citekeys["108"] <- "**zhang108**"
+citekeys["131"] <- "**zhang131**"
+citekeys["165"] <- "@Zhu:2010je"
+citekeys["991"] <- "**m.Lopez-Dee1999**"
+citekeys["992"] <- "**m.Yadav2007**"
+citekeys["993"] <- "**m.Nagasawa2003**"
+citekeys["994"] <- "**m.Yun2013**"
+citekeys["995"] <- "**m.Duan2012**"
+citekeys["996"] <- "**m.Ohmori2009**"
+citekeys["997"] <- "**m.Dreni2007**"
+citekeys["998"] <- "**m.Cui2010**"
+citekeys["999"] <- "**m.Fornara2004**"
+
+
 compare[, Reference := citekeys[as.character(zhangRef)]]
 
 # SI table
 st_reviewInSitu <- data.table(reshape2::dcast(compare, msuId + Reference ~ stage,
                                               value.var = 'compare'))
+
+# deal with genes that have the same expression pattern in >1 report
+st_reviewInSitu <- st_reviewInSitu[, .(
+  Reference = paste(Reference, collapse = ", "))
+  , by = c("msuId", "RM", "PBM", "SBM", "SM", "FM")]
+
 st_reviewInSitu[, `Gene symbol` :=
                   oryzr::LocToGeneName(msuId, plotLabels = FALSE)$symbols,
                 by = msuId]

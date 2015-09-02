@@ -487,7 +487,7 @@ def gsea(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # Compare published TF data
 #
-@merge([detect_expressed_genes, define_review_inSituDB], 'ruffus/os.compare')
+@merge([detect_expressed_genes, define_review_inSituDB, run_deseq2_os], 'ruffus/os.compare')
 def compare_inSitus(inputFiles, outputFiles):
     jobScript = 'src/R/compareVsInSitu.R'
     ntasks = '1'
