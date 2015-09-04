@@ -7,12 +7,10 @@ output:
     fig_caption: yes
     force_captions: yes
     highlight: pygments
-    keep_md: yes
     number_sections: yes
     dev: "CairoPDF"
   pdf_document:
     fig_caption: yes
-    keep_tex: yes
     number_sections: yes
     dev: "CairoPDF"
   word_document:
@@ -50,6 +48,8 @@ pander::pandoc.table(st_libStats, split.tables = Inf, missing = "", round = 1, e
                      justify = c("right", rep("center", length(names(st_libStats)) - 1)))
 ```
 
+----
+
 ```{r st_reviewInSitu, results = "asis"}
 pander::set.caption(paste0(
   I(pasteLabel("**Table S", s_tableCount, "st_reviewInSitu")),
@@ -59,11 +59,15 @@ pander::pandoc.table(st_reviewInSitu, split.tables = Inf,
                      emphasize.cols = c(1,2), missing = "")
 ```
 
+----
+
 ```{r sf_pca}
 print(sf_pca)
 ```
 
 **`r I(pasteLabel("Figure S", s_figCount, "sf_pca"))`**: Principal components analysis of transformed read counts for each library. The two libraries made from degraded RNA did not cluster with other libraries (see `r I(pasteLabel("Table S", s_tableCount, "st_libStats"))`), suggesting that the use of degraded RNA affected quantification of expression. For this reason these two libraries were not included in subsequent analyses.
+
+----
 
 ```{r sf_isGenesTpm, fig.height = 8.661, fig.width = 6.614}
 print(sf_isGenesTpm)
@@ -71,16 +75,22 @@ print(sf_isGenesTpm)
 
 **`r I(pasteLabel("Figure S", s_figCount, "sf_isGenesTpm"))`**: Quantitative expression values for the genes that were compared to published *in situ* results. The expression value in transcripts per million is shown on the *x*-axis. Points are coloured by replicate, and plotted as a triangle if the gene was above the expression cutoff or a circle otherwise. Although four replicates were produced from each of the RM and PBM, only three replicates for each stage are included in the analysis (see Results). 
 
+----
+
 ```{r sf_mfuzzCentroids}
 print(sf_mfuzzCentroids)
 ```
 
 **`r I(pasteLabel("Figure S", s_figCount, "sf_mfuzzCentroids"))`**: Minimum centroid distance for 2–`r maxClust` cluster cores (*c*). Eight cluster cores were used because the rate of change of the minimum centroid distance over *c* decreases after *c* = 8.
 
+----
+
 ``` {r sf_mfuzzPca}
 print(sf_mfuzzPca)
 ```
 
 **`r I(pasteLabel("Figure S", s_figCount, "sf_mfuzzPca"))`**: Classical multidimensional scaling (MDS) of Euclidean distances between transformed read counts for clustered genes. Genes are coloured by the cluster to which they were assigned. The separation of genes by cluster on the MDS plot supports the use of eight clusters.
+
+----
 
 # References for supporting information
