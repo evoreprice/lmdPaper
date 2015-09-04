@@ -17,7 +17,7 @@ output:
     dev: "CairoPDF"
   word_document:
     fig_caption: yes
-bibliography: bib/papersLib.bib
+bibliography: bib/papersLib.bibtex
 ---
 
 ```{r Setup, include=FALSE, results="hide", warning=FALSE}

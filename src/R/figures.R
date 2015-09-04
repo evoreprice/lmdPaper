@@ -101,12 +101,13 @@ citekeys <- structure(c("@Ikeda:2007ja", "@Li:2011es", "@Ren:2013jv", "@Suzaki:2
                         "@Ashikari:2005eg", "@Yan:2011hw", "@Li:2013iq", "@Yoshida:2012fg", 
                         "@Kurakawa:2007go", "@Lee:2012hj", "@Lee:2007cj", "@Gao:2010iz", 
                         "@IkedaKawakatsu:2012co", "@Horigome:2009gt", "@Lee:2007cj", 
-                        "@Jiao:2010ft", "@Miura:2010it", "**zhang55**", "**zhang73**", 
-                        "@Komatsu:2003iu", "@Li:2010ks", "**zhang108**", "**zhang131**", 
-                        "@Zhu:2010je", "**m.Lopez-Dee1999**", "**m.Yadav2007**", "**m.Nagasawa2003**", 
-                        "**m.Yun2013**", "**m.Duan2012**", "**m.Ohmori2009**", "**m.Dreni2007**", 
-                        "**m.Cui2010**", "**m.Fornara2004**", "**m.Komatsu2009**"),
-                      .Names = c("56","85", "118", "129", "21", "82", "154", "148", "3", "150", "86", 
+                        "@Jiao:2010ft", "@Miura:2010it", "@Huang:2009kf", "@Kobayashi:2010hn", 
+                        "@Komatsu:2003iu", "@Li:2010ks", "@Oikawa:2009cs", "@Tabuchi:2011gx", 
+                        "@Zhu:2010je", "@LopezDee:1999ds", "@Yadav:2007im", "@Nagasawa:2003gu", 
+                        "@Yun:2013id", "@Duan:2012bt", "@Ohmori:2009kj", "@Dreni:2007jd", 
+                        "@Cui:2010kt", "@Fornara:2004bi", "**m.Komatsu2009**"),
+                      .Names = c("56", 
+                                 "85", "118", "129", "21", "82", "154", "148", "3", "150", "86", 
                                  "153", "78", "82", "83", "48", "59", "54", "83", "68", "100", 
                                  "55", "73", "75", "84", "108", "131", "165", "991", "992", "993", 
                                  "994", "995", "996", "997", "998", "999", "990"))
@@ -142,7 +143,7 @@ setkey(genes, "MSU identifier")
 genes <- unique(genes)
 genTpm <- tpm[genes]
 genTpm.long <- reshape2::melt(genTpm, id.vars = c('MSU identifier', 'Gene symbol'),
-                                variable.name = "lib", value.name = "Expression (transcripts per million)")
+                              variable.name = "lib", value.name = "Expression (transcripts per million)")
 
 # expression calls for these genes by library
 expGenTT <- data.table(readRDS('output/expressedGenes/expGenTT.Rds'), key = "id")
