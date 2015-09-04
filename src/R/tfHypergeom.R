@@ -64,7 +64,7 @@ familyClusters <- data.table(reshape2::dcast(familyStats[clusterStats],
                                              Fam + n + nexpr ~ Cluster,
                                              value.var = "nclust"), key = "Fam")
 cc <- grep("^C\\d+", names(familyClusters), value = TRUE)
-familyClusters[, total := rowSums(.SD), .SDcols = nc]
+familyClusters[, total := rowSums(.SD), .SDcols = cc]
 
 # combine the results for adjusting p-values
 resultsLong <- merge(reshape2::melt(inClusterPerFamily,
