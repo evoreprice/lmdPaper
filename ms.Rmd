@@ -156,7 +156,21 @@ The primary sequences of *Arabidopsis thaliana*, *Solanum lycopersicum* and *Ory
 
 # Tables
 
-```{r pander, results = "asis"}
+```{r t_familiesPerCluster, results = "asis"}
+
+pander::set.caption(paste0(
+  I(pasteLabel("**Table ", tableCount, "t_familiesPerCluster")),
+  "**: Transcription factor and transcriptional regulator family members in each cluster. *n*, total number of family members, *n*~expr~, number of family members expressed in the whole dataset, C~1~–C~", c, "~, number of family members in each cluster, and the total number of family members in all clusters."))
+t_familiesPerCluster <- as.data.frame(t_familiesPerCluster[!Total == 0])
+rownames(t_familiesPerCluster) <- t_familiesPerCluster$Family
+t_familiesPerCluster$Family <- NULL
+pander::pandoc.table(t_familiesPerCluster, split.tables = Inf, emphasize.rownames = FALSE,
+                     justify = c("right", rep("centre", length(names(t_familiesPerCluster)) - 1), "left"))
+
+```
+
+
+```{r t_hypergeom, results = "asis"}
 pander::set.alignment('center', row.names = 'right')
 pander::set.caption(paste0(
   I(pasteLabel("**Table ", tableCount, "t_hypergeom")),

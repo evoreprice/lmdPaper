@@ -47,11 +47,24 @@ hyperGeomResults <- sapply(1:length(tfdbByFamily), function(i)
          clusterSize, lower.tail = FALSE))
 colnames(hyperGeomResults) <- names(tfdbByFamily)
 
-# what about ALOGs (not TFs)
+# what about ALOGs (not annotated on TFDB)
 ALOG <- c('LOC_Os07g04670', 'LOC_Os02g07030', 'LOC_Os06g46030',
           'LOC_Os02g41460', 'LOC_Os04g43580', 'LOC_Os10g33780',
           'LOC_Os02g56610', 'LOC_Os01g61310', 'LOC_Os05g39500', 'LOC_Os05g28040')
 
+# table of cluster and tf family stats
+familyStats <- data.table(Fam = names(exprPerFamily), nexpr = exprPerFamily,
+                          key = 'Fam')
+familyStats[, n := dim(tfdb[Family == Fam,])[1], by = Fam]
+clusterStats.wide <- data.table(t(inClusterPerFamily), keep.rownames = TRUE,
+                                key = "rn")
+clusterStats <- reshape2::melt(clusterStats.wide, id.vars ="rn",
+                               variable.name = "Cluster", value.name = "nclust")
+familyClusters <- data.table(reshape2::dcast(familyStats[clusterStats],
+                                             Fam + n + nexpr ~ Cluster,
+                                             value.var = "nclust"), key = "Fam")
+cc <- grep("^C\\d+", names(familyClusters), value = TRUE)
+familyClusters[, total := rowSums(.SD), .SDcols = nc]
 
 # combine the results for adjusting p-values
 resultsLong <- merge(reshape2::melt(inClusterPerFamily,
@@ -107,3 +120,6 @@ sigFamilies <- sigFamilies[, c(generalCn, cnDt[,cn])]
 
 # output
 saveRDS(sigFamilies, paste0(mfuzzDir, "/sigFamilies.Rds"))
+saveRDS(familyClusters, paste0(mfuzzDir, "/familyClusters.Rds"))
+
+

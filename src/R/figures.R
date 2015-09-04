@@ -317,6 +317,16 @@ sf_mfuzzPca <- ggplot(vg.mds, aes(x = MDS1, y=MDS2, colour = factor(cluster))) +
 
 s_figCount <- incCount(s_figCount, "sf_mfuzzPca")
 
+# table of families/cluster
+t_familiesPerCluster <- readRDS('output/mfuzz/familyClusters.Rds')
+t_familiesPerCluster[!total == 0]
+from <- grep("^C\\d+", names(t_familiesPerCluster), value = TRUE)
+to <- sub("(\\d+)", "~\\1~", from)
+setnames(t_familiesPerCluster, old = c("Fam", "n", "nexpr", "total", from),
+         new = c("Family", "*n*", "*n*~expr~", "Total", to))
+
+tableCount <- incCount(tableCount, "t_familiesPerCluster")
+
 #################
 ### HYPERGEOM ###
 #################
