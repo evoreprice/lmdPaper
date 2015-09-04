@@ -154,8 +154,7 @@ The primary sequences of *Arabidopsis thaliana*, *Solanum lycopersicum* and *Ory
 
 # Tables
 
-```{r t_familiesPerCluster, results = "asis"}
-
+```{r t_familiesPerCluster, results = "hide"}
 pander::set.caption(paste0(
   I(pasteLabel("**Table ", tableCount, "t_familiesPerCluster")),
   "**: Transcription factor and transcriptional regulator family members in each cluster. *n*, total number of family members, *n*~expr~, number of family members expressed in the whole dataset, C~1~–C~", c, "~, number of family members in each cluster, and the total number of family members in all clusters."))
@@ -164,7 +163,6 @@ rownames(t_familiesPerCluster) <- t_familiesPerCluster$Family
 t_familiesPerCluster$Family <- NULL
 pander::pandoc.table(t_familiesPerCluster, split.tables = Inf, emphasize.rownames = FALSE,
                      justify = c("right", rep("centre", length(names(t_familiesPerCluster)) - 1), "left"))
-
 ```
 
 
@@ -192,7 +190,6 @@ git <- c(paste("**git branch:**",system("git rev-parse --abbrev-ref HEAD", inter
           paste("**git hash:**", system("git rev-parse HEAD", intern = TRUE)))
 
 for (x in git){cat(x, "\n")}
-
 ```
 
 # References (move to before *Tables*)

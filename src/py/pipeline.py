@@ -529,6 +529,10 @@ def st_libStats(inputFiles, outputFiles):
 @merge(hypergeom, "ruffus/table.t_hypergeom")
 def t_hypergeom(inputFiles, outputFiles):
     touch(outputFiles)
+@merge(hypergeom, "ruffus/table.t_familiesPerCluster")
+def t_familiesPerCluster(inputFiles, outputFiles):
+    touch(outputFiles)
+
 
 #---------------------------------------------------------------
 # PCA plot
