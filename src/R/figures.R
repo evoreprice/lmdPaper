@@ -260,7 +260,7 @@ centres.wide[, label := factor(label, levels = label)]
 plotData <- reshape2::melt(plotData.wide,
                            id.vars = c("id", "Cluster", "Membership", "label", "number"),
                            variable.name = "Stage",
-                           value.name = "Normalised, transformed read counts")
+                           value.name = "Scaled, transformed read counts")
 
 # fix stage label
 plotData[, Stage := plyr::mapvalues(Stage, "ePBM.SBM", "ePBM/SBM")]
@@ -272,7 +272,7 @@ heatscale <- RColorBrewer::brewer.pal(n = 6, name = "YlOrRd")
 centres <- reshape2::melt(centres.wide, id.vars = 'label',
                           measure.vars = c("RM", "PBM", "ePBM.SBM", "SM"),
                           variable.name = 'Stage',
-                          value.name = "Normalised, transformed read counts")
+                          value.name = "Scaled, transformed read counts")
 centres[, Stage := plyr::mapvalues(Stage, "ePBM.SBM", "ePBM/SBM")]
 
 # number of clusters (for text)
@@ -281,7 +281,7 @@ maxClust <- readRDS('output/mfuzz/maxClust.Rds')
 
 # main cluster figure
 f_mfuzzClusters <- ggplot(plotData,
-                          aes(x = Stage, y = `Normalised, transformed read counts`,
+                          aes(x = Stage, y = `Scaled, transformed read counts`,
                               colour = Membership, group = id)) +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
