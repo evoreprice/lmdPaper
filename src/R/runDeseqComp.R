@@ -4,12 +4,12 @@
 
 # check for STAR output
 starDirSl <- "output/madsComp/sl/STAR"
-if (!dir.exists(starDir)) {
+if (!dir.exists(starDirSl)) {
   cat("starDirSl not found, exiting\n", file = stderr())
   quit(save = "no", status = 1)
 }
 starDirAt <- "output/madsComp/at/STAR"
-if (!dir.exists(starDir)) {
+if (!dir.exists(starDirAt)) {
   cat("starDirAt not found, exiting\n", file = stderr())
   quit(save = "no", status = 1)
 }

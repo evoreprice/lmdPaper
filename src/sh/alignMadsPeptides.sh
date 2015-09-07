@@ -67,6 +67,6 @@ _EOF_
 
 # align
 
-clustalo -i "$outdir"/madsPeptides.fasta --full --outfmt=clustal --outfile="$outdir"/madsPeptides.aln
+clustalo -i "$outdir"/madsPeptides.fasta --full --force --outfmt=clustal --outfile="$outdir"/madsPeptides.aln
 
 exit 0
