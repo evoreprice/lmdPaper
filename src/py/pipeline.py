@@ -64,13 +64,13 @@ def submit_job(jobScript, ntasks, cpus_per_task, job_name):
     f.close()
     # mail output
     if proc.returncode != 0:
-        subject = "[Tom@SLURM] Pipeline step " + jobId + " FAILED"
+        subject = "[Tom@SLURM] Pipeline step " + job_name + " FAILED"
     else:
-        subject = "[Tom@SLURM] Pipeline step " + jobId + " finished"
+        subject = "[Tom@SLURM] Pipeline step " + job_name + " finished"
     mail = Popen(['mail', '-s', subject, 'tom'], stdin = PIPE)
     mail.communicate(out + err)
     # check subprocess exit code
-    assert proc.returncode == 0, 'Job failed with non-zero exit code'  
+    assert proc.returncode == 0, "Job " + job_name + " failed with non-zero exit code"
     return(jobId)
 
 # Variant of submit_job for JGI jobs where email/password is required
@@ -101,9 +101,9 @@ def submit_download_job(jobScript, job_name, jgiLogon, jgiPassword):
     f.close()
     # mail output
     if proc.returncode != 0:
-        subject = "[Tom@SLURM] Pipeline step " + jobId + " FAILED"
+        subject = "[Tom@SLURM] Pipeline step " + job_name + " FAILED"
     else:
-        subject = "[Tom@SLURM] Pipeline step " + jobId + " finished"
+        subject = "[Tom@SLURM] Pipeline step " + job_name + " finished"
     mail = Popen(['mail', '-s', subject, 'tom'], stdin = PIPE)
     mail.communicate(out + err)
     # check completion    
