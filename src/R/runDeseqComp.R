@@ -16,13 +16,13 @@ if (!dir.exists(starDirAt)) {
 
 # load the quant files
 starFilesSl <- list.files(starDirSl, pattern = "ReadsPerGene", full.names = TRUE)
-if (length(starFiles) == 0) {
+if (length(starFilesSl) == 0) {
   cat("Couldn't find STAR count files, exiting\n", file = stderr())
   quit(save = "no", status = 1)
 }
 # load the quant files
 starFilesAt <- list.files(starDirAt, pattern = "ReadsPerGene", full.names = TRUE)
-if (length(starFiles) == 0) {
+if (length(starFilesAt) == 0) {
   cat("Couldn't find STAR count files, exiting\n", file = stderr())
   quit(save = "no", status = 1)
 }
