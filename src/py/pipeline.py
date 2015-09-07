@@ -315,12 +315,25 @@ def map_sl_reads(inputFiles, outputFiles):
 # map arabidopsis reads
 #
 @merge([download_at_reads, download_at_genome], output = "ruffus/at.bamfiles")
-
 def map_at_reads(inputFiles, outputFiles):
     jobScript = 'src/sh/pipelineAt.sh'
     ntasks = '1'
     cpus_per_task = '4'
     job_name = 'atMap'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)    
+    
+#---------------------------------------------------------------
+# Run DESeq2 on tomato and arabidopsis bamfiles
+#
+@merge([map_at_reads, map_sl_reads], output = "ruffus/comp.deseq2")
+def run_deseq_comp(inputFiles, outputFiles):
+    jobScript = 'src/R/runDeseqComp.R'
+    ntasks = '1'
+    cpus_per_task = '1'
+    job_name = 'deseqCmp'
     jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
     # update ruffus flag
     print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
@@ -498,19 +511,19 @@ def compare_inSitus(inputFiles, outputFiles):
     print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
     touch(outputFiles)
 
-##---------------------------------------------------------------
-## clustal-align MADS peptides
-##
-#@transform(get_mads_peptides, suffix(".data"), ".alignment")
-#def align_mads_peptides(inputFiles, outputFiles):
-#    jobScript = 'src/sh/alignMadsPeptides.sh'
-#    ntasks = '1'
-#    cpus_per_task = '1'
-#    job_name = 'clustal'
-#    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
-#    # update ruffus flag
-#    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
-#    touch(outputFiles)
+#---------------------------------------------------------------
+# clustal-align MADS peptides
+#
+@transform(get_mads_peptides, suffix(".data"), ".alignment")
+def align_mads_peptides(inputFiles, outputFiles):
+    jobScript = 'src/sh/alignMadsPeptides.sh'
+    ntasks = '1'
+    cpus_per_task = '1'
+    job_name = 'clustal'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)
 
 #---------------------------------------------------------------
 # FIGURES AND TABLES

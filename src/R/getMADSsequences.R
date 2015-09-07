@@ -3,7 +3,9 @@
 library(data.table)
 
 # interesting MADS family from arora paper
-agl2os <- c('LOC_Os03g11614', 'LOC_Os03g54170', 'LOC_Os09g32948', 'LOC_Os06g06750', 'LOC_Os08g41950')
+agl2os <- c('LOC_Os03g11614', 'LOC_Os03g54170', 'LOC_Os09g32948',
+            'LOC_Os06g06750', 'LOC_Os08g41950',
+            "LOC_Os03g14850") # Malpha as an outgroup
 
 # arabidopsis genes
 agl2at <- c("AT5G15800", "AT2G03710", "AT3G02310", "AT1G24260")

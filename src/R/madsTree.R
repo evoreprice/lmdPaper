@@ -1,27 +1,27 @@
 #!/usr/bin/Rscript
 
+library(ggdendro)
+library(ggplot2)
+library(data.table)
+
 clustalAlign <- seqinr::read.alignment('output/madsComp/clustal/madsPeptides.aln',
                                        format = 'clustal')
-#ggdendro::ggdendrogram(
-
-ape::as.alignment(clustalAlign)
-
 cDist <- seqinr::dist.alignment(clustalAlign, matrix = "similarity")
-mat <- as.matrix(cDist)
-which(apply(mat, 2, function(x) any(is.nan(x))))
+hc <- hclust(cDist, method = "average")
+hcdata <- lapply(dendro_data(hc), data.table)
+#segment(hcdata)[yend == 0, yend := y - 0.1]
 
 
-mat[, "AT1G59920"]
+ggdendrogram(hc, rotate = TRUE)
 
-phy <- ape::njs(cDist)
+ggplot(segment(hcdata)) +
+  theme_dendro() +
+  coord_flip() +
+  scale_y_reverse(expand=c(0.2, 0)) +
+  geom_label(data = label(hcdata), mapping = aes(x = x, y = y, label = label),
+             hjust = 0) + 
+  geom_segment(aes(x=x, y=y, xend=xend, yend=yend)) 
+  
 
-
-
-mat <- seqinr::as.matrix.alignment(clustalAlign)
-ape::boot.phylo(phylo, mat, seqinr::dist.alignment)
-
-
-
-hclust(cDist, "average")
-
-hc <- hclust(seqinr::dist.alignment(clustalAlign))
+plot(ape::as.phylo(hc))
+plot(ape::as.phylo(hc), type = "unrooted")
