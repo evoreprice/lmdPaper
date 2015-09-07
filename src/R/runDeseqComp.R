@@ -53,7 +53,7 @@ ddsAt <- DESeq2::DESeqDataSetFromMatrix(countData = subset(starCountsAt, !grepl(
 ddsAt <- DESeq2::DESeq(ddsAt)
 
 # MAKE OUTPUT FOLDER
-outDir <- "output/DESeq2"
+outDir <- "output/madsComp/"
 if (!dir.exists(outDir)) {
   dir.create(outDir)
 }
