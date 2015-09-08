@@ -1,6 +1,36 @@
 #!/usr/bin/Rscript
 
+library(ggdendro)
+library(ggplot2)
 library(data.table)
+
+# DESeq2 results
+ddsOsFile <- "output/DESeq2/ddsWald.Rds"
+ddsSlFile <- "output/madsComp/ddsSl.Rds"
+ddsAtFile <- "output/madsComp/ddsAt.Rds"
+
+lapply(list(ddsAtFile, ddsSlFile, ddsOsFile), function(x)
+  if(!file.exists(x)) {
+    cat(x, " not found, exiting\n", file = stderr())
+    quit(save = "no", status = 1)
+  })
+
+# get DESeq2 results
+ddsOs <- readRDS(ddsOsFile)
+resOs <- data.table(as.data.frame(
+  DESeq2::results(ddsOs, contrast = c("stage", "SM", "RM"))),
+  keep.rownames = TRUE, key = "rn")
+ddsAt <- readRDS(ddsAtFile)
+resAt <- data.table(as.data.frame(
+  DESeq2::results(ddsAt, contrast = c("stage", "FM", "IM"))),
+  keep.rownames = TRUE, key = "rn")
+ddsSl <- readRDS(ddsSlFile)
+resSl <- data.table(as.data.frame(
+  DESeq2::results(ddsSl, contrast = c("stage", "fm", "sim"))),
+  keep.rownames = TRUE, key = "rn")
+
+# make DESeq results data.table
+resAll <- rbind(resOs, resAt, resSl)
 
 # set up biomaRt for phytozome
 phytozome <- biomaRt::useMart(biomart = 'phytozome_mart', dataset = "phytozome")
@@ -50,6 +80,9 @@ madsPeptides[name == '', name := NA]
 madsPeptides[!is.na(name) & organism_name == "Osativa", name := paste0("OS_", name)]
 madsPeptides[!is.na(name) & organism_name == "Athaliana", name := paste0("AT_", name)]
 madsPeptides[is.na(name), name := toupper(gene_name1)]
+
+# add l2fc values
+madsPeptides[, log2FoldChange := resAll[rn == gene_name1, log2FoldChange], by = gene_name1]
 
 # make a list of lines for writing
 madsLines <- c(apply(madsPeptides, 1, function(x)
@@ -123,10 +156,33 @@ system("clustalo -i /tmp/madsDomain.fasta --full --force --outfmt=fa --outfile=/
 
 # read clustal back in
 domainAlign <- seqinr::read.alignment("/tmp/madsDomain.faa", format = 'fasta')
+
+# make a protein tree
 cDist <- seqinr::dist.alignment(domainAlign, matrix = "similarity")
 hc <- hclust(cDist, method = "average")
 hcdata <- lapply(dendro_data(hc), data.table)
-ggdendrogram(hc, rotate = TRUE)
+#ggdendrogram(hc, rotate = TRUE) # sneak peek
 
+# add L2FCs to label
+label(hcdata)[, log2FoldChange := madsPeptides[name == label, log2FoldChange], by = label]
 
+# plot (move to figures.R)
+heatscale <- rev(RColorBrewer::brewer.pal(5, "PuOr"))
+ggplot(segment(hcdata)) +
+  xlab(NULL) + ylab(NULL) +
+  theme_minimal(base_size = 8, base_family = "Helvetica") +
+  theme(axis.text = element_blank(),
+        panel.grid = element_blank()) +
+  coord_flip() +
+  scale_y_reverse(limits = c(0.775, -0.2)) +
+  scale_x_continuous(expand = c(0,1)) +
+  geom_label(data = label(hcdata),
+             mapping = aes(x = x, y = y, label = label, fill = log2FoldChange),
+             hjust = "left", size = 2) + 
+  guides(fill = guide_colourbar(title = expression(Log[2]*"-fold change"))) +
+  scale_fill_gradient2(low = heatscale[1], mid = 'grey90', high = heatscale[5],
+                       midpoint = 0, na.value = NA) +
+  geom_segment(aes(x=x, y=y, xend=xend, yend=yend), lineend = "round") 
+
+ggsave(filename = "~/test.pdf", width = 3.150 * 4, height = 49)
 
