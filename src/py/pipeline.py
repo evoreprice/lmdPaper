@@ -526,6 +526,16 @@ def align_mads_peptides(inputFiles, outputFiles):
     touch(outputFiles)
 
 #---------------------------------------------------------------
+# make dendogram of MADS genes
+#
+@merge([run_deseq_comp, align_mads_peptides, run_deseq2_os], 'ruffus/comp.dendro')
+def make_mads_dendogram(inputFiles, outputFiles):
+    jobScript = 'src/sh/alignMadsPeptides.sh'
+    ntasks = '1'
+    cpus_per_task = '1'
+    job_name = 'clustal'
+
+#---------------------------------------------------------------
 # FIGURES AND TABLES
 #---------------------------------------------------------------
 
