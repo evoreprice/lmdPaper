@@ -1,7 +1,5 @@
 #!/usr/bin/Rscript
 
-library(ggdendro)
-library(ggplot2)
 library(data.table)
 
 # DESeq2 results
@@ -39,8 +37,8 @@ phytozome <- biomaRt::useMart(biomart = 'phytozome_mart', dataset = "phytozome")
 filters <- c("panther_id_list", "organism_id")
 values <- list("PTHR11945", c("167", "204", "225"))
 atts <- c("transcript_name", "gene_name1", "organism_name", "synonyms", "peptide_sequence")
-martResults <- data.table(biomaRt::getBM(atts, filters, values, phytozome, uniqueRows = TRUE),
-                          key = c( "gene_name1", "transcript_name", "organism_name"))
+res <- biomaRt::getBM(atts, filters, values, phytozome, uniqueRows = TRUE)
+martResults <- data.table(res, key = c("gene_name1", "transcript_name", "organism_name"))
 rm(phytozome)
 
 # deal with multiple synonyms
@@ -83,6 +81,9 @@ madsPeptides[is.na(name), name := toupper(gene_name1)]
 
 # add l2fc values
 madsPeptides[, log2FoldChange := resAll[rn == gene_name1, log2FoldChange], by = gene_name1]
+
+# sneak peek at number of genes
+#madsPeptides[, .(length(unlist(gene_name1))), by = organism_name]
 
 # make a list of lines for writing
 madsLines <- c(apply(madsPeptides, 1, function(x)
@@ -157,13 +158,89 @@ system("clustalo -i /tmp/madsDomain.fasta --full --force --outfmt=fa --outfile=/
 # read clustal back in
 domainAlign <- seqinr::read.alignment("/tmp/madsDomain.faa", format = 'fasta')
 
+# what happens if i do this with the whole alignment?
+#domainAlign <- clustalAlign
+
+# clean the alignment
+alignmentLength <- nchar(domainAlign$seq[[1]])
+nb <- domainAlign$nb
+# minimum percentages
+minpcnongap <- 30
+minpcident <- 5
+# number of non-gaps at each position
+nbNonGaps <- sapply(1:alignmentLength, function(i)
+  sum(!sapply(domainAlign$seq, substr, start = i, stop = i) == "-"))
+# percentage of non-gap pairs that are identical at each position
+countPcNonGapIdent <- function(letterSet) {
+  # remove gap letters
+  letterSet <- letterSet[!letterSet == "-"]
+  # return 0 if no comparisons
+  if (length(letterSet) < 2) {return(0)} 
+  # how many comparisons?
+  nbPairs <- length(letterSet) * (length(letterSet) - 1)/2
+  # do the comparisons
+  identPairs <- 0
+  while(length(letterSet) > 1) {
+    # how many of the pairs are identical?
+    identPairs <- identPairs + sum(letterSet[1] == letterSet[-1])
+    # remove the current letter
+    letterSet <- letterSet[-1]
+  }
+  return(identPairs * 100 / nbPairs)
+}
+pcNonGapIdent <- sapply(1:alignmentLength, function(i)
+  countPcNonGapIdent(sapply(domainAlign$seq, substr, start = i, stop = i)))
+# keep the letters that match our criteria
+keptLetters <- which(nbNonGaps * 100 / nb > minpcnongap & pcNonGapIdent > minpcident)
+# make a new alignment
+cleanedMatrix <- seqinr::as.matrix.alignment(domainAlign)[,keptLetters]
+nb <- dim(cleanedMatrix)[1]
+nam <- rownames(cleanedMatrix)
+seq <- apply(cleanedMatrix, 1, paste0, collapse = "")
+names(seq) <- NULL
+cleanedAlignment <- seqinr::as.alignment(nb = nb, nam = nam, seq = seq)
+
 # make a protein tree
 cDist <- seqinr::dist.alignment(domainAlign, matrix = "similarity")
 hc <- hclust(cDist, method = "average")
 hcdata <- lapply(dendro_data(hc), data.table)
 
+# nj tree with ape, visualise with ggtree?
+# need a function to make the tree
+makeNjTree <- function(domainAlign) {
+  if (class(domainAlign) == "matrix") {
+    # convert matrix to alignment
+    nb <- dim(domainAlign)[1]
+    nam <- rownames(domainAlign)
+    seq <- apply(domainAlign, 1, paste0, collapse = "")
+    names(seq) <- NULL
+    domainAlign <- seqinr::as.alignment(nb = nb, nam = nam, seq = seq)
+  }
+  cDist <- seqinr::dist.alignment(domainAlign, matrix = "similarity")
+  njTree <- ape::bionj(cDist)
+  return(njTree)
+}
+
+njTree <- makeNjTree(cleanedAlignment)
+njBoot <- ape::boot.phylo(njTree, seqinr::as.matrix.alignment(domainAlign), makeNjTree)
+ggtree(njTree, layout = "circular") + geom_text(aes(label = label, angle = angle))
+t1 <- ggtree(njTree, layout = "circular") + geom_tiplab(aes(angle = angle + 90), hjust = -0.2, vjust = 0.5)
+ggtree(njTree) %>% hilight(292, fill ="red", alpha = 0.5)
+t1 <- ggtree(njTree, layout = "circular") %>% collapse(node = 292)
+t1
+annotation_clade2(t1, tip1 = 197, tip2 = 169, label = "bof")
+ggsave("~/test3.pdf", width = 20, height = 20)
+
+ggtree(njTree) + geom_tiplab() + geom_text(aes(label = node))
+t <- ggtree(njTree) + geom_tiplab()
+annotation_clade2(t, tip1 = 197, tip2 = 169, label = "bof")
+t %>% hilight(292, fill ="red", alpha = 0.5)
+ggtree(njTree) + geom_text(aes(label = node)) %>% collapse(node = 292)
+ggsave("~/test2.pdf", width = 10, height = 49)
+
 # can i make the tree with ape?
-njsTree <- ape::njs(cDist)
+cDistAll <- seqinr::dist.alignment(clustalAlign, matrix = "similarity")
+njsTree <- ape::njs(cDistAll)
 njsTree <- ape::root(njsTree, interactive = TRUE)
 ape::boot.phylo(njsTree)
 ape::chronopl(njsTree, 0, tol = -Inf)
