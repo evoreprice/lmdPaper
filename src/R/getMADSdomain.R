@@ -161,7 +161,26 @@ domainAlign <- seqinr::read.alignment("/tmp/madsDomain.faa", format = 'fasta')
 cDist <- seqinr::dist.alignment(domainAlign, matrix = "similarity")
 hc <- hclust(cDist, method = "average")
 hcdata <- lapply(dendro_data(hc), data.table)
+
+# can i make the tree with ape?
+njsTree <- ape::njs(cDist)
+njsTree <- ape::root(njsTree, interactive = TRUE)
+ape::boot.phylo(njsTree)
+ape::chronopl(njsTree, 0, tol = -Inf)
+
+# similarity histogram
+hist(1-(cDist^2))
+
+hist(1-(seqinr::dist.alignment(clustalAlign)^2))
+
+ape::is.ultrametric(njsTree)
+
+ape::as.hclust.phylo(njsTree)
+
+
 #ggdendrogram(hc, rotate = TRUE) # sneak peek
+# plot(hc)
+# rect.hclust(hc, k = 16)
 
 # add L2FCs to label
 label(hcdata)[, log2FoldChange := madsPeptides[name == label, log2FoldChange], by = label]
@@ -184,5 +203,5 @@ ggplot(segment(hcdata)) +
                        midpoint = 0, na.value = NA) +
   geom_segment(aes(x=x, y=y, xend=xend, yend=yend), lineend = "round") 
 
-ggsave(filename = "~/test.pdf", width = 3.150 * 4, height = 49)
+ggsave(filename = "~/test.eps", width = 8.3, height = 11.7 * 4) 
 
