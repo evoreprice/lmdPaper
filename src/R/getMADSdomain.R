@@ -102,6 +102,20 @@ clustalAlign <- seqinr::read.alignment("/tmp/mads.faa", format = 'fasta')
 # convert to a matrix
 clustal <- seqinr::as.matrix.alignment(clustalAlign)
 
+# can I cut the tree here?
+cDist <- seqinr::dist.alignment(clustalAlign, matrix = "similarity")
+cDist[is.na(cDist)] <- 0
+hc <- hclust(cDist, method = "average")
+clades <- cutree(hc, h = 0.55)
+mikcc <- clades[clades == which.max(table(clades))]
+mikccMatrix <- clustal[c(names(mikcc), "AT_AGL33"),]
+# make ungapped sequences
+gappedDomains <- apply(mikccMatrix, 1, paste0, collapse = "")
+names(gappedDomains) <- rownames(mikccMatrix)
+domains <- sapply(gappedDomains, gsub, pattern = "-", replacement = "")
+# chuck out "domains" with < 200 AAs
+keptDomains <- domains[sapply(domains, nchar) >= 200 | names(domains) == "AT_AGL33"]
+
 # set sliding window size
 window <- 140
 
@@ -237,7 +251,8 @@ makeNjTree <- function(domainAlign, outgroup) {
   rootedNjt <- ape::root(njTree, outgroup, resolve.root = TRUE)
   return(rootedNjt)
 }
-njTree <- makeNjTree(mikccAlignment, "AT_AGL33")
+### ATTENTION!!! CHECK
+njTree <- makeNjTree(cleanedAlignment, "AT_AGL33")
 heatscale <- rev(RColorBrewer::brewer.pal(5, "PuOr"))
 gtree <- ggplot(njTree, aes(x = x, y = y, label = label)) +
   xlab(NULL) + ylab(NULL) +
