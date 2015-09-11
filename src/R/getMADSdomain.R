@@ -7,8 +7,10 @@ set.seed(1)
 ddsOsFile <- "output/DESeq2/ddsWald.Rds"
 ddsSlFile <- "output/madsComp/ddsSl.Rds"
 ddsAtFile <- "output/madsComp/ddsAt.Rds"
+# atTfdb
+atTfdbFile <- "data/attfdb/atTfdb.Rds"
 
-lapply(list(ddsAtFile, ddsSlFile, ddsOsFile), function(x)
+lapply(list(ddsAtFile, ddsSlFile, ddsOsFile, atTfdbFile), function(x)
   if(!file.exists(x)) {
     cat(x, " not found, exiting\n", file = stderr())
     quit(save = "no", status = 1)
@@ -99,141 +101,181 @@ system("clustalo -i /tmp/madslines.fasta --full --force --outfmt=fa --outfile=/t
 # read clustal back in
 clustalAlign <- seqinr::read.alignment("/tmp/mads.faa", format = 'fasta')
 
-# convert to a matrix
-clustal <- seqinr::as.matrix.alignment(clustalAlign)
-
-# can I cut the tree here?
-cDist <- seqinr::dist.alignment(clustalAlign, matrix = "similarity")
-cDist[is.na(cDist)] <- 0
-hc <- hclust(cDist, method = "average")
-clades <- cutree(hc, h = 0.55)
-mikcc <- clades[clades == which.max(table(clades))]
-mikccMatrix <- clustal[c(names(mikcc), "AT_AGL33"),]
-# make ungapped sequences
-gappedDomains <- apply(mikccMatrix, 1, paste0, collapse = "")
-names(gappedDomains) <- rownames(mikccMatrix)
-domains <- sapply(gappedDomains, gsub, pattern = "-", replacement = "")
-# chuck out "domains" with < 200 AAs
-keptDomains <- domains[sapply(domains, nchar) >= 200 | names(domains) == "AT_AGL33"]
-
-# set sliding window size
-window <- 140
-
-# make a list of matrices of width window
-getWindow <- function(clustal, i, window) {
-  indEnd <- i + window - 1
-  return(clustal[, i:indEnd])
-}
-startIdxs <- seq(1:(dim(clustal)[2] - window + 1))
-clustalWindows <- lapply(startIdxs, function(i)
-  getWindow(clustal, i, window))
-names(clustalWindows) <- startIdxs
-
-# make each window into an alignment
-alignmentWindows <- lapply(clustalWindows, function(x)
-  seqinr::as.alignment(nb = dim(x)[1], nam = rownames(x), seq = apply(x, 1, paste0, collapse = "")))
-
-# run dist on each window
-windowDists <- lapply(alignmentWindows, seqinr::dist.alignment, matrix = "similarity")
-
-# sum distances (NaN -> 3)
-sumDist <- function(x) {
-  # take a copy (don't mutate original)
-  y <- x
-  y[is.nan(y)] <- 3
-  return(sum(y))
-}
-distSums <- lapply(windowDists, function(x) sumDist(x))
-
-# get the window with the lowest distance
-startIdx <- as.integer(names(distSums[which.min(distSums)]))
-
-# get the region + 10 residues each side
-bestWindow <- clustal[, (startIdx - 10) : (startIdx + window + 9) ]
-
-# make ungapped sequences
-gappedDomains <- apply(bestWindow, 1, paste0, collapse = "")
-names(gappedDomains) <- rownames(bestWindow)
-domains <- sapply(gappedDomains, gsub, pattern = "-", replacement = "")
-
-# density of domain size?
-#dLength <- data.table(domainLength = sapply(domains, nchar))
-#ggplot(dLength, aes(x = domainLength)) + stat_density() +
-#  geom_vline(xintercept = dLength[, quantile(domainLength, 0.15)], colour = "red") +
-#  geom_vline(xintercept = 70, colour = "blue")
-#domains[sapply(domains, nchar) > 70 & sapply(domains, nchar) < dLength[, quantile(domainLength, 0.15)]]
-
-# chuck out "domains" with < 70 AAs
-keptDomains <- domains[!sapply(domains, nchar) < 70]
-
-# write a new fasta file
-keptDomainsLines <- c()
-for (x in names(keptDomains)) {
-  keptDomainsLines <- c(keptDomainsLines, paste0(">", x), toupper(keptDomains[[x]]), "")
+# function to clean the alignment
+cleanAlignment <- function(domainAlign, minpcnongap, minpcident) {
+  alignmentLength <- nchar(domainAlign$seq[[1]])
+  nb <- domainAlign$nb
+  # number of non-gaps at each position
+  nbNonGaps <- sapply(1:alignmentLength, function(i)
+    sum(!sapply(domainAlign$seq, substr, start = i, stop = i) == "-"))
+  # percentage of non-gap pairs that are identical at each position
+  countPcNonGapIdent <- function(letterSet) {
+    # remove gap letters
+    letterSet <- letterSet[!letterSet == "-"]
+    # return 0 if no comparisons
+    if (length(letterSet) < 2) {return(0)} 
+    # how many comparisons?
+    nbPairs <- length(letterSet) * (length(letterSet) - 1)/2
+    # do the comparisons
+    identPairs <- 0
+    while(length(letterSet) > 1) {
+      # how many of the pairs are identical?
+      identPairs <- identPairs + sum(letterSet[1] == letterSet[-1])
+      # remove the current letter
+      letterSet <- letterSet[-1]
+    }
+    return(identPairs * 100 / nbPairs)
+  }
+  pcNonGapIdent <- sapply(1:alignmentLength, function(i)
+    countPcNonGapIdent(sapply(domainAlign$seq, substr, start = i, stop = i)))
+  # keep the letters that match our criteria
+  keptLetters <- which(nbNonGaps * 100 / nb > minpcnongap & pcNonGapIdent > minpcident)
+  # make a new alignment
+  cleanedMatrix <- seqinr::as.matrix.alignment(domainAlign)[,keptLetters]
+  nb <- dim(cleanedMatrix)[1]
+  nam <- rownames(cleanedMatrix)
+  seq <- apply(cleanedMatrix, 1, paste0, collapse = "")
+  names(seq) <- NULL
+  cleanedAlignment <- seqinr::as.alignment(nb = nb, nam = nam, seq = seq)
+  return(cleanedAlignment)
 }
 
-writeLines(keptDomainsLines, "/tmp/madsDomain.fasta")
-
-# run clustalo on new FASTA
-system("clustalo -i /tmp/madsDomain.fasta --full --force --outfmt=fa --outfile=/tmp/madsDomain.faa")
-
-# read clustal back in
-domainAlign <- seqinr::read.alignment("/tmp/madsDomain.faa", format = 'fasta')
-
-# what happens if i do this with the whole alignment?
-# domainAlign <- clustalAlign
-
-# clean the alignment
-alignmentLength <- nchar(domainAlign$seq[[1]])
-nb <- domainAlign$nb
 # minimum percentages
 minpcnongap <- 30
 minpcident <- 5
-# number of non-gaps at each position
-nbNonGaps <- sapply(1:alignmentLength, function(i)
-  sum(!sapply(domainAlign$seq, substr, start = i, stop = i) == "-"))
-# percentage of non-gap pairs that are identical at each position
-countPcNonGapIdent <- function(letterSet) {
-  # remove gap letters
-  letterSet <- letterSet[!letterSet == "-"]
-  # return 0 if no comparisons
-  if (length(letterSet) < 2) {return(0)} 
-  # how many comparisons?
-  nbPairs <- length(letterSet) * (length(letterSet) - 1)/2
-  # do the comparisons
-  identPairs <- 0
-  while(length(letterSet) > 1) {
-    # how many of the pairs are identical?
-    identPairs <- identPairs + sum(letterSet[1] == letterSet[-1])
-    # remove the current letter
-    letterSet <- letterSet[-1]
-  }
-  return(identPairs * 100 / nbPairs)
-}
-pcNonGapIdent <- sapply(1:alignmentLength, function(i)
-  countPcNonGapIdent(sapply(domainAlign$seq, substr, start = i, stop = i)))
-# keep the letters that match our criteria
-keptLetters <- which(nbNonGaps * 100 / nb > minpcnongap & pcNonGapIdent > minpcident)
-# make a new alignment
-cleanedMatrix <- seqinr::as.matrix.alignment(domainAlign)[,keptLetters]
-nb <- dim(cleanedMatrix)[1]
-nam <- rownames(cleanedMatrix)
-seq <- apply(cleanedMatrix, 1, paste0, collapse = "")
-names(seq) <- NULL
-cleanedAlignment <- seqinr::as.alignment(nb = nb, nam = nam, seq = seq)
 
-#select MIKCc clade (plus outgroup)
-cDist <- seqinr::dist.alignment(cleanedAlignment, matrix = "similarity")
+# clean
+cleanClustalAlign <- cleanAlignment(clustalAlign, minpcnongap, minpcident)
+
+# find the clade of the alignment with the most type ii mads genes
+# lists of type I and type II names
+setkey(madsPeptides, "gene_name1")
+atTfdb <- readRDS(atTfdbFile)
+typeI <-atTfdb[FamilyID == "MADS" & SubFamily == "TypeI", unique(toupper(LocusName))]
+typeII <- atTfdb[FamilyID == "MADS" & SubFamily == "TypeII", unique(toupper(LocusName))]
+t1names <- madsPeptides[typeI, unique(name[!is.na(name)])]
+t2names <- madsPeptides[typeII, unique(name[!is.na(name)])]
+# distance and UPGMA tree
+cDist <- seqinr::dist.alignment(cleanClustalAlign, matrix = "similarity")
+cDist[is.na(cDist)] <- 0
 hc <- hclust(cDist, method = "average")
-clades <- cutree(hc, h = 0.475)
-mikcc <- clades[clades == which.max(table(clades))]
-# will use AGL33 to root tree
-mikccMatrix <- cleanedMatrix[c(names(mikcc), "AT_AGL33"),]
-nb <- dim(mikccMatrix)[1]
-nam <- rownames(mikccMatrix)
-seq <- apply(mikccMatrix, 1, paste0, collapse = "")
-names(seq) <- NULL
-mikccAlignment <- seqinr::as.alignment(nb = nb, nam = nam, seq = seq)
+# get the lowest cut with as many type II mads as possible
+optimClades <- function(h, hc) {
+  clades <- cutree(hc, h = h)
+  # which clade has the most type II mads
+  mikccClade <- as.integer(names(which.max(table(clades[names(clades) %in% t2names]))))
+  # list of genes in this clade
+  genesInClade <- unique(names(clades[clades == mikccClade]))
+  # return number of type II mads minus number of type I mads in this clade
+  return(sum(genesInClade %in% t2names) - sum(genesInClade %in% t1names)/10)
+}
+hMin <- optimize(f = optimClades, interval = c(0,1), hc = hc, maximum = TRUE, tol = 10^-10)
+
+# get the genes in this clade
+clades <- cutree(hc, h = hMin$maximum)
+mikccClade <- as.integer(names(which.max(table(clades[names(clades) %in% t2names]))))
+genesInClade <- unique(names(clades[clades == mikccClade]))
+
+# get the clustal matrix for these genes
+clustal <- seqinr::as.matrix.alignment(clustalAlign)
+mikccMatrix <- clustal[genesInClade,]
+
+# make ungapped sequences
+gappedMikcc <- apply(mikccMatrix, 1, paste0, collapse = "")
+names(gappedMikcc) <- rownames(mikccMatrix)
+mikcc <- sapply(gappedMikcc, gsub, pattern = "-", replacement = "")
+# chuck out proteins with < 175 AAs
+keptMikcc <- mikcc[sapply(mikcc, nchar) >= 175]
+
+############################################
+### DISABLE SLIDING WINDOW STUFF FOR NOW ###
+############################################
+# # set sliding window size
+# window <- 140
+# 
+# # make a list of matrices of width window
+# getWindow <- function(clustal, i, window) {
+#   indEnd <- i + window - 1
+#   return(clustal[, i:indEnd])
+# }
+# startIdxs <- seq(1:(dim(clustal)[2] - window + 1))
+# clustalWindows <- lapply(startIdxs, function(i)
+#   getWindow(clustal, i, window))
+# names(clustalWindows) <- startIdxs
+# 
+# # make each window into an alignment
+# alignmentWindows <- lapply(clustalWindows, function(x)
+#   seqinr::as.alignment(nb = dim(x)[1], nam = rownames(x), seq = apply(x, 1, paste0, collapse = "")))
+# 
+# # run dist on each window
+# windowDists <- lapply(alignmentWindows, seqinr::dist.alignment, matrix = "similarity")
+# 
+# # sum distances (NaN -> 3)
+# sumDist <- function(x) {
+#   # take a copy (don't mutate original)
+#   y <- x
+#   y[is.nan(y)] <- 3
+#   return(sum(y))
+# }
+# distSums <- lapply(windowDists, function(x) sumDist(x))
+# 
+# # get the window with the lowest distance
+# startIdx <- as.integer(names(distSums[which.min(distSums)]))
+# 
+# # get the region + 10 residues each side
+# bestWindow <- clustal[, (startIdx - 10) : (startIdx + window + 9) ]
+# 
+# # make ungapped sequences
+# gappedDomains <- apply(bestWindow, 1, paste0, collapse = "")
+# names(gappedDomains) <- rownames(bestWindow)
+# domains <- sapply(gappedDomains, gsub, pattern = "-", replacement = "")
+# 
+# # density of domain size?
+# #dLength <- data.table(domainLength = sapply(domains, nchar))
+# #ggplot(dLength, aes(x = domainLength)) + stat_density() +
+# #  geom_vline(xintercept = dLength[, quantile(domainLength, 0.15)], colour = "red") +
+# #  geom_vline(xintercept = 70, colour = "blue")
+# #domains[sapply(domains, nchar) > 70 & sapply(domains, nchar) < dLength[, quantile(domainLength, 0.15)]]
+# 
+# # chuck out "domains" with < 70 AAs
+# keptDomains <- domains[!sapply(domains, nchar) < 70]
+
+##############################################
+### SWITCH BELOW BACK TO KEPTDOMAIN IF NEC ###
+##############################################
+
+# write a new fasta file
+keptMikccLines <- c()
+for (x in names(keptMikcc)) {
+  keptMikccLines <- c(keptMikccLines, paste0(">", x), toupper(keptMikcc[[x]]), "")
+}
+
+writeLines(keptMikccLines, "/tmp/mikccProteins.fasta")
+
+# run clustalo on new FASTA
+system("clustalo -i /tmp/mikccProteins.fasta --full --force --outfmt=fa --outfile=/tmp/mikccProteins.faa")
+
+# read clustal back in
+mikccAlign <- seqinr::read.alignment("/tmp/mikccProteins.faa", format = 'fasta')
+
+cleanedAlignment <- cleanAlignment(mikccAlign, minpcnongap, minpcident)
+
+##############################################
+### disable second MIKCc selection for now ###
+##############################################
+
+# #select MIKCc clade (plus outgroup)
+# cDist <- seqinr::dist.alignment(cleanedAlignment, matrix = "similarity")
+# hc <- hclust(cDist, method = "average")
+# clades <- cutree(hc, h = 0.475)
+# mikcc <- clades[clades == which.max(table(clades))]
+# # will use AGL33 to root tree
+# mikccMatrix <- cleanedMatrix[c(names(mikcc), "AT_AGL33"),]
+# nb <- dim(mikccMatrix)[1]
+# nam <- rownames(mikccMatrix)
+# seq <- apply(mikccMatrix, 1, paste0, collapse = "")
+# names(seq) <- NULL
+# mikccAlignment <- seqinr::as.alignment(nb = nb, nam = nam, seq = seq)
 
 # nj tree with ape, visualise with ggtree
 # need a function to make the tree
@@ -251,8 +293,15 @@ makeNjTree <- function(domainAlign, outgroup) {
   rootedNjt <- ape::root(njTree, outgroup, resolve.root = TRUE)
   return(rootedNjt)
 }
-### ATTENTION!!! CHECK
-njTree <- makeNjTree(cleanedAlignment, "AT_AGL33")
+# choose an outgroup
+og <- "AT_AGL41"
+  cleanedAlignment$nam[cleanedAlignment$nam %in% t1names]
+njTree <- makeNjTree(cleanedAlignment, og)
+
+# draw a tree (move to figures)
+library(ggplot2)
+library(ggtree)
+
 heatscale <- rev(RColorBrewer::brewer.pal(5, "PuOr"))
 gtree <- ggplot(njTree, aes(x = x, y = y, label = label)) +
   xlab(NULL) + ylab(NULL) +
@@ -268,49 +317,49 @@ exprAnnot <- madsPeptides[unique(njTree$tip.label), .(name, log2FoldChange)]
 gtree <- gtree %<+% exprAnnot
 gtree <- gtree + geom_label(mapping = aes(fill = log2FoldChange), size = 2) +
   scale_y_continuous(expand = c(0,1))
-gtree <- annotation_clade(gtree, node = 151, "AGL2-like")
-gtree <- annotation_clade(gtree, node = 144, "AGL6-like")
-annotation_clade(gtree, node = 125, "SQUA-like")
+# gtree <- annotation_clade(gtree, node = 151, "AGL2-like")
+# gtree <- annotation_clade(gtree, node = 144, "AGL6-like")
+# annotation_clade(gtree, node = 125, "SQUA-like")
 gtree
 ggsave(filename = "~/test2.pdf", width = 8.3, height = 11.7 * 2) 
 
-
-# similarity histogram
-hist(1-(cDist^2))
-
-hist(1-(seqinr::dist.alignment(clustalAlign)^2))
-
-ape::is.ultrametric(njsTree)
-
-ape::as.hclust.phylo(njsTree)
-
-
-#ggdendrogram(hc, rotate = TRUE) # sneak peek
-# plot(hc)
-# rect.hclust(hc, k = 16)
-
-# add L2FCs to label
-label(hcdata)[, log2FoldChange := madsPeptides[name == label, log2FoldChange], by = label]
-
-# plot (move to figures.R)
-heatscale <- rev(RColorBrewer::brewer.pal(5, "PuOr"))
-ggplot(segment(hcdata)) +
-  xlab(NULL) + ylab(NULL) +
-  theme_minimal(base_size = 8, base_family = "Helvetica") +
-  theme(axis.text = element_blank(),
-        panel.grid = element_blank()) +
-  coord_flip() +
-  scale_y_reverse(limits = c(0.775, -0.2)) +
-  scale_x_continuous(expand = c(0,1)) +
-  geom_label(data = label(hcdata),
-             mapping = aes(x = x, y = y, label = label, fill = log2FoldChange),
-             hjust = "left", size = 2) + 
-  guides(fill = guide_colourbar(title = expression(Log[2]*"-fold change"))) +
-  scale_fill_gradient2(low = heatscale[1], mid = 'grey90', high = heatscale[5],
-                       midpoint = 0, na.value = NA) +
-  geom_segment(aes(x=x, y=y, xend=xend, yend=yend), lineend = "round") 
-
-ggsave(filename = "~/test.eps", width = 8.3, height = 11.7 * 4) 
+# 
+# # similarity histogram
+# hist(1-(cDist^2))
+# 
+# hist(1-(seqinr::dist.alignment(clustalAlign)^2))
+# 
+# ape::is.ultrametric(njsTree)
+# 
+# ape::as.hclust.phylo(njsTree)
+# 
+# 
+# #ggdendrogram(hc, rotate = TRUE) # sneak peek
+# # plot(hc)
+# # rect.hclust(hc, k = 16)
+# 
+# # add L2FCs to label
+# label(hcdata)[, log2FoldChange := madsPeptides[name == label, log2FoldChange], by = label]
+# 
+# # plot (move to figures.R)
+# heatscale <- rev(RColorBrewer::brewer.pal(5, "PuOr"))
+# ggplot(segment(hcdata)) +
+#   xlab(NULL) + ylab(NULL) +
+#   theme_minimal(base_size = 8, base_family = "Helvetica") +
+#   theme(axis.text = element_blank(),
+#         panel.grid = element_blank()) +
+#   coord_flip() +
+#   scale_y_reverse(limits = c(0.775, -0.2)) +
+#   scale_x_continuous(expand = c(0,1)) +
+#   geom_label(data = label(hcdata),
+#              mapping = aes(x = x, y = y, label = label, fill = log2FoldChange),
+#              hjust = "left", size = 2) + 
+#   guides(fill = guide_colourbar(title = expression(Log[2]*"-fold change"))) +
+#   scale_fill_gradient2(low = heatscale[1], mid = 'grey90', high = heatscale[5],
+#                        midpoint = 0, na.value = NA) +
+#   geom_segment(aes(x=x, y=y, xend=xend, yend=yend), lineend = "round") 
+# 
+# ggsave(filename = "~/test.eps", width = 8.3, height = 11.7 * 4) 
 
 # OUTPUT TO SAVE
 #domains
