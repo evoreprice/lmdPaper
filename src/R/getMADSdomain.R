@@ -1,6 +1,7 @@
 #!/usr/bin/Rscript
 
 library(data.table)
+set.seed(1)
 
 # DESeq2 results
 ddsOsFile <- "output/DESeq2/ddsWald.Rds"
@@ -141,6 +142,13 @@ gappedDomains <- apply(bestWindow, 1, paste0, collapse = "")
 names(gappedDomains) <- rownames(bestWindow)
 domains <- sapply(gappedDomains, gsub, pattern = "-", replacement = "")
 
+# density of domain size?
+#dLength <- data.table(domainLength = sapply(domains, nchar))
+#ggplot(dLength, aes(x = domainLength)) + stat_density() +
+#  geom_vline(xintercept = dLength[, quantile(domainLength, 0.15)], colour = "red") +
+#  geom_vline(xintercept = 70, colour = "blue")
+#domains[sapply(domains, nchar) > 70 & sapply(domains, nchar) < dLength[, quantile(domainLength, 0.15)]]
+
 # chuck out "domains" with < 70 AAs
 keptDomains <- domains[!sapply(domains, nchar) < 70]
 
@@ -159,7 +167,7 @@ system("clustalo -i /tmp/madsDomain.fasta --full --force --outfmt=fa --outfile=/
 domainAlign <- seqinr::read.alignment("/tmp/madsDomain.faa", format = 'fasta')
 
 # what happens if i do this with the whole alignment?
-#domainAlign <- clustalAlign
+# domainAlign <- clustalAlign
 
 # clean the alignment
 alignmentLength <- nchar(domainAlign$seq[[1]])
@@ -200,14 +208,22 @@ seq <- apply(cleanedMatrix, 1, paste0, collapse = "")
 names(seq) <- NULL
 cleanedAlignment <- seqinr::as.alignment(nb = nb, nam = nam, seq = seq)
 
-# make a protein tree
-cDist <- seqinr::dist.alignment(domainAlign, matrix = "similarity")
+#select MIKCc clade (plus outgroup)
+cDist <- seqinr::dist.alignment(cleanedAlignment, matrix = "similarity")
 hc <- hclust(cDist, method = "average")
-hcdata <- lapply(dendro_data(hc), data.table)
+clades <- cutree(hc, h = 0.475)
+mikcc <- clades[clades == which.max(table(clades))]
+# will use AGL33 to root tree
+mikccMatrix <- cleanedMatrix[c(names(mikcc), "AT_AGL33"),]
+nb <- dim(mikccMatrix)[1]
+nam <- rownames(mikccMatrix)
+seq <- apply(mikccMatrix, 1, paste0, collapse = "")
+names(seq) <- NULL
+mikccAlignment <- seqinr::as.alignment(nb = nb, nam = nam, seq = seq)
 
-# nj tree with ape, visualise with ggtree?
+# nj tree with ape, visualise with ggtree
 # need a function to make the tree
-makeNjTree <- function(domainAlign) {
+makeNjTree <- function(domainAlign, outgroup) {
   if (class(domainAlign) == "matrix") {
     # convert matrix to alignment
     nb <- dim(domainAlign)[1]
@@ -218,32 +234,31 @@ makeNjTree <- function(domainAlign) {
   }
   cDist <- seqinr::dist.alignment(domainAlign, matrix = "similarity")
   njTree <- ape::bionj(cDist)
-  return(njTree)
+  rootedNjt <- ape::root(njTree, outgroup, resolve.root = TRUE)
+  return(rootedNjt)
 }
+njTree <- makeNjTree(mikccAlignment, "AT_AGL33")
+heatscale <- rev(RColorBrewer::brewer.pal(5, "PuOr"))
+gtree <- ggplot(njTree, aes(x = x, y = y, label = label)) +
+  xlab(NULL) + ylab(NULL) +
+  theme_minimal(base_size = 8, base_family = "Helvetica") +
+  theme(axis.text = element_blank(),
+        panel.grid = element_blank()) +
+  scale_fill_gradient2(low = heatscale[1], mid = 'grey90', high = heatscale[5],
+                       midpoint = 0, na.value = "white") +
+  geom_tree()
+# add expression values as an annotation
+setkey(madsPeptides, "name")
+exprAnnot <- madsPeptides[unique(njTree$tip.label), .(name, log2FoldChange)]
+gtree <- gtree %<+% exprAnnot
+gtree <- gtree + geom_label(mapping = aes(fill = log2FoldChange), size = 2) +
+  scale_y_continuous(expand = c(0,1))
+gtree <- annotation_clade(gtree, node = 151, "AGL2-like")
+gtree <- annotation_clade(gtree, node = 144, "AGL6-like")
+annotation_clade(gtree, node = 125, "SQUA-like")
+gtree
+ggsave(filename = "~/test2.pdf", width = 8.3, height = 11.7 * 2) 
 
-njTree <- makeNjTree(cleanedAlignment)
-njBoot <- ape::boot.phylo(njTree, seqinr::as.matrix.alignment(domainAlign), makeNjTree)
-ggtree(njTree, layout = "circular") + geom_text(aes(label = label, angle = angle))
-t1 <- ggtree(njTree, layout = "circular") + geom_tiplab(aes(angle = angle + 90), hjust = -0.2, vjust = 0.5)
-ggtree(njTree) %>% hilight(292, fill ="red", alpha = 0.5)
-t1 <- ggtree(njTree, layout = "circular") %>% collapse(node = 292)
-t1
-annotation_clade2(t1, tip1 = 197, tip2 = 169, label = "bof")
-ggsave("~/test3.pdf", width = 20, height = 20)
-
-ggtree(njTree) + geom_tiplab() + geom_text(aes(label = node))
-t <- ggtree(njTree) + geom_tiplab()
-annotation_clade2(t, tip1 = 197, tip2 = 169, label = "bof")
-t %>% hilight(292, fill ="red", alpha = 0.5)
-ggtree(njTree) + geom_text(aes(label = node)) %>% collapse(node = 292)
-ggsave("~/test2.pdf", width = 10, height = 49)
-
-# can i make the tree with ape?
-cDistAll <- seqinr::dist.alignment(clustalAlign, matrix = "similarity")
-njsTree <- ape::njs(cDistAll)
-njsTree <- ape::root(njsTree, interactive = TRUE)
-ape::boot.phylo(njsTree)
-ape::chronopl(njsTree, 0, tol = -Inf)
 
 # similarity histogram
 hist(1-(cDist^2))
@@ -282,3 +297,6 @@ ggplot(segment(hcdata)) +
 
 ggsave(filename = "~/test.eps", width = 8.3, height = 11.7 * 4) 
 
+# OUTPUT TO SAVE
+#domains
+#madsPeptides
