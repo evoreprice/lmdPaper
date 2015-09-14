@@ -18,13 +18,14 @@ ddsAtFile <- "output/madsComp/ddsAt.Rds"
 # atTfdb
 atTfdbFile <- "data/attfdb/atTfdb.Rds"
 
+# check files exist
 lapply(list(ddsAtFile, ddsSlFile, ddsOsFile, atTfdbFile), function(x)
   if(!file.exists(x)) {
     cat(x, " not found, exiting\n", file = stderr())
     quit(save = "no", status = 1)
   })
 
-# MAKE OUTPUT FOLDER
+# make output folder
 outDir <- "output/madsComp/clustal"
 if (!dir.exists(outDir)) {
   dir.create(outDir)
@@ -97,9 +98,6 @@ madsPeptides[is.na(name), name := toupper(gene_name1)]
 
 # add l2fc values
 madsPeptides[, log2FoldChange := resAll[rn == gene_name1, log2FoldChange], by = gene_name1]
-
-# sneak peek at number of genes
-#madsPeptides[, .(length(unlist(gene_name1))), by = organism_name]
 
 # make a list of lines for writing
 madsLines <- c(apply(madsPeptides, 1, function(x)
@@ -202,67 +200,9 @@ mikcMatrix <- allMads.matrix[genesInClade,]
 gappedMikc <- apply(mikcMatrix, 1, paste0, collapse = "")
 names(gappedMikc) <- rownames(mikcMatrix)
 mikc <- sapply(gappedMikc, gsub, pattern = "-", replacement = "")
-# chuck out proteins with < 175 AAs
+# chuck out proteins with < 200 AAs
 minProtLength <- 200
-#maxProtLength <- 400
 keptMikc <- mikc[sapply(mikc, nchar) >= minProtLength]
-
-############################################
-### DISABLE SLIDING WINDOW STUFF FOR NOW ###
-############################################
-# # set sliding window size
-# window <- 140
-# 
-# # make a list of matrices of width window
-# getWindow <- function(clustal, i, window) {
-#   indEnd <- i + window - 1
-#   return(clustal[, i:indEnd])
-# }
-# startIdxs <- seq(1:(dim(clustal)[2] - window + 1))
-# clustalWindows <- lapply(startIdxs, function(i)
-#   getWindow(clustal, i, window))
-# names(clustalWindows) <- startIdxs
-# 
-# # make each window into an alignment
-# alignmentWindows <- lapply(clustalWindows, function(x)
-#   seqinr::as.alignment(nb = dim(x)[1], nam = rownames(x), seq = apply(x, 1, paste0, collapse = "")))
-# 
-# # run dist on each window
-# windowDists <- lapply(alignmentWindows, seqinr::dist.alignment, matrix = "similarity")
-# 
-# # sum distances (NaN -> 3)
-# sumDist <- function(x) {
-#   # take a copy (don't mutate original)
-#   y <- x
-#   y[is.nan(y)] <- 3
-#   return(sum(y))
-# }
-# distSums <- lapply(windowDists, function(x) sumDist(x))
-# 
-# # get the window with the lowest distance
-# startIdx <- as.integer(names(distSums[which.min(distSums)]))
-# 
-# # get the region + 10 residues each side
-# bestWindow <- clustal[, (startIdx - 10) : (startIdx + window + 9) ]
-# 
-# # make ungapped sequences
-# gappedDomains <- apply(bestWindow, 1, paste0, collapse = "")
-# names(gappedDomains) <- rownames(bestWindow)
-# domains <- sapply(gappedDomains, gsub, pattern = "-", replacement = "")
-# 
-# # density of domain size?
-# #dLength <- data.table(domainLength = sapply(domains, nchar))
-# #ggplot(dLength, aes(x = domainLength)) + stat_density() +
-# #  geom_vline(xintercept = dLength[, quantile(domainLength, 0.15)], colour = "red") +
-# #  geom_vline(xintercept = 70, colour = "blue")
-# #domains[sapply(domains, nchar) > 70 & sapply(domains, nchar) < dLength[, quantile(domainLength, 0.15)]]
-# 
-# # chuck out "domains" with < 70 AAs
-# keptDomains <- domains[!sapply(domains, nchar) < 70]
-
-##############################################
-### SWITCH BELOW BACK TO KEPTDOMAIN IF NEC ###
-##############################################
 
 # write a new fasta file
 keptMikcLines <- c()
