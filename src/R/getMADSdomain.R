@@ -224,25 +224,8 @@ mikc.clustal <- seqinr::read.alignment(mikc.clustal.file, format = 'fasta')
 # clean
 mikcCleaned <- cleanAlignment(mikc.clustal, minpcnongap, minpcident)
 
-##############################################
-### disable second MIKCc selection for now ###
-##############################################
-
-# #select MIKCc clade (plus outgroup)
-# cDist <- seqinr::dist.alignment(cleanedAlignment, matrix = "similarity")
-# hc <- hclust(cDist, method = "average")
-# clades <- cutree(hc, h = 0.475)
-# mikcc <- clades[clades == which.max(table(clades))]
-# # will use AGL33 to root tree
-# mikccMatrix <- cleanedMatrix[c(names(mikcc), "AT_AGL33"),]
-# nb <- dim(mikccMatrix)[1]
-# nam <- rownames(mikccMatrix)
-# seq <- apply(mikccMatrix, 1, paste0, collapse = "")
-# names(seq) <- NULL
-# mikccAlignment <- seqinr::as.alignment(nb = nb, nam = nam, seq = seq)
-
 # nj tree with ape, visualise with ggtree
-# need a function to make the tree
+# function to make the tree (would enable bootstrapping)
 makeNjTree <- function(myAlignment, outgroup) {
   if (class(myAlignment) == "matrix") {
     # convert matrix to alignment
