@@ -91,9 +91,9 @@ Because of the enrichment of TF family members in some of the gene expression cl
 
 ## MADS genes: comparison of expression & homology in rice, tomato, arabidopsis
 
-There was an overrepresentation of MADS genes in clusters **xyz** and their overall expression is enriched in the spikelet meristem sample. These results correspond with previous studies that have established the importance of MADS genes in inflorescence development in rice and other plants (**expand**).
+There was an overrepresentation of MADS genes in cluster `r getClusterName('small', 'inc')` and their overall expression is enriched in the spikelet meristem sample. These results correspond with previous studies that have established the importance of MADS genes in inflorescence development in rice and other plants (**expand**).
 
-To investigate the evolution of the MADS family in Angiosperms, their expression profiles in the dicots *A. thaliana* and *Solanum lycopersicum* and the monocot *O. sativa* were compared to their homology in these species. 
+The change in expression of MIKC proteins between undifferentiated and differentiated meristems was extracted from the dataset reported here and two other studies that used LMD and RNA-sequencing in early stages of inflorescence development in Arabidopsis and tomato [@Mantegazza:2014di; @Park:2012dg]. To investigate the evolution of the MADS family in Angiosperms, these changes were compared to homology of MIKC proteins in the three species (`r I(pasteLabel("Figure ", figCount, "f_madsTree"))`). 
 
 | **Figure**: Similarity tree of MADS proteins with L2FC values between comparable samples (and dN/dS values?) for each one:
 | **rice**: rachis meristem vs. spikelet merisem.
@@ -118,7 +118,7 @@ Briefly, adaptor trimming was performed with `cutadapt` [@Martin:2011eu] and rea
 
 ### Comparative analysis of MADS family
 
-The primary sequences of *Arabidopsis thaliana*, *Solanum lycopersicum* and *Oryza sativa* MADS proteins were downloaded by querying Phytozome 10.3 [@Goodstein:2012ho] for the PANTHER family PTHR11945 ('MADS BOX PROTEIN') via the `biomaRt` interface [@Thomas:2003db; @Durinck:2009ki]. An initial alignment of all proteins was performed with `Clustal Omega` using a full distance matrix (**ref clustalo**). To clean the alignment, poorly conserved regions where greater than `minpcnongap` percent of sequences had gaps or less than `minpcident` perc ent of pairwise comparisons between sequences had identical residues were removed. To recover MADS genes related to the Arabidopsis MIKC clade, a UGPMA tree was estimated from the cleaned alignment and the tree was cut at the lowest height that returned a clade including all type II Arabidopsis MADS proteins listed in the Arabidopsis transcription factor database on the Arabidopsis Gene Regulatory Information Server (**ref for AGRIS**), with as few type I proteins as possible. Protein sequences in this clade that were longer than `minProtLength` amino acids were realigned using `Clustal Omega`, and the alignment was cleaned as described above, used to estimate a neighbour-joining tree with the `bionj` algorithm implemented in the `ape` package (**ref:ape***) and rooted to a type I MADS sequence (`og`). The tree was plotted using the `ggtree` extension for `ggplot2` (**ref ggtree**).
+The primary sequences of *Arabidopsis thaliana*, *Solanum lycopersicum* and *Oryza sativa* MADS proteins were downloaded by querying Phytozome 10.3 [@Goodstein:2012ho] for the PANTHER family PTHR11945 ('MADS BOX PROTEIN') via the `biomaRt` interface [@Thomas:2003db; @Durinck:2009ki]. An initial alignment of all proteins was performed with `Clustal Omega` using a full distance matrix (**ref clustalo**). To clean the alignment, poorly conserved regions where greater than `r minpcnongap` percent of sequences had gaps or less than `r minpcident` percent of pairwise comparisons between sequences had identical residues were removed. To recover MADS genes related to the Arabidopsis MIKC clade, a UGPMA tree was estimated from the cleaned alignment and the tree was cut at the lowest height that returned a clade including all type II Arabidopsis MADS proteins listed in the Arabidopsis transcription factor database on the Arabidopsis Gene Regulatory Information Server (**ref for AGRIS**), with as few type I proteins as possible. Protein sequences in this clade that were longer than `r minProtLength` amino acids were realigned using `Clustal Omega`, and the alignment was cleaned as described above and used to estimate a neighbour-joining tree with the `bionj` algorithm implemented in the `ape` package (**ref:ape***) rooted to a type I MADS sequence (`r og`). L~2~FC change expression values for tomato and Arabidopsis genes were estimated from samples that have previously been described [@Mantegazza:2014di; @Park:2012dg] using the same method described above for the rice samples. The tree was plotted using the `ggtree` extension for `ggplot2` (**ref ggtree**).
 
 # Accession Numbers
 
@@ -183,6 +183,14 @@ print(f_gsea)
 ```
 
 **`r I(pasteLabel("Figure ", figCount, "f_gsea"))`**. Geneset enrichment analysis (GSEA) for transcription factor and other transcriptional regulator families. Test statistics were calculated from the L~2~FC values between the stage of interest and all other stages for the expressed genes in each geneset. The absolute value of the test statistic indicates the magnitude of the geneset-level change, and a positive test statistic indicates enrichment and a negative statistic indicates depletion. Although some test statistics had low *p*-values none were lower than 0.10 after Benjamini-Hochberg correction.
+
+----
+
+```{r f_madsTree}
+print(f_madsTree)
+```
+
+**`r I(pasteLabel("Figure ", figCount, "f_madsTree"))`**. Neighbour-joining similarity tree of putatative MIKC proteins in *A. thaliana*, *Solanum lycopersicum* and *Oryza sativa* ssp. *japonica*. Named proteins starting with AT_ or OS_ are from Arabidopsis or rice respectively, and other proteins are labelled with their unique identifiers. The colour of the label represents the Log~2~-fold change (L~2~FC) in expression of the gene encoding that protein between undifferentiated and differentiated meristems. A white background indicates that no results were returned by `DESeq2` for the gene in question, *e.g.* because of low read counts or an extreme count outlier. For rice, L~2~FC was estimated from the RM and SM samples reported here. For *A. thaliana*, L~2~FC was estimated using the inflorescence meristem and floret meristem samples reported by @Mantegazza:2014di. The simpodial meristem and floret meristem samples generated by @Park:2012dg were used to estimate L~2~FC values for tomato genes. Clades are labelled following the nomenclature presented by (**ref: Arora paper**).
 
 ----
 

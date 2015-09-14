@@ -2,7 +2,6 @@
 
 library(data.table)
 library(ggplot2)
-library(ggtree)
 extrafont::loadfonts()
 
 #####################
@@ -302,8 +301,13 @@ getClusterName <- function(deln1n2, deln2n4){
 }
 
 # centroid dis vs. c (for SI)
-sf_mfuzzCentroids <- readRDS('output/mfuzz/centPlot.Rds') +
-  theme_minimal(base_size = 8, base_family = "Helvetica")
+centroids <- readRDS('output/mfuzz/centroids.Rds')
+sf_mfuzzCentroids <- ggplot(centroids, aes(x = x, y = y)) +
+  theme_minimal(base_size = 8, base_family = "Helvetica") +
+  xlab(expression(Cluster~number~"("*italic(c)*")")) +
+  ylab("Minimum centroid distance") +
+  stat_smooth(method = loess, se = FALSE) +
+  geom_point()
 
 s_figCount <- incCount(s_figCount, "sf_mfuzzCentroids")
 
@@ -380,14 +384,18 @@ f_gsea <- ggplot(gsea, aes(x = Stage, y = rn, label = padj, fill = `Test\nstatis
   scale_x_discrete(expand = c(0,0)) +
   scale_fill_gradientn(colours = heatscale) +
   facet_grid(Category ~ ., scales = "free_y", space = "free_y") +
-  geom_raster() +
-  geom_text(data = gsea[showPval == TRUE], size = 2)
+  geom_raster()
+if (gsea[,any(showPval)]){
+  f_gsea <- f_gsea + geom_text(data = gsea[which(showPval),], size = 2)
+}
 
 figCount <- incCount(figCount, "f_gsea")
 
 #################
 ### MADS TREE ###
 #################
+
+library(ggtree)
 
 njTree <- readRDS('output/madsComp/clustal/njTree.Rds')
 madsPeptides <- readRDS('output/madsComp/clustal/madsPeptides.Rds')
@@ -396,26 +404,82 @@ minpcident <- readRDS('output/madsComp/clustal/minpcident.Rds')
 minProtLength <- readRDS('output/madsComp/clustal/minProtLength.Rds')
 og <- readRDS('output/madsComp/clustal/og.Rds')
 
-# draw a tree (move to figures)
-heatscale <- rev(RColorBrewer::brewer.pal(5, "PuOr"))
-f_madsTree <- ggplot(njTree, aes(x = x, y = y, label = label)) +
-  xlab(NULL) + ylab(NULL) +
-  theme_minimal(base_size = 8, base_family = "Helvetica") +
-  theme(axis.text = element_blank(),
-        panel.grid = element_blank()) +
-  scale_fill_gradient2(low = heatscale[1], mid = 'grey90', high = heatscale[5],
-                       midpoint = 0, na.value = "white") +
-  geom_tree()
-# add expression values as an annotation
+# set up expression values for annotation
 setkey(madsPeptides, "name")
 exprAnnot <- madsPeptides[unique(njTree$tip.label), .(name, log2FoldChange)]
+
+# draw a tree
+heatscale <- rev(RColorBrewer::brewer.pal(5, "PuOr"))
+f_madsTree <- ggtree::ggtree(njTree, aes(x = x, y = y, label = label), size = 0.025) +
+  xlab(NULL) + ylab(NULL) +
+  scale_y_continuous(expand = c(0,1)) +
+  theme_minimal(base_size = 8, base_family = "Helvetica") +
+  theme(axis.text = element_blank(),
+        panel.grid = element_blank(),
+        legend.key.size = unit(0.5, "lines"),
+        legend.text = element_text(size = 4),
+        legend.title = element_text(size = 5),
+        legend.position = c(0,0.5),
+        legend.justification = c(0,0.5))
+# add expression values as an annotation
 f_madsTree <- f_madsTree %<+% exprAnnot
-f_madsTree <- f_madsTree + geom_label(mapping = aes(fill = log2FoldChange), size = 2) +
-  scale_y_continuous(expand = c(0,1))
-# gtree <- annotation_clade(gtree, node = 151, "AGL2-like")
-# gtree <- annotation_clade(gtree, node = 144, "AGL6-like")
-# annotation_clade(gtree, node = 125, "SQUA-like")
-f_madsTree
-#ggsave(filename = paste0(outDir, "/tempTree.pdf"), width = 8.3, height = 11.7 * 2) 
+f_madsTree <- f_madsTree +
+  scale_fill_gradient2(low = heatscale[1], mid = 'grey90', high = heatscale[5],
+                       midpoint = 0, na.value = "white",
+                       name = expression(L[2]*"FC")) +
+  geom_label(mapping = aes(fill = log2FoldChange), na.rm = TRUE,
+             hjust = "left",
+             size = 1.5,
+             colour = NA,
+             label.padding = unit(0.05, "lines"),
+             label.r = unit(0.05, "lines")) +
+  ggplot2::geom_text(size= 1.5, na.rm = TRUE, hjust = -0.01)
+
+# annotate clades
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 146, "AGL2-like",
+                                       offset = 0.08, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 160, "AGL6-like",
+                                       offset = 0.09, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 133, "TM3-like",
+                                       offset = 0.1, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 169, "AG-like",
+                                       offset = 0.09, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 166, "AGL12-like",
+                                       offset = 0.09, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 179, "SQUA-like",
+                                       offset = 0.07, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 193, "STMADS11-like",
+                                       offset = 0.1, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 201, "AGL17-like",
+                                       offset = 0.06, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 209, "FLC-like",
+                                       offset = 0.1, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 215, "GLO-like",
+                                       offset = 0.06, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 219, "DEF-like",
+                                       offset = 0.07, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 115, "MIKC*",
+                                       offset = 0.15, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 212, "GGM13-like",
+                                       offset = 0.025, font.size = 1.5, bar.size = 0.5,
+                                       angle = 0, offset.text = 0.04)
+
+# 1-col width=3.150,
+# max height=8.661,
+# max width = 6.614
+#  cairo_pdf(filename = "output/madsComp/clustal/tempTree.pdf", width = 3.150,
+#    height = 8.661)
+#  f_madsTree
+#  dev.off()
+# 
+# # quick print for node labels
+# cairo_pdf(filename = "output/madsComp/clustal/nodes.pdf", width = 6.614,
+#           height = 8.661)
+# ggtree(njTree) + ggplot2::geom_text(aes(label = label), hjust = -0.1, size = 2) + 
+#   ggplot2::geom_text(mapping = aes(x = branch, label = node), vjust = -0.3, size = 2)
+# 
+# dev.off()
+
+detach("package:ggtree", unload=TRUE)
 
 figCount <- incCount(figCount, "f_madsTree")

@@ -69,20 +69,12 @@ centroids <- data.frame(
   y = Dmin(vg.s, m = m1, crange = seq(2, maxClust, 1), repeats = 3, visu = FALSE)
 )
 
-# visualise dmin vs cluster number
-centPlot <- ggplot(centroids, aes(x = x, y = y)) +
-  theme_minimal() +
-  xlab(expression(Cluster~number~"("*italic(c)*")")) +
-  ylab("Minimum centroid distance") +
-  stat_smooth(method = loess, se = FALSE) +
-  geom_point()
-
-# can try to find inflection points, doesn't work very well.
-points <- seq(2, maxClust, length.out = 10000)
-pred <- predict(loess(centroids$y ~ centroids$x), points)
-infl <- c(FALSE, diff(diff(pred) > 0) != 0)
-centPlotWithPoints <- centPlot +
-  geom_point(data = data.frame(x = points[infl], y = pred[infl]), colour = 'red')
+# # can try to find inflection points, doesn't work very well.
+# points <- seq(2, maxClust, length.out = 10000)
+# pred <- predict(loess(centroids$y ~ centroids$x), points)
+# infl <- c(FALSE, diff(diff(pred) > 0) != 0)
+# centPlotWithPoints <- centPlot +
+#   geom_point(data = data.frame(x = points[infl], y = pred[infl]), colour = 'red')
 
 # we will go with 8 clusters
 c <- 8
@@ -150,9 +142,10 @@ saveRDS(vg.mds, paste0(outDir, "/vg.mds.Rds"))
 saveRDS(c1, paste0(outDir, "/c1.Rds"))
 saveRDS(clusters, paste0(outDir, "/clusters.Rds"))
 saveRDS(annotatedClusters, paste0(outDir, "/annotatedClusters.Rds"))
-saveRDS(centPlot, paste0(outDir, "/centPlot.Rds"))
+#saveRDS(centPlot, paste0(outDir, "/centPlot.Rds"))
 saveRDS(maxClust, paste0(outDir, "/maxClust.Rds"))
 saveRDS(vstFiltered, paste0(outDir, "/vstFiltered.Rds"))
+saveRDS(centroids, paste0(outDir, "/centroids.Rds"))
 
 # SAVE LOGS
 sInf <- c(paste("git branch:",system("git rev-parse --abbrev-ref HEAD", intern = TRUE)),
