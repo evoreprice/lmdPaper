@@ -3,6 +3,14 @@
 library(data.table)
 set.seed(1)
 
+# how many CPUs we got?
+SLURM_NTASKS <- as.integer(Sys.getenv("SLURM_NTASKS"))
+if(!is.na(SLURM_NTASKS)) {
+  maxCpus <- SLURM_NTASKS
+} else {
+  maxCpus <- 1
+}
+
 # DESeq2 results
 ddsOsFile <- "output/DESeq2/ddsWald.Rds"
 ddsSlFile <- "output/madsComp/ddsSl.Rds"
@@ -15,6 +23,12 @@ lapply(list(ddsAtFile, ddsSlFile, ddsOsFile, atTfdbFile), function(x)
     cat(x, " not found, exiting\n", file = stderr())
     quit(save = "no", status = 1)
   })
+
+# MAKE OUTPUT FOLDER
+outDir <- "output/madsComp/clustal"
+if (!dir.exists(outDir)) {
+  dir.create(outDir)
+}
 
 # get DESeq2 results
 ddsOs <- readRDS(ddsOsFile)
@@ -63,7 +77,6 @@ madsPeptides <- unique(martResults[transcript_name == primaryTx])
 madsPeptides[organism_name == "Osativa", synonyms := oryzr::LocToGeneName(gene_name1)$symbols]
 
 # deal with multiple MADS peptides for one oryza name
-gene_names <- c("LOC_Os03g03070","LOC_Os03g03100")
 tagDuplicateSynonyms <- function(gene_names) {
   if(length(gene_names) == 1) {
     return(madsPeptides[gene_name1 == gene_names, synonyms])
@@ -75,7 +88,7 @@ madsPeptides[organism_name == "Osativa" & !is.na(synonyms),
              synonyms := tagDuplicateSynonyms(unlist(list(gene_name1))),
              by = synonyms]
 
-# set up names for un-named genes and add "At" or "Os" for ambiguous genes
+# set up names for un-named genes and add "At" or "Os" to named proteins
 madsPeptides[, name := synonyms ]
 madsPeptides[name == '', name := NA]
 madsPeptides[!is.na(name) & organism_name == "Osativa", name := paste0("OS_", name)]
@@ -93,21 +106,25 @@ madsLines <- c(apply(madsPeptides, 1, function(x)
   c(paste0(">", x["name"]), x["peptide_sequence"], "")))
 
 # write the FASTA
-writeLines(madsLines, "/tmp/madslines.fasta")
+allMads.file <- paste0(outDir, "/allMads.fasta")
+writeLines(madsLines, allMads.file)
 
 # run clustalo on generated FASTA
-system("clustalo -i /tmp/madslines.fasta --full --force --outfmt=fa --outfile=/tmp/mads.faa")
+allMads.clustal.file <- paste0(outDir, "/allMads.faa")
+cmd <- paste0("clustalo --full --force --outfmt=fa", " --threads=", maxCpus,
+              " -i ", allMads.file, " --outfile=", allMads.clustal.file)
+system(cmd)
 
 # read clustal back in
-clustalAlign <- seqinr::read.alignment("/tmp/mads.faa", format = 'fasta')
+allMads.clustal <- seqinr::read.alignment(allMads.clustal.file, format = "fasta")
 
 # function to clean the alignment
-cleanAlignment <- function(domainAlign, minpcnongap, minpcident) {
-  alignmentLength <- nchar(domainAlign$seq[[1]])
-  nb <- domainAlign$nb
+cleanAlignment <- function(myAlignment, minpcnongap, minpcident) {
+  alignmentLength <- nchar(myAlignment$seq[[1]])
+  nb <- myAlignment$nb
   # number of non-gaps at each position
   nbNonGaps <- sapply(1:alignmentLength, function(i)
-    sum(!sapply(domainAlign$seq, substr, start = i, stop = i) == "-"))
+    sum(!sapply(myAlignment$seq, substr, start = i, stop = i) == "-"))
   # percentage of non-gap pairs that are identical at each position
   countPcNonGapIdent <- function(letterSet) {
     # remove gap letters
@@ -127,11 +144,11 @@ cleanAlignment <- function(domainAlign, minpcnongap, minpcident) {
     return(identPairs * 100 / nbPairs)
   }
   pcNonGapIdent <- sapply(1:alignmentLength, function(i)
-    countPcNonGapIdent(sapply(domainAlign$seq, substr, start = i, stop = i)))
+    countPcNonGapIdent(sapply(myAlignment$seq, substr, start = i, stop = i)))
   # keep the letters that match our criteria
   keptLetters <- which(nbNonGaps * 100 / nb > minpcnongap & pcNonGapIdent > minpcident)
   # make a new alignment
-  cleanedMatrix <- seqinr::as.matrix.alignment(domainAlign)[,keptLetters]
+  cleanedMatrix <- seqinr::as.matrix.alignment(myAlignment)[,keptLetters]
   nb <- dim(cleanedMatrix)[1]
   nam <- rownames(cleanedMatrix)
   seq <- apply(cleanedMatrix, 1, paste0, collapse = "")
@@ -145,7 +162,7 @@ minpcnongap <- 30
 minpcident <- 5
 
 # clean
-cleanClustalAlign <- cleanAlignment(clustalAlign, minpcnongap, minpcident)
+allMads.cleaned <- cleanAlignment(allMads.clustal, minpcnongap, minpcident)
 
 # find the clade of the alignment with the most type ii mads genes
 # lists of type I and type II names
@@ -156,9 +173,9 @@ typeII <- atTfdb[FamilyID == "MADS" & SubFamily == "TypeII", unique(toupper(Locu
 t1names <- madsPeptides[typeI, unique(name[!is.na(name)])]
 t2names <- madsPeptides[typeII, unique(name[!is.na(name)])]
 # distance and UPGMA tree
-cDist <- seqinr::dist.alignment(cleanClustalAlign, matrix = "similarity")
-cDist[is.na(cDist)] <- 0
-hc <- hclust(cDist, method = "average")
+allMads.dist <- seqinr::dist.alignment(allMads.cleaned, matrix = "similarity")
+allMads.dist[is.na(allMads.dist)] <- 0
+allMads.hc <- hclust(allMads.dist, method = "average")
 # get the lowest cut with as many type II mads as possible
 optimClades <- function(h, hc) {
   clades <- cutree(hc, h = h)
@@ -169,23 +186,26 @@ optimClades <- function(h, hc) {
   # return number of type II mads minus number of type I mads in this clade
   return(sum(genesInClade %in% t2names) - sum(genesInClade %in% t1names)/10)
 }
-hMin <- optimize(f = optimClades, interval = c(0,1), hc = hc, maximum = TRUE, tol = 10^-10)
+hMin <- optimize(f = optimClades, interval = c(0,1), hc = allMads.hc,
+                 maximum = TRUE, tol = 10^-10)
 
 # get the genes in this clade
-clades <- cutree(hc, h = hMin$maximum)
-mikccClade <- as.integer(names(which.max(table(clades[names(clades) %in% t2names]))))
-genesInClade <- unique(names(clades[clades == mikccClade]))
+clades <- cutree(allMads.hc, h = hMin$maximum)
+mikcClade <- as.integer(names(which.max(table(clades[names(clades) %in% t2names]))))
+genesInClade <- unique(names(clades[clades == mikcClade]))
 
 # get the clustal matrix for these genes
-clustal <- seqinr::as.matrix.alignment(clustalAlign)
-mikccMatrix <- clustal[genesInClade,]
+allMads.matrix <- seqinr::as.matrix.alignment(allMads.clustal)
+mikcMatrix <- allMads.matrix[genesInClade,]
 
 # make ungapped sequences
-gappedMikcc <- apply(mikccMatrix, 1, paste0, collapse = "")
-names(gappedMikcc) <- rownames(mikccMatrix)
-mikcc <- sapply(gappedMikcc, gsub, pattern = "-", replacement = "")
+gappedMikc <- apply(mikcMatrix, 1, paste0, collapse = "")
+names(gappedMikc) <- rownames(mikcMatrix)
+mikc <- sapply(gappedMikc, gsub, pattern = "-", replacement = "")
 # chuck out proteins with < 175 AAs
-keptMikcc <- mikcc[sapply(mikcc, nchar) >= 175]
+minProtLength <- 200
+#maxProtLength <- 400
+keptMikc <- mikc[sapply(mikc, nchar) >= minProtLength]
 
 ############################################
 ### DISABLE SLIDING WINDOW STUFF FOR NOW ###
@@ -245,20 +265,24 @@ keptMikcc <- mikcc[sapply(mikcc, nchar) >= 175]
 ##############################################
 
 # write a new fasta file
-keptMikccLines <- c()
-for (x in names(keptMikcc)) {
-  keptMikccLines <- c(keptMikccLines, paste0(">", x), toupper(keptMikcc[[x]]), "")
+keptMikcLines <- c()
+for (x in names(keptMikc)) {
+  keptMikcLines <- c(keptMikcLines, paste0(">", x), toupper(keptMikc[[x]]), "")
 }
-
-writeLines(keptMikccLines, "/tmp/mikccProteins.fasta")
+mikcProteins.file <- paste0(outDir, "/mikcProteins.fasta")
+writeLines(keptMikcLines, mikcProteins.file)
 
 # run clustalo on new FASTA
-system("clustalo -i /tmp/mikccProteins.fasta --full --force --outfmt=fa --outfile=/tmp/mikccProteins.faa")
+mikc.clustal.file <- paste0(outDir, "/mikcProteins.faa")
+cmd <- paste0("clustalo --iterations=10 --outfmt=fa --force", " --threads=",
+              maxCpus, " -i ", mikcProteins.file, " --outfile=", mikc.clustal.file)
+system(cmd)
 
 # read clustal back in
-mikccAlign <- seqinr::read.alignment("/tmp/mikccProteins.faa", format = 'fasta')
+mikc.clustal <- seqinr::read.alignment(mikc.clustal.file, format = 'fasta')
 
-cleanedAlignment <- cleanAlignment(mikccAlign, minpcnongap, minpcident)
+# clean
+mikcCleaned <- cleanAlignment(mikc.clustal, minpcnongap, minpcident)
 
 ##############################################
 ### disable second MIKCc selection for now ###
@@ -279,24 +303,24 @@ cleanedAlignment <- cleanAlignment(mikccAlign, minpcnongap, minpcident)
 
 # nj tree with ape, visualise with ggtree
 # need a function to make the tree
-makeNjTree <- function(domainAlign, outgroup) {
-  if (class(domainAlign) == "matrix") {
+makeNjTree <- function(myAlignment, outgroup) {
+  if (class(myAlignment) == "matrix") {
     # convert matrix to alignment
-    nb <- dim(domainAlign)[1]
-    nam <- rownames(domainAlign)
-    seq <- apply(domainAlign, 1, paste0, collapse = "")
+    nb <- dim(myAlignment)[1]
+    nam <- rownames(myAlignment)
+    seq <- apply(myAlignment, 1, paste0, collapse = "")
     names(seq) <- NULL
-    domainAlign <- seqinr::as.alignment(nb = nb, nam = nam, seq = seq)
+    myAlignment <- seqinr::as.alignment(nb = nb, nam = nam, seq = seq)
   }
-  cDist <- seqinr::dist.alignment(domainAlign, matrix = "similarity")
+  cDist <- seqinr::dist.alignment(myAlignment, matrix = "similarity")
   njTree <- ape::bionj(cDist)
   rootedNjt <- ape::root(njTree, outgroup, resolve.root = TRUE)
   return(rootedNjt)
 }
 # choose an outgroup
-og <- "AT_AGL41"
-  cleanedAlignment$nam[cleanedAlignment$nam %in% t1names]
-njTree <- makeNjTree(cleanedAlignment, og)
+# og <- "AT_AGL41"
+og <- mikcCleaned$nam[mikcCleaned$nam %in% t1names][1]
+njTree <- makeNjTree(mikcCleaned, og)
 
 # draw a tree (move to figures)
 library(ggplot2)
@@ -321,7 +345,7 @@ gtree <- gtree + geom_label(mapping = aes(fill = log2FoldChange), size = 2) +
 # gtree <- annotation_clade(gtree, node = 144, "AGL6-like")
 # annotation_clade(gtree, node = 125, "SQUA-like")
 gtree
-ggsave(filename = "~/test2.pdf", width = 8.3, height = 11.7 * 2) 
+ggsave(filename = paste0(outDir, "/tempTree.pdf"), width = 8.3, height = 11.7 * 2) 
 
 # 
 # # similarity histogram
@@ -362,5 +386,19 @@ ggsave(filename = "~/test2.pdf", width = 8.3, height = 11.7 * 2)
 # ggsave(filename = "~/test.eps", width = 8.3, height = 11.7 * 4) 
 
 # OUTPUT TO SAVE
-#domains
-#madsPeptides
+saveRDS(njTree, paste0(outDir, "/njTree.Rds"))
+saveRDS(madsPeptides, paste0(outDir, "/madsPeptides.Rds"))
+saveRDS(minpcnongap, paste0(outDir, "/minpcnongap.Rds"))
+saveRDS(minpcident, paste0(outDir, "/minpcident.Rds"))
+saveRDS(minProtLength, paste0(outDir, "/minProtLength.Rds"))
+saveRDS(og, paste0(outDir, "/og.Rds"))
+
+# SAVE LOGS
+sInf <- c(paste("git branch:",system("git rev-parse --abbrev-ref HEAD", intern = TRUE)),
+          paste("git hash:", system("git rev-parse HEAD", intern = TRUE)),
+          paste("clustalo version:", system("clustalo --version", intern = TRUE)),
+          capture.output(sessionInfo()))
+logLocation <- paste0(outDir, "/SessionInfo.txt")
+writeLines(sInf, logLocation)
+
+quit(save = "no", status = 0)

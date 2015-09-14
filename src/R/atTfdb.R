@@ -11,7 +11,6 @@ setnames(atTfdb, old = names(atTfdb),
          new = c("FamilyID", "LocusName", "GeneName", "Description",
                  "RNIntegration", "SubFamily", "BindingSite", "SpecialInfo"))
 
-
 # MAKE OUTPUT FOLDER
 outDir <- "data/attfdb"
 if (!dir.exists(outDir)) {
