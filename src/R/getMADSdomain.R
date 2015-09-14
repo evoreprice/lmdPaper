@@ -240,35 +240,12 @@ makeNjTree <- function(myAlignment, outgroup) {
   rootedNjt <- ape::root(njTree, outgroup, resolve.root = TRUE)
   return(rootedNjt)
 }
+
 # choose an outgroup
-# og <- "AT_AGL41"
 og <- mikcCleaned$nam[mikcCleaned$nam %in% t1names][1]
 njTree <- makeNjTree(mikcCleaned, og)
 
-# draw a tree (move to figures)
-library(ggplot2)
-library(ggtree)
 
-heatscale <- rev(RColorBrewer::brewer.pal(5, "PuOr"))
-gtree <- ggplot(njTree, aes(x = x, y = y, label = label)) +
-  xlab(NULL) + ylab(NULL) +
-  theme_minimal(base_size = 8, base_family = "Helvetica") +
-  theme(axis.text = element_blank(),
-        panel.grid = element_blank()) +
-  scale_fill_gradient2(low = heatscale[1], mid = 'grey90', high = heatscale[5],
-                       midpoint = 0, na.value = "white") +
-  geom_tree()
-# add expression values as an annotation
-setkey(madsPeptides, "name")
-exprAnnot <- madsPeptides[unique(njTree$tip.label), .(name, log2FoldChange)]
-gtree <- gtree %<+% exprAnnot
-gtree <- gtree + geom_label(mapping = aes(fill = log2FoldChange), size = 2) +
-  scale_y_continuous(expand = c(0,1))
-# gtree <- annotation_clade(gtree, node = 151, "AGL2-like")
-# gtree <- annotation_clade(gtree, node = 144, "AGL6-like")
-# annotation_clade(gtree, node = 125, "SQUA-like")
-gtree
-ggsave(filename = paste0(outDir, "/tempTree.pdf"), width = 8.3, height = 11.7 * 2) 
 
 # 
 # # similarity histogram

@@ -2,6 +2,7 @@
 
 library(data.table)
 library(ggplot2)
+library(ggtree)
 extrafont::loadfonts()
 
 #####################
@@ -383,3 +384,38 @@ f_gsea <- ggplot(gsea, aes(x = Stage, y = rn, label = padj, fill = `Test\nstatis
   geom_text(data = gsea[showPval == TRUE], size = 2)
 
 figCount <- incCount(figCount, "f_gsea")
+
+#################
+### MADS TREE ###
+#################
+
+njTree <- readRDS('output/madsComp/clustal/njTree.Rds')
+madsPeptides <- readRDS('output/madsComp/clustal/madsPeptides.Rds')
+minpcnongap <- readRDS('output/madsComp/clustal/minpcnongap.Rds')
+minpcident <- readRDS('output/madsComp/clustal/minpcident.Rds')
+minProtLength <- readRDS('output/madsComp/clustal/minProtLength.Rds')
+og <- readRDS('output/madsComp/clustal/og.Rds')
+
+# draw a tree (move to figures)
+heatscale <- rev(RColorBrewer::brewer.pal(5, "PuOr"))
+f_madsTree <- ggplot(njTree, aes(x = x, y = y, label = label)) +
+  xlab(NULL) + ylab(NULL) +
+  theme_minimal(base_size = 8, base_family = "Helvetica") +
+  theme(axis.text = element_blank(),
+        panel.grid = element_blank()) +
+  scale_fill_gradient2(low = heatscale[1], mid = 'grey90', high = heatscale[5],
+                       midpoint = 0, na.value = "white") +
+  geom_tree()
+# add expression values as an annotation
+setkey(madsPeptides, "name")
+exprAnnot <- madsPeptides[unique(njTree$tip.label), .(name, log2FoldChange)]
+f_madsTree <- f_madsTree %<+% exprAnnot
+f_madsTree <- f_madsTree + geom_label(mapping = aes(fill = log2FoldChange), size = 2) +
+  scale_y_continuous(expand = c(0,1))
+# gtree <- annotation_clade(gtree, node = 151, "AGL2-like")
+# gtree <- annotation_clade(gtree, node = 144, "AGL6-like")
+# annotation_clade(gtree, node = 125, "SQUA-like")
+f_madsTree
+#ggsave(filename = paste0(outDir, "/tempTree.pdf"), width = 8.3, height = 11.7 * 2) 
+
+figCount <- incCount(figCount, "f_madsTree")
