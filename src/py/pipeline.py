@@ -208,15 +208,15 @@ def download_tfdb(outputFiles):
     touch(outputFiles)
 
 #---------------------------------------------------------------
-# download MADS peptides
+# download at TFDB
 #
-@originate(['ruffus/madsPeptides.data'])
+@originate(['ruffus/attfdb.data'])
 
-def get_mads_peptides(outputFiles):
-    jobScript = 'src/R/getMADSsequences.R'
+def download_atTfdb(outputFiles):
+    jobScript = 'src/R/atTfdb.R'
     ntasks = '1'
     cpus_per_task = '1'
-    job_name = 'madsPept'
+    job_name = 'atTfdb'
     jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
     # update ruffus flag
     print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
@@ -512,28 +512,18 @@ def compare_inSitus(inputFiles, outputFiles):
     touch(outputFiles)
 
 #---------------------------------------------------------------
-# clustal-align MADS peptides
+# make dendogram of MADS genes
 #
-@transform(get_mads_peptides, suffix(".data"), ".alignment")
-def align_mads_peptides(inputFiles, outputFiles):
-    jobScript = 'src/sh/alignMadsPeptides.sh'
+@merge([run_deseq_comp, download_atTfdb, run_deseq2_os], 'ruffus/madsComp.dendro')
+def madsCompTree(inputFiles, outputFiles):
+    jobScript = 'src/R/madsCompTree.R'
     ntasks = '1'
-    cpus_per_task = '1'
-    job_name = 'clustal'
+    cpus_per_task = '6'
+    job_name = 'madsComp'
     jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
     # update ruffus flag
     print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
     touch(outputFiles)
-
-#---------------------------------------------------------------
-# make dendogram of MADS genes
-#
-@merge([run_deseq_comp, align_mads_peptides, run_deseq2_os], 'ruffus/comp.dendro')
-def make_mads_dendogram(inputFiles, outputFiles):
-    jobScript = 'src/sh/alignMadsPeptides.sh'
-    ntasks = '1'
-    cpus_per_task = '1'
-    job_name = 'clustal'
 
 #---------------------------------------------------------------
 # FIGURES AND TABLES
@@ -582,6 +572,13 @@ def sf_mfuzzPca(inputFiles, outputFiles):
 #
 @merge(gsea, "ruffus/figure.f_gsea")
 def f_gsea(inputFiles, outputFiles):
+    touch(outputFiles)
+
+#---------------------------------------------------------------
+# MADS tree
+#
+@merge(madsCompTree, "ruffus/figure.f_madsTree")
+def f_madsTree(inputFiles, outputFiles):
     touch(outputFiles)
 
 #---------------------------------------------------------------
