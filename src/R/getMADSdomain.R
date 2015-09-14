@@ -245,46 +245,6 @@ makeNjTree <- function(myAlignment, outgroup) {
 og <- mikcCleaned$nam[mikcCleaned$nam %in% t1names][1]
 njTree <- makeNjTree(mikcCleaned, og)
 
-
-
-# 
-# # similarity histogram
-# hist(1-(cDist^2))
-# 
-# hist(1-(seqinr::dist.alignment(clustalAlign)^2))
-# 
-# ape::is.ultrametric(njsTree)
-# 
-# ape::as.hclust.phylo(njsTree)
-# 
-# 
-# #ggdendrogram(hc, rotate = TRUE) # sneak peek
-# # plot(hc)
-# # rect.hclust(hc, k = 16)
-# 
-# # add L2FCs to label
-# label(hcdata)[, log2FoldChange := madsPeptides[name == label, log2FoldChange], by = label]
-# 
-# # plot (move to figures.R)
-# heatscale <- rev(RColorBrewer::brewer.pal(5, "PuOr"))
-# ggplot(segment(hcdata)) +
-#   xlab(NULL) + ylab(NULL) +
-#   theme_minimal(base_size = 8, base_family = "Helvetica") +
-#   theme(axis.text = element_blank(),
-#         panel.grid = element_blank()) +
-#   coord_flip() +
-#   scale_y_reverse(limits = c(0.775, -0.2)) +
-#   scale_x_continuous(expand = c(0,1)) +
-#   geom_label(data = label(hcdata),
-#              mapping = aes(x = x, y = y, label = label, fill = log2FoldChange),
-#              hjust = "left", size = 2) + 
-#   guides(fill = guide_colourbar(title = expression(Log[2]*"-fold change"))) +
-#   scale_fill_gradient2(low = heatscale[1], mid = 'grey90', high = heatscale[5],
-#                        midpoint = 0, na.value = NA) +
-#   geom_segment(aes(x=x, y=y, xend=xend, yend=yend), lineend = "round") 
-# 
-# ggsave(filename = "~/test.eps", width = 8.3, height = 11.7 * 4) 
-
 # OUTPUT TO SAVE
 saveRDS(njTree, paste0(outDir, "/njTree.Rds"))
 saveRDS(madsPeptides, paste0(outDir, "/madsPeptides.Rds"))
