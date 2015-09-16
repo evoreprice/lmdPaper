@@ -101,28 +101,28 @@ clusterExpr <- do.call(rbind, clusterExpr)
 
 # get gene names from LocToGeneName
 setkey(clusterExpr, 'NAME')
-annotatedClusters <- cbind(clusterExpr, oryzr::LocToGeneName(clusterExpr[, NAME], plotLabels = FALSE))
+clusterExpr[, c("RapID", "symbols", "names") := oryzr::LocToGeneName(NAME), by = NAME]
 
 # get MSU annotation from all.locus_brief_info.7.0.tab
-acNAME <- as.character(annotatedClusters[,NAME])
+acNAME <- as.character(clusterExpr[,NAME])
 msuAnn <- data.table(read.delim(file = msuAnn.file, sep = "\t",header = TRUE,
                                 fill = TRUE), key = 'locus')  
 # data.table magic to get 1 annotation per LOC ID
 anns <- msuAnn[acNAME, .(annotation = paste(unique(annotation), sep = ",")), by = locus]
-annotatedClusters[, MSU.annotation := as.character(anns[, annotation])]
+clusterExpr[, MSU.annotation := as.character(anns[, annotation])]
 
 # rename and reorder columns
-annotatedClusters[, gene_id := NAME][, membership := MEM.SHIP][, c('NAME', 'MEM.SHIP') := NULL]
-setcolorder(annotatedClusters, c('gene_id', 'Cluster', 'membership', 'RapID',
+clusterExpr[, gene_id := NAME][, membership := MEM.SHIP][, c('NAME', 'MEM.SHIP') := NULL]
+setcolorder(clusterExpr, c('gene_id', 'Cluster', 'membership', 'RapID',
                                  'symbols', 'names', 'MSU.annotation'))
 
 # create a workbook
 wb <- xlsx::createWorkbook()
 
 # add sheet for each cluster
-for(i in 1:max(annotatedClusters[,Cluster])){
+for(i in 1:max(clusterExpr[,Cluster])){
   sheet <- xlsx::createSheet(wb, sheetName = paste("Cluster", i))
-  xlsx::addDataFrame(annotatedClusters[Cluster == i], sheet = sheet,
+  xlsx::addDataFrame(clusterExpr[Cluster == i], sheet = sheet,
                      showNA = FALSE, row.names = FALSE)
 }
 
@@ -141,7 +141,7 @@ saveRDS(vg.s, paste0(outDir, "/expressionMatrix.Rds"))
 saveRDS(vg.mds, paste0(outDir, "/vg.mds.Rds"))
 saveRDS(c1, paste0(outDir, "/c1.Rds"))
 saveRDS(clusters, paste0(outDir, "/clusters.Rds"))
-saveRDS(annotatedClusters, paste0(outDir, "/annotatedClusters.Rds"))
+saveRDS(clusterExpr, paste0(outDir, "/annotatedClusters.Rds"))
 #saveRDS(centPlot, paste0(outDir, "/centPlot.Rds"))
 saveRDS(maxClust, paste0(outDir, "/maxClust.Rds"))
 saveRDS(vstFiltered, paste0(outDir, "/vstFiltered.Rds"))

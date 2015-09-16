@@ -59,7 +59,7 @@ res <- biomaRt::getBM(atts, filters, values, phytozome, uniqueRows = TRUE)
 martResults <- data.table(res, key = c("gene_name1", "transcript_name", "organism_name"))
 rm(phytozome)
 
-# deal with multiple synonyms
+# deal with multiple arabidopsis synonyms
 formatSynonymList <- function(x) {
   xLen <- length(x)
   if(xLen == 1) {
@@ -74,8 +74,35 @@ martResults[, synonyms := formatSynonymList(unlist(list(synonyms))),
 martResults[, primaryTx := sort(transcript_name)[1], by = gene_name1]
 madsPeptides <- unique(martResults[transcript_name == primaryTx])
 
-# add oryzr gene symbols to synonyms
-madsPeptides[organism_name == "Osativa", synonyms := oryzr::LocToGeneName(gene_name1)$symbols]
+# format rice names and synonyms
+pickRiceSynonyms <- function(symbol_synonyms) {
+  riceSymbols <- symbol_synonyms[!sapply(symbol_synonyms, grepl, pattern = "^RMADS|^FDRMADS|^NMADS")]
+  riceSymbols <- riceSymbols[gsub("[a-z]|[[:digit:]]", "", riceSymbols) != ""]
+  if (length(riceSymbols) < 1) {
+    return("")
+  }
+  paste0("(", paste0(riceSymbols, collapse = "/"), ")")
+}
+
+riceSynonyms <- madsPeptides[organism_name == "Osativa",
+                             oryzr::LocToGeneName(gene_name1, return.synonyms = TRUE)]
+riceSynonyms <- riceSynonyms[!is.na(symbols)]
+riceSynonyms[!is.na(symbol_synonyms), useSynonyms := pickRiceSynonyms(unique(symbol_synonyms)), by = .(MsuID)]
+riceSynonyms[useSynonyms != "", label := paste(symbols, useSynonyms)]
+riceSynonyms[is.na(label), label := symbols]
+setkey(riceSynonyms, "MsuID", "label")
+riceSynonyms <- unique(riceSynonyms)
+setkey(riceSynonyms, "MsuID")
+# join rice synonyms to madsPeptides
+madsPeptides <- riceSynonyms[madsPeptides, .(
+  transcript_name,
+  gene_name1,
+  organism_name,
+  synonyms,
+  peptide_sequence,
+  riceLab = label
+)]
+madsPeptides[organism_name == "Osativa", synonyms := riceLab][, riceLab := NULL]
 
 # deal with multiple MADS peptides for one oryza name
 tagDuplicateSynonyms <- function(gene_names) {
@@ -242,7 +269,7 @@ makeNjTree <- function(myAlignment, outgroup) {
 }
 
 # choose an outgroup
-og <- mikcCleaned$nam[mikcCleaned$nam %in% t1names][1]
+og <- mikcCleaned$nam[mikcCleaned$nam %in% t1names]
 njTree <- makeNjTree(mikcCleaned, og)
 
 # OUTPUT TO SAVE
