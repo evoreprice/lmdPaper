@@ -124,7 +124,7 @@ st_reviewInSitu <- st_reviewInSitu[, .(
   , by = c("msuId", "RM", "PBM", "SBM", "SM", "FM")]
 
 st_reviewInSitu[, `Gene symbol` :=
-                  oryzr::LocToGeneName(msuId, plotLabels = FALSE)$symbols,
+                  oryzr::LocToGeneName(msuId)$symbols,
                 by = msuId]
 setnames(st_reviewInSitu, old = "msuId", new = "MSU identifier")
 setcolorder(st_reviewInSitu, neworder =

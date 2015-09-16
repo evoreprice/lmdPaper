@@ -10,6 +10,7 @@ output:
     highlight: pygments
     number_sections: yes
     dev: "CairoPDF"
+    toc: true
   word_document:
     fig_caption: yes
     reference_docx: csl/wordStyles.docx
@@ -89,7 +90,7 @@ Because of the enrichment of TF family members in some of the gene expression cl
 
 **Discussion: In which samples were TF families involved in branching enriched?**
 
-## MADS genes: comparison of expression & homology in rice, tomato, arabidopsis
+## Evolution of MADS genes in monocots and dicots
 
 There was an overrepresentation of MADS genes in cluster `r getClusterName('small', 'inc')` and their overall expression is enriched in the spikelet meristem sample. These results correspond with previous studies that have established the importance of MADS genes in inflorescence development in rice and other plants (**expand**).
 
