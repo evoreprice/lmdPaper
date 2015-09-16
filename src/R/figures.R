@@ -436,31 +436,31 @@ f_madsTree <- f_madsTree +
   ggplot2::geom_text(size= 1.5, na.rm = TRUE, hjust = -0.01)
 
 # annotate clades
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 146, "AGL2-like",
-                                       offset = 0.08, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 160, "AGL6-like",
-                                       offset = 0.09, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 133, "TM3-like",
-                                       offset = 0.1, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 169, "AG-like",
-                                       offset = 0.09, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 166, "AGL12-like",
-                                       offset = 0.09, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 179, "SQUA-like",
-                                       offset = 0.07, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 193, "STMADS11-like",
-                                       offset = 0.1, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 201, "AGL17-like",
-                                       offset = 0.06, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 209, "FLC-like",
-                                       offset = 0.1, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 215, "GLO-like",
-                                       offset = 0.06, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 219, "DEF-like",
-                                       offset = 0.07, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 115, "MIKC*",
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 145, "AGL2-like",
                                        offset = 0.15, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 212, "GGM13-like",
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 159, "AGL6-like",
+                                       offset = 0.09, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 132, "TM3-like",
+                                       offset = 0.1, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 168, "AG-like",
+                                       offset = 0.15, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 165, "AGL12-like",
+                                       offset = 0.09, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 178, "SQUA-like",
+                                       offset = 0.13, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 192, "STMADS11-like",
+                                       offset = 0.12, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 200, "AGL17-like",
+                                       offset = 0.14, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 208, "FLC-like",
+                                       offset = 0.09, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 214, "GLO-like",
+                                       offset = 0.06, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 218, "DEF-like",
+                                       offset = 0.08, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 114, "MIKC*",
+                                       offset = 0.14, font.size = 1.5, bar.size = 0.5)
+f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 211, "GGM13-like",
                                        offset = 0.025, font.size = 1.5, bar.size = 0.5,
                                        angle = 0, offset.text = 0.04)
 
@@ -472,7 +472,7 @@ f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 212, "GGM13-like",
 #  f_madsTree
 #  dev.off()
 # 
-# # quick print for node labels
+# quick print for node labels
 # cairo_pdf(filename = "output/madsComp/clustal/nodes.pdf", width = 6.614,
 #           height = 8.661)
 # ggtree(njTree) + ggplot2::geom_text(aes(label = label), hjust = -0.1, size = 2) + 
