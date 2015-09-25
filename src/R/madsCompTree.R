@@ -47,6 +47,8 @@ resSl <- data.table(as.data.frame(
 
 # make DESeq results data.table
 resAll <- rbind(resOs, resAt, resSl)
+# remove genes that failed filtering
+resAll[is.na(padj), log2FoldChange := NA]
 
 # set up biomaRt for phytozome
 phytozome <- biomaRt::useMart(biomart = 'phytozome_mart', dataset = "phytozome")

@@ -355,6 +355,68 @@ t_hypergeom[is.na(t_hypergeom)] <- ""
 tableCount <- incCount(tableCount, "t_hypergeom")
 
 ############
+### ALOG ###
+############
+
+# set up biomaRt for phytozome
+phytozome <- biomaRt::useMart(biomart = 'phytozome_mart', dataset = "phytozome")
+
+# query biomaRt
+filters <- c("pfam_id_list", "organism_id")
+values <- list("PF04852", "204")
+atts <- c("gene_name1", "organism_name")
+res <- biomaRt::getBM(atts, filters, values, phytozome, uniqueRows = TRUE)
+martResults <- data.table(res, key = c("gene_name1"))
+rm(phytozome)
+
+# add labels
+alogTable <- martResults[, oryzr::LocToGeneName(gene_name1, shortLabels = TRUE), by = gene_name1]
+
+# add expression values
+tpm <- data.table(readRDS('output/tpm/tpm.Rds'), keep.rownames = TRUE)
+setkey(tpm, "rn")
+plotData.wide <- tpm[alogTable]
+
+# convert to long
+plotData <- reshape2::melt(plotData.wide, id.vars = c("rn", "RapID", "symbols", "names", "labels"),
+                           variable.name = "library", value.name = "Expression (TPM)")
+setkey(plotData, "rn", "library")
+
+# add expression calls
+expGenTT.wide <- data.table(readRDS('output/expressedGenes/expGenTT.Rds'), key = "id")
+expGenTT <- reshape2::melt(expGenTT.wide, id.vars = "id", variable = "library", value = "isExpr")
+setkey(expGenTT, "id", "library")
+plotData <- expGenTT[plotData, .(
+  id,
+  library,
+  labels,
+  `Expression (TPM)`,
+  isExpr)]
+
+# add stage
+plotData[, stage := substr(library, start = 1, stop = 2)]
+old <- c("n1", "n2", "n3", "n4")
+new <- c("RM", "PBM", "ePBM/\nSBM", "SM")
+plotData[, stage := factor(plyr::mapvalues(stage, from = old, to = new), levels = new)]
+
+# put g1 first on the plot
+plotData[, labels := relevel(factor(labels), "G1 (lng/ELE)")]
+
+# make a plot
+cols <- RColorBrewer::brewer.pal(3, "Set1")[c(2,1)]
+f_alogFamily <- ggplot(plotData, aes(x = stage, y = `Expression (TPM)`, group = labels,
+                     colour = isExpr)) +
+  theme_minimal(base_size = 8, base_family = "Helvetica") +
+  theme(axis.text.x = element_text(vjust = 0.5)) +
+  scale_colour_manual(values = cols, guide = FALSE) +
+  facet_wrap(~labels, nrow = 3) +
+  xlab(NULL) +
+  stat_smooth(se = FALSE, colour = "grey", size = 0.5) +
+  geom_point(alpha = 0.7)
+
+figCount <- incCount(figCount, "f_alogFamily")
+
+############
 ### GSEA ###
 ############
 
