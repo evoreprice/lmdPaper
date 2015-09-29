@@ -591,6 +591,12 @@ def st_reviewInSitu(inputFiles, outputFiles):
 def sf_isGenesTpm(inputFiles, outputFiles):
     touch(outputFiles)
 
+#---------------------------------------------------------------
+# ALOG TPM plot
+#
+@merge([calculate_tpm, detect_expressed_genes], "ruffus/table.st_reviewInSitu")
+def f_alogFamily(inputFiles, outputFiles):
+    touch(outputFiles)
 
 
 

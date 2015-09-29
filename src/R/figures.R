@@ -2,7 +2,7 @@
 
 library(data.table)
 library(ggplot2)
-extrafont::loadfonts()
+#extrafont::loadfonts()
 
 #####################
 ### SETUP FOR RMD ###
@@ -159,7 +159,7 @@ plotData <- expGenTT.long[genTpm.long]
 # add stage names from deseq2
 colData <- data.table(as.data.frame(GenomicRanges::colData(
   readRDS('output/DESeq2/ddsLrt.Rds'))), keep.rownames = TRUE)
-plotData[, stage := colData[rn == as.character(lib), stage]]
+plotData[, stage := colData[rn == as.character(lib), stage], by = lib]
 
 # add replicate number to colour points
 plotData[, Replicate := sub(".*(\\d+)", "\\1", lib)]
@@ -370,7 +370,7 @@ martResults <- data.table(res, key = c("gene_name1"))
 rm(phytozome)
 
 # add labels
-alogTable <- martResults[, oryzr::LocToGeneName(gene_name1, shortLabels = TRUE), by = gene_name1]
+alogTable <- martResults[, oryzr::LocToGeneName(gene_name1), by = gene_name1]
 
 # add expression values
 tpm <- data.table(readRDS('output/tpm/tpm.Rds'), keep.rownames = TRUE)
@@ -378,7 +378,7 @@ setkey(tpm, "rn")
 plotData.wide <- tpm[alogTable]
 
 # convert to long
-plotData <- reshape2::melt(plotData.wide, id.vars = c("rn", "RapID", "symbols", "names", "labels"),
+plotData <- reshape2::melt(plotData.wide, id.vars = c("rn", "RapID", "symbols", "names"),
                            variable.name = "library", value.name = "Expression (TPM)")
 setkey(plotData, "rn", "library")
 
@@ -389,7 +389,7 @@ setkey(expGenTT, "id", "library")
 plotData <- expGenTT[plotData, .(
   id,
   library,
-  labels,
+  symbols,
   `Expression (TPM)`,
   isExpr)]
 
@@ -399,17 +399,34 @@ old <- c("n1", "n2", "n3", "n4")
 new <- c("RM", "PBM", "ePBM/\nSBM", "SM")
 plotData[, stage := factor(plyr::mapvalues(stage, from = old, to = new), levels = new)]
 
+# set up labels
+plotData[!is.na(symbols), symbols := paste(symbols, "·", id)]
+plotData[is.na(symbols), symbols := id]
 # put g1 first on the plot
-plotData[, labels := relevel(factor(labels), "G1 (lng/ELE)")]
+plotData[, symbols := relevel(factor(symbols), "G1 · LOC_Os07g04670")]
+
+# remove genes that aren't expressed
+# plotData[, expressedInStage := sum(isExpr) >= 2, by = .(id, stage)]
+# plotData[, geneIsExpressed := any(expressedInStage), by = id]
+# unexpressedAlogGenes <- plotData[geneIsExpressed == FALSE, unique(as.character(symbols))]
+# unexpressedAlogGenes <- gsub("^(\\w+)\\s·\\s(\\w+)$", "*\\2* (*\\1*)", unexpressedAlogGenes)
+# unexpressedAlogGenes <- gsub("^(\\w+)", "*\\1*", unexpressedAlogGenes)
+# unexpressedAlogGenes <- paste(
+#   paste(unexpressedAlogGenes[-length(unexpressedAlogGenes)], collapse = ", "),
+#   unexpressedAlogGenes[length(unexpressedAlogGenes)],
+#   sep = " and "
+# )
+# plotData <- plotData[geneIsExpressed == TRUE]
 
 # make a plot
 cols <- RColorBrewer::brewer.pal(3, "Set1")[c(2,1)]
-f_alogFamily <- ggplot(plotData, aes(x = stage, y = `Expression (TPM)`, group = labels,
+f_alogFamily <- ggplot(plotData, aes(x = stage, y = `Expression (TPM)`, group = symbols,
                      colour = isExpr)) +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
-  theme(axis.text.x = element_text(vjust = 0.5)) +
+  theme(axis.text.x = element_text(vjust = 0.5),
+        strip.text = element_text(face = "italic")) +
   scale_colour_manual(values = cols, guide = FALSE) +
-  facet_wrap(~labels, nrow = 3) +
+  facet_wrap(~symbols, ncol = 2) +
   xlab(NULL) +
   stat_smooth(se = FALSE, colour = "grey", size = 0.5) +
   geom_point(alpha = 0.7)
@@ -505,7 +522,7 @@ f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 159, "AGL6-like",
 f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 132, "TM3-like",
                                        offset = 0.1, font.size = 1.5, bar.size = 0.5)
 f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 168, "AG-like",
-                                       offset = 0.15, font.size = 1.5, bar.size = 0.5)
+                                       offset = 0.09, font.size = 1.5, bar.size = 0.5)
 f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 165, "AGL12-like",
                                        offset = 0.09, font.size = 1.5, bar.size = 0.5)
 f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 178, "SQUA-like",
@@ -529,10 +546,10 @@ f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 211, "GGM13-like",
 # 1-col width=3.150,
 # max height=8.661,
 # max width = 6.614
-#  cairo_pdf(filename = "output/madsComp/clustal/tempTree.pdf", width = 3.150,
-#    height = 8.661)
-#  f_madsTree
-#  dev.off()
+cairo_pdf(filename = "output/madsComp/clustal/tempTree.pdf", width = 3.150,
+    height = 8.661)
+  f_madsTree
+  dev.off()
 # 
 # quick print for node labels
 # cairo_pdf(filename = "output/madsComp/clustal/nodes.pdf", width = 6.614,
