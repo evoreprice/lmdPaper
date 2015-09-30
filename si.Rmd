@@ -1,16 +1,22 @@
 ---
 title: "Supporting Information"
 csl: csl/the-plant-journal.csl
-header-includes: \usepackage{graphicx}
+header-includes:
+  \usepackage{graphicx}
+  \usepackage{caption}
+  \captionsetup[figure]{labelfont=bf}
+  \renewcommand{\thefigure}{S\arabic{figure}}
 output:
+  rmarkdown::tufte_handout:
+    dev: "CairoPDF"
+  pdf_document:
+    fig_caption: yes
+    number_sections: yes
+    dev: "CairoPDF"
   BiocStyle::html_document:
     fig_caption: yes
     force_captions: yes
     highlight: pygments
-    number_sections: yes
-    dev: "CairoPDF"
-  pdf_document:
-    fig_caption: yes
     number_sections: yes
     dev: "CairoPDF"
   word_document:
@@ -22,25 +28,26 @@ bibliography: bib/papersLib.bibtex
 
 knitr::opts_chunk$set(fig.path='figures/',
                cache.path='cache/',
-               dev=c("png", "cairo_pdf"),
-               fig.align = 'center',
+#               fig.align = 'center', 
+               dev = "cairo_pdf",
                dpi=300,
                fig.show='hold',
                fig.height = 3.150,
                fig.width = 3.150,
-               cache=FALSE,
+               out.width = 3.150,
+               out.height = 3.150,
+#               cache=FALSE,
                echo=FALSE,
                results="hide",
                message=FALSE,
                warning=FALSE)
 
 pander::panderOptions("table.caption.prefix", "")
-
 source('src/R/figures.R')
 
 ```
 
-``` {r st_libStats, results = "asis"}
+``` {r st_libStats, results = "asis", fig.cap = I(pasteLabel("**Table S", s_tableCount, "st_libStats"))}
 pander::set.caption(paste0(
   I(pasteLabel("**Table S", s_tableCount, "st_libStats")),
   "**: Library and sequencing statistics."))
@@ -61,7 +68,7 @@ pander::pandoc.table(st_reviewInSitu, split.tables = Inf,
 
 ----
 
-```{r sf_pca}
+```{r sf_pca, fig.cap = paste0("Principal components analysis of transformed read counts for each library. The two libraries made from degraded RNA did not cluster with other libraries (see ", I(pasteLabel("Table S", s_tableCount, "st_libStats")), "), suggesting that the use of degraded RNA affected quantification of expression. For this reason these two libraries were not included in subsequent analyses.")}
 print(sf_pca)
 ```
 

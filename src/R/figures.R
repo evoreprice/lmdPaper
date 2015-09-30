@@ -2,6 +2,7 @@
 
 library(data.table)
 library(ggplot2)
+set.seed(1)
 #extrafont::loadfonts()
 
 #####################
@@ -70,6 +71,10 @@ pcaPlotData <- data.frame(
 pcaPlotData$rIdx <- 1:dim(pcaPlotData)[1]
 opIdx <- pcaPlotData[c('n2r3', 'n4r1'),'rIdx']
 
+# format legend
+pcaPlotData$Stage <- plyr::mapvalues(pcaPlotData$Stage, from = "ePBM/SBM",
+                                     to = "ePBM/\nSBM")
+
 sf_pca <- ggplot(data = pcaPlotData,
                  aes(x = PCA1, y = PCA2, colour = Stage, label = label)) +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
@@ -86,7 +91,6 @@ sf_pca <- ggplot(data = pcaPlotData,
             hjust = -0.2, show.legend = FALSE)
 
 s_figCount <- incCount(s_figCount, "sf_pca")
-
 
 #######################
 ### COMPARE IN SITU ###
@@ -182,7 +186,7 @@ sf_isGenesTpm <- ggplot(plotData, aes(x = stage, y = `Expression (transcripts pe
   scale_color_brewer(palette = "Set1") +
   guides(shape = FALSE, size = FALSE) +
   stat_smooth(aes(group = label), method = "loess", se = FALSE, colour = "grey", size = 0.5) + 
-  geom_point(size = 1, alpha = 0.8) +
+  geom_point(size = 1, alpha = 0.8, position = position_jitter(width = 0.2)) +
   facet_wrap(~ label, scales = "free_y", ncol = 4)
 s_figCount <- incCount(s_figCount, "sf_isGenesTpm")
 
@@ -429,7 +433,7 @@ f_alogFamily <- ggplot(plotData, aes(x = stage, y = `Expression (TPM)`, group = 
   facet_wrap(~symbols, ncol = 2) +
   xlab(NULL) +
   stat_smooth(se = FALSE, colour = "grey", size = 0.5) +
-  geom_point(alpha = 0.7)
+  geom_point(shape = 16, alpha = 0.7, position = position_jitter(height = 0, width = 0.3))
 
 figCount <- incCount(figCount, "f_alogFamily")
 
@@ -546,10 +550,10 @@ f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 211, "GGM13-like",
 # 1-col width=3.150,
 # max height=8.661,
 # max width = 6.614
-cairo_pdf(filename = "output/madsComp/clustal/tempTree.pdf", width = 3.150,
-    height = 8.661)
-  f_madsTree
-  dev.off()
+# cairo_pdf(filename = "output/madsComp/clustal/tempTree.pdf", width = 3.150,
+#    height = 8.661)
+#  f_madsTree
+#  dev.off()
 # 
 # quick print for node labels
 # cairo_pdf(filename = "output/madsComp/clustal/nodes.pdf", width = 6.614,

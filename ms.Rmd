@@ -2,7 +2,10 @@
 title: Genome-wide changes in expression during inflorescence architecture development
   in rice
 csl: csl/the-plant-journal.csl
-header-includes: \usepackage{graphicx}
+header-includes:
+  \usepackage{graphicx}
+  \usepackage[utf8]{inputenc}
+  \DeclareUnicodeCharacter{2265}{$\geq$}
 output:
   BiocStyle::html_document:
     fig_caption: yes
@@ -17,6 +20,8 @@ output:
   pdf_document:
     fig_caption: yes
     number_sections: yes
+  rmarkdown::tufte_handout:
+    default
 bibliography: bib/papersLib.bibtex
 ---
 
@@ -64,9 +69,9 @@ Thomas W.R. Harrop^§^[^1], Israr Ud Din^¶^[^1], Veronica Gregis^¶^, Michela O
 # Introduction
 
 ## Rice inflorescence development
-### Branching & grain yield
-### Sequential changes in meristem activity
-### Discuss a few key genes?
+## Branching & grain yield
+## Sequential changes in meristem activity
+## Discuss a few key genes?
 
 # Results and Discussion
 
@@ -82,11 +87,78 @@ To recover common expression patterns in expressed genes, read counts were trans
 
 Examination of the clustered genes suggested that transcription factors were overrepresented in most clusters (**annotated cluster tables in SI**). To determine whether particular TF families were associated with particular patterns of expression, the enrichment of TF family members in each cluster was calculated using hypergeometric tests. Using the list of transcription factor and other transcriptional regulator families available on the Plant Transcription Factor Database [@PerezRodriguez:2010co], a hypergeometric test was carried out if there were at least two members of one family in a given cluster. After adjustment for multiple comparisons, each cluster had a significant enrichment of at least one family (`r I(pasteLabel("Table ", tableCount, "t_hypergeom"))`). Cluster `r getClusterName('inc', 'small')`, containing genes that are more highly expressed in the PBM–SM samples than in the RM sample, has an enrichment of Homeobox and basic helix-loop-helix TFs whereas the cluster with the complementary pattern (cluster `r getClusterName('dec', 'small')`) is enriched for ABI3VP1 and G2-like TFs. MADS TFs and TRAF genes were overreprsented among genes that have low expression in the SM and PBM but higher expression in the RM (cluster `r getClusterName('small', 'inc')`) and bHLH, SBP and C2C2-GATA TFs were overreprented among genes with the inverse pattern (cluster `r getClusterName('small', 'dec')`)
 
+Two G1-Like (ALOG) genes, *G1L2* and *G1L5* (*TAWAWA*), were present in clusters `r getClusterName('dec', 'small')` and `r getClusterName('dec', 'dec')` respectively. Only three ALOG genes are expressed in the meristem RNA sequencing dataset, but they share a similar expression pattern (`r I(pasteLabel("Figure ", figCount, "f_alogFamily"))`). *G1L5* mutants **do what, incl. ref**, and the co-expression of other ALOG genes suggests redundancy within the family.
+
 **Discussion: what might these patterns mean biologically? Which clusters have genes that are already candidates for panicle branching?**
+
+1. Cluster 1
+  + FZP
+  + WRKY81
+  + OsFBX127, OsFBX291
+  + MADS5, MADS56
+  + BZIP46, BZIP62
+  + YAB6
+  + LOC_Os07g02800 (MYB family?), LOC_Os07g12910 (PHD protein?)
+2. Cluster 2
+  + G1L2
+  + SPL19
+  + MADS47
+  + HOX13
+  + OsFBX30, OsFBO13, OsFBX258
+3. Cluster 3
+  + SNB
+  + G1L5 (TAWAWA)
+  + EP3 (OsFBK5), OsFBX257, OsFBX263, OsFBX333, OsFBX334, OsFBX421
+  + MADS57
+  + BZIP79
+  + ARF9, SAUR25, OsSAUR48
+  + WRKY36
+  + BC10
+  + LOC_Os12g39640 (MYB family?)
+4. Cluster 4
+  + PLT9 (AP2-like)
+  + MADS61
+  + ARF6A, OsSAUR33, LOC_Os08g44750 (auxin-induced protein 5NG4)
+  + OsFBX18
+  + BZIP23
+  + ROC1, ROC3, LOC_Os09g35760 (homeobox/START)
+5. Cluster 5
+  + IDS1, ERF61 (AP2)
+  + OsFBX109
+  + LOC_Os08g25799 (MYB family?)
+6. Cluster 6
+  + SPL3, SPL12
+  + WRKY123
+  + MIR319A (leaf morphology / cold tolerance in indica: 10.1111/pce.12130. Nothing about inflorescence. Strange results, check.)
+  + OsFBX14, OsFBL4, OsFBLD1
+  + ARF2
+  + C3H22
+  + LOC_Os04g35430 (PHD domain?)
+7. Cluster 7
+  + LOGL1, LOGL6
+  + BZIP47
+  + HOX14
+  + WRKY88
+  + SHR1
+  + SCR (GRAS)
+  + NAC41 (No apical meristem protein)
+  + OsFBO2, OsFBX125, OsFBX349
+  + LOC_Os03g53700 (PHD domain?)
+  + LOC_Os08g06240 (MYB domain?)
+8. Cluster 8
+  + PAP2 (MADS34)
+  + DEP1
+  + OsFBK1
+  + SAUR6
+  + LOC_Os02g13310 (homeobox?)
 
 ## Dynamic expression of transcription factor families
 
 Because of the enrichment of TF family members in some of the gene expression clusters, geneset enrichment analysis (GSEA) was used to provide an overview of expression of transcription factors and other regulators in the meristem samples (`r I(pasteLabel("Figure ", figCount, "f_gsea"))`). Unlike soft clustering, which groups genes based on shared expression dynamics, this GSEA was used to investigate the overall strength of expression of the families based on Log~2~-fold changes (L~2~FC) in expression of their members in each stage. These patterns are not intended to represent each member of each gene family: for example, there are several MADS genes that have lower expression in the SM than in the RM, but the test statistic for the whole MADS family was higher in the SM than in the RM. Despite this caveat, there are some notable modes of expression shared between different families that may indicate roles in inflorescence development. The most pronounced change in expression appears to occur between the RM and branch meristem samples. Several families (including TUBBY-like, GROWTH-REGULATING FACTOR, bZIP and ABI3VP1 TF genes and Aux/IAA genes) are strongly expressed in RM and lower in the other meristem types. Another group, including mTERF, MYB, SBP and FHA TF genes and SET, PHD and Jumonji regulator genes, is enriched in one or both of the PBM and ePBM/SBM samples but depleted or not enriched in the RM samples.
+
+The strong expression of SPL genes (which possess the SBP-box) in the RM and PBM and their presence in clusters `r getClusterName('small', 'dec')` and `r getClusterName('dec', 'small')` suggests involvement in the early stages of inflorescence development. Overexpression of *WEALTHY FARMER'S PANICLE* (*WFP*/*SPL14*), which was detected by *in situ* hybridisation experiments in the RM and branch meristems in wild-type plants, is associated with increased branching and grain yield [@Jiao:2010ft; @Miura:2010it]. *WFP*, *SPL3*, *SPL12* and *SPL17* are all highly expressed in the RM, gradually decrease in expression and have weakest expression in the SM. These genes are all targets of *miR156*, a microRNA that causes reduced panicle size and delayed flowering when overexpressed (**ref: http://www.ncbi.nlm.nih.gov/pmc/articles/PMC1557610/**).
+
+
 
 **Discussion: In which samples were TF families involved in branching enriched?**
 
