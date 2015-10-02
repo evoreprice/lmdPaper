@@ -7,6 +7,9 @@ header-includes:
   \usepackage[utf8]{inputenc}
   \DeclareUnicodeCharacter{2265}{$\geq$}
 output:
+  word_document:
+    fig_caption: yes
+    reference_docx: csl/wordStyles.docx
   BiocStyle::html_document:
     fig_caption: yes
     force_captions: yes
@@ -14,9 +17,6 @@ output:
     number_sections: yes
     dev: "CairoPDF"
     toc: true
-  word_document:
-    fig_caption: yes
-    reference_docx: csl/wordStyles.docx
   pdf_document:
     fig_caption: yes
     number_sections: yes
