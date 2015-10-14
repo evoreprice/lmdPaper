@@ -34,21 +34,23 @@ if (!dir.exists(outDir)) {
 # get DESeq2 results
 ddsOs <- readRDS(ddsOsFile)
 resOs <- data.table(as.data.frame(
-  DESeq2::results(ddsOs, contrast = c("stage", "SM", "RM"))),
+  DESeq2::results(ddsOs, contrast = c("stage", "SM", "RM"), lfcThreshold = log2(1.5), alpha = 0.1)),
   keep.rownames = TRUE, key = "rn")
 ddsAt <- readRDS(ddsAtFile)
 resAt <- data.table(as.data.frame(
-  DESeq2::results(ddsAt, contrast = c("stage", "FM", "IM"))),
+  DESeq2::results(ddsAt, contrast = c("stage", "FM", "IM"), lfcThreshold = log2(1.5), alpha = 0.1)),
   keep.rownames = TRUE, key = "rn")
 ddsSl <- readRDS(ddsSlFile)
 resSl <- data.table(as.data.frame(
-  DESeq2::results(ddsSl, contrast = c("stage", "fm", "sim"))),
+  DESeq2::results(ddsSl, contrast = c("stage", "fm", "sim"), lfcThreshold = log2(1.5), alpha = 0.1)),
   keep.rownames = TRUE, key = "rn")
 
 # make DESeq results data.table
 resAll <- rbind(resOs, resAt, resSl)
 # remove genes that failed filtering
 resAll[is.na(padj), log2FoldChange := NA]
+# remove genes that weren't significant
+resAll[padj > 0.1, log2FoldChange := NA]
 
 # set up biomaRt for phytozome
 phytozome <- biomaRt::useMart(biomart = 'phytozome_mart', dataset = "phytozome")
