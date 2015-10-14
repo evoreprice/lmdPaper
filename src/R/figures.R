@@ -362,27 +362,21 @@ tableCount <- incCount(tableCount, "t_hypergeom")
 ### ALOG ###
 ############
 
-# set up biomaRt for phytozome
-phytozome <- biomaRt::useMart(biomart = 'phytozome_mart', dataset = "phytozome")
+svpMads <- c("LOC_Os02g52340", "LOC_Os03g08754", "LOC_Os06g11330")
+expG1s <- c("LOC_Os02g07030", "LOC_Os06g46030", "LOC_Os10g33780")
 
-# query biomaRt
-filters <- c("pfam_id_list", "organism_id")
-values <- list("PF04852", "204")
-atts <- c("gene_name1", "organism_name")
-res <- biomaRt::getBM(atts, filters, values, phytozome, uniqueRows = TRUE)
-martResults <- data.table(res, key = c("gene_name1"))
-rm(phytozome)
+expTable <- rbind(data.table(msuId = svpMads, type = "mads"),
+data.table(msuId = expG1s, type = "g1l"))
 
-# add labels
-alogTable <- martResults[, oryzr::LocToGeneName(gene_name1), by = gene_name1]
+expTable[, symbol := oryzr::LocToGeneName(msuId)$symbols, by = msuId]
 
 # add expression values
 tpm <- data.table(readRDS('output/tpm/tpm.Rds'), keep.rownames = TRUE)
 setkey(tpm, "rn")
-plotData.wide <- tpm[alogTable]
+plotData.wide <- tpm[expTable]
 
 # convert to long
-plotData <- reshape2::melt(plotData.wide, id.vars = c("rn", "RapID", "symbols", "names"),
+plotData <- reshape2::melt(plotData.wide, id.vars = c("rn", "type", "symbol"),
                            variable.name = "library", value.name = "Expression (TPM)")
 setkey(plotData, "rn", "library")
 
@@ -392,8 +386,9 @@ expGenTT <- reshape2::melt(expGenTT.wide, id.vars = "id", variable = "library", 
 setkey(expGenTT, "id", "library")
 plotData <- expGenTT[plotData, .(
   id,
+  type,
   library,
-  symbols,
+  symbol,
   `Expression (TPM)`,
   isExpr)]
 
@@ -404,36 +399,31 @@ new <- c("RM", "PBM", "ePBM/\nSBM", "SM")
 plotData[, stage := factor(plyr::mapvalues(stage, from = old, to = new), levels = new)]
 
 # set up labels
-plotData[!is.na(symbols), symbols := paste(symbols, "·", id)]
-plotData[is.na(symbols), symbols := id]
-# put g1 first on the plot
-plotData[, symbols := relevel(factor(symbols), "G1 · LOC_Os07g04670")]
-
-# remove genes that aren't expressed
-# plotData[, expressedInStage := sum(isExpr) >= 2, by = .(id, stage)]
-# plotData[, geneIsExpressed := any(expressedInStage), by = id]
-# unexpressedAlogGenes <- plotData[geneIsExpressed == FALSE, unique(as.character(symbols))]
-# unexpressedAlogGenes <- gsub("^(\\w+)\\s·\\s(\\w+)$", "*\\2* (*\\1*)", unexpressedAlogGenes)
-# unexpressedAlogGenes <- gsub("^(\\w+)", "*\\1*", unexpressedAlogGenes)
-# unexpressedAlogGenes <- paste(
-#   paste(unexpressedAlogGenes[-length(unexpressedAlogGenes)], collapse = ", "),
-#   unexpressedAlogGenes[length(unexpressedAlogGenes)],
-#   sep = " and "
-# )
-# plotData <- plotData[geneIsExpressed == TRUE]
+plotData[!is.na(symbol), symbol := paste(symbol, "·", id)]
+plotData[is.na(symbol), symbol := id]
 
 # make a plot
 cols <- RColorBrewer::brewer.pal(3, "Set1")[c(2,1)]
-f_alogFamily <- ggplot(plotData, aes(x = stage, y = `Expression (TPM)`, group = symbols,
-                     colour = isExpr)) +
-  theme_minimal(base_size = 8, base_family = "Helvetica") +
-  theme(axis.text.x = element_text(vjust = 0.5),
-        strip.text = element_text(face = "italic")) +
-  scale_colour_manual(values = cols, guide = FALSE) +
-  facet_wrap(~symbols, ncol = 2) +
-  xlab(NULL) +
-  stat_smooth(se = FALSE, colour = "grey", size = 0.5) +
-  geom_point(shape = 16, alpha = 0.7, position = position_jitter(height = 0, width = 0.3))
+alogPlot <- function(plotData) {
+  return(
+    ggplot(plotData, aes(x = stage, y = `Expression (TPM)`, group = symbol,
+                         colour = isExpr)) +
+      theme_minimal(base_size = 8, base_family = "Helvetica") +
+      theme(axis.text.x = element_text(vjust = 0.5),
+            strip.text = element_text(face = "italic"),
+            plot.title = element_text(hjust = 0, face = "bold")) +
+      scale_colour_manual(values = cols, guide = FALSE) +
+      facet_wrap(~symbol, ncol = 1) +
+      xlab(NULL) +
+      stat_smooth(se = FALSE, colour = "grey", size = 0.5) +
+      geom_point(shape = 16, alpha = 0.7, position = position_jitter(height = 0, width = 0.3))
+  )
+}
+  
+f_alogFamily_a <- alogPlot(plotData[type == 'g1l']) + ggtitle("a")
+f_alogFamily_b <- alogPlot(plotData[type == 'mads']) + ggtitle("b") + ylab(NULL)
+
+f_alogFamily <- gridExtra::grid.arrange(f_alogFamily_a, f_alogFamily_b, ncol = 2)
 
 figCount <- incCount(figCount, "f_alogFamily")
 
