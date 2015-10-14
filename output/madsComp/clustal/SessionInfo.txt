@@ -1,5 +1,5 @@
 git branch: master
-git hash: acfc817c42661b347e9c1915bb7a04e13bcaa59f
+git hash: 3e5f9801c2a324aed3d3e1c4fa5c855225256146
 clustalo version: 1.2.1
 R version 3.2.2 (2015-08-14)
 Platform: x86_64-pc-linux-gnu (64-bit)
@@ -22,26 +22,26 @@ other attached packages:
 loaded via a namespace (and not attached):
  [1] Rcpp_0.12.1               RColorBrewer_1.1-2       
  [3] futile.logger_1.4.1       plyr_1.8.3               
- [5] GenomeInfoDb_1.4.2        XVector_0.8.0            
+ [5] GenomeInfoDb_1.4.3        XVector_0.8.0            
  [7] bitops_1.0-6              futile.options_1.0.0     
  [9] biomaRt_2.24.1            rpart_4.1-10             
 [11] nlme_3.1-122              RSQLite_1.0.0            
 [13] annotate_1.46.1           gtable_0.1.2             
 [15] lattice_0.20-33           DBI_0.3.1                
 [17] parallel_3.2.2            proto_0.3-10             
-[19] RcppArmadillo_0.5.600.2.0 gridExtra_2.0.0          
-[21] oryzr_0.1.9               genefilter_1.50.0        
+[19] RcppArmadillo_0.6.100.0.0 gridExtra_2.0.0          
+[21] oryzr_0.1.10              genefilter_1.50.0        
 [23] cluster_2.0.3             S4Vectors_0.6.6          
-[25] IRanges_2.2.7             ade4_1.7-2               
+[25] IRanges_2.2.9             ade4_1.7-2               
 [27] locfit_1.5-9.1            stats4_3.2.2             
 [29] grid_3.2.2                nnet_7.3-11              
 [31] Biobase_2.28.0            AnnotationDbi_1.30.1     
 [33] XML_3.98-1.3              survival_2.38-3          
-[35] BiocParallel_1.2.21       foreign_0.8-66           
+[35] BiocParallel_1.2.22       foreign_0.8-66           
 [37] latticeExtra_0.6-26       Formula_1.2-1            
 [39] seqinr_3.1-3              geneplotter_1.46.0       
-[41] DESeq2_1.8.1              ggplot2_1.0.1.9003       
-[43] lambda.r_1.1.7            Hmisc_3.16-0             
+[41] DESeq2_1.8.2              ggplot2_1.0.1.9003       
+[43] lambda.r_1.1.7            Hmisc_3.17-0             
 [45] scales_0.3.0              BiocGenerics_0.14.0      
 [47] GenomicRanges_1.20.8      splines_3.2.2            
 [49] ape_3.3                   colorspace_1.2-6         
