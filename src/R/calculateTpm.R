@@ -10,7 +10,7 @@ library(dplyr)
 
 # import GTF
 gtfFile <- 'data/genome/os/Osativa_204_v7.0.gene_exons.cuffcomp.rRNAremoved.gtf'
-gtf <- import.gff(gtfFile, format = 'gtf', genome = 'Osativa_204_v7.0', asRangedData=F, feature.type="exon")
+gtf <- import.gff(gtfFile, format = 'gtf', genome = 'Osativa_204_v7.0', feature.type="exon")
 
 # reduce ranges by gene_name (MSU ID), i.e. merge overlapping exons
 grl <- reduce(split(gtf, elementMetadata(gtf)$gene_name))
