@@ -1,5 +1,5 @@
 git branch: master
-git hash: 4cc78f40cde6ac35f498838f6cdb68fcb91e7ef1
+git hash: a20e48d2b6002a8d1c1382be62917126cde05391
 clustalo version: 1.2.1
 R version 3.2.2 (2015-08-14)
 Platform: x86_64-pc-linux-gnu (64-bit)

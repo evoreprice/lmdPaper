@@ -100,10 +100,13 @@ names(expressedGenesByLibrary) <- levels(q95.plot$lib)
 # expressed genes truth table
 tt <- data.table(dnaTpm.plot)[type == 'Genic']
 tt[, expressed := tpm > cutoffs[lib], by = id]
+tt[, stage := substr(lib, 1, 2)]
+tt[, expByStage := sum(expressed) > 1, by = .(id, stage)]
 expGenTT <- reshape2::dcast(tt, id ~ lib, value.var = "expressed")
 
 # list of expressed genes
-expressedGenes <- unique(do.call(c, expressedGenesByLibrary))
+expressedGenes <- unique(do.call(c, expressedGenesByLibrary)) # expressed in any lib
+#expressedGenes <- tt[expByStage == TRUE, unique(id)] # expressed in at least 2 libs in 1 stage
 
 # what are the real cutoffs in the tpm calculations performed *without* the shuffled GTF?
 realTpm <- readRDS(paste0(tpmDir, '/tpm.Rds'))

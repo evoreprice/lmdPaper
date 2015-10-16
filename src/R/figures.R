@@ -53,7 +53,7 @@ s_tableCount <- incCount(s_tableCount, "st_libStats")
 ################
 
 expressedGenes <- readRDS('output/expressedGenes/expressedGenesAll.Rds')
-vst <- readRDS('output/DESeq2/vstAll.Rds')
+vst <- BiocGenerics::updateObject(readRDS('output/DESeq2/vstAll.Rds'))
 
 exprVst <- GenomicRanges::assay(vst)[expressedGenes,]
 exprVst <- GenomicRanges::assay(vst)
@@ -411,7 +411,9 @@ alogPlot <- function(plotData) {
       theme_minimal(base_size = 8, base_family = "Helvetica") +
       theme(axis.text.x = element_text(vjust = 0.5),
             strip.text = element_text(face = "italic"),
-            plot.title = element_text(hjust = 0, face = "bold")) +
+            plot.title = element_text(hjust = 0, face = "bold")
+#            , plot.background = element_rect(colour = "grey50")
+            ) +
       scale_colour_manual(values = cols, guide = FALSE) +
       facet_wrap(~symbol, ncol = 1) +
       xlab(NULL) +
