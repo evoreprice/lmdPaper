@@ -33,7 +33,7 @@ if (!dir.exists(outDir)) {
 }
 
 # take the geometric mean of the vst expression values
-vst <- readRDS(paste0(deseqDir, "/vst.Rds"))
+vst <- GenomicRanges::updateObject(readRDS(paste0(deseqDir, "/vst.Rds")))
 gm_mean <- function(x, na.rm = TRUE) {
   exp(sum(log(x[x > 0]), na.rm = na.rm)/length(x))
 }
@@ -49,7 +49,7 @@ vstFiltered <- vstMeans[expressedGenes,]
 
 # get the most variable genes
 vstByVar <- vstFiltered[(rev(order(apply(vstFiltered, 1, var)))),]
-varGenes <- vstByVar[1:(0.25 * dim(vstByVar)[1]),]
+varGenes <- vstByVar[1:(1/3 * dim(vstByVar)[1]),]
 
 # set up the expressionSet
 pData <- data.frame(Stage = as.factor(colnames(varGenes)), row.names = colnames(varGenes))
