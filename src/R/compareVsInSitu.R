@@ -25,7 +25,7 @@ if (!file.exists(ddsFile)) {
   cat("ddsFile file not found, exiting\n", file = stderr())
   quit(save = "no", status = 1)
 }
-dds <- readRDS(ddsFile)
+dds <- BiocGenerics::updateObject(readRDS(ddsFile))
 
 # split the zhang genes expression field.
  trim <- function(x) {gsub("^\\s+|\\s+$", "", x)}
@@ -83,12 +83,13 @@ expZhangGenes.melt <- reshape2::melt(
 
 # compare this to the expressed genes truth table
 expGenTT.wide <- data.table(readRDS("output/expressedGenes/expGenTT.Rds"))
-expGenTT <- reshape2::melt(expGenTT.wide, id.vars = "id", variable.name = "lib", value.name = "expressed")
+expGenTT <- reshape2::melt(expGenTT.wide, id.vars = "id", variable.name = "lib",
+                           value.name = "expressed")
 
 # add stage names from deseq2, but map "ePBM/SBM" to "SBM"
 colData <- data.table(as.data.frame(GenomicRanges::colData(
   readRDS('output/DESeq2/ddsLrt.Rds'))), keep.rownames = TRUE)
-expGenTT[, stage := colData[rn == as.character(lib), stage]]
+expGenTT[, stage := colData[rn %in% as.character(lib), stage]]
 expGenTT[, stage := plyr::mapvalues(stage, "ePBM/SBM", "SBM")]
 
 # call a gene expressed if it's detected in > 1 library per stage

@@ -15,7 +15,7 @@ if (!file.exists(ddsFile)) {
   cat("ddsFile file not found, exiting\n", file = stderr())
   quit(save = "no", status = 1)
 }
-dds <- readRDS(ddsFile)
+dds <- BiocGenerics::updateObject(readRDS(ddsFile))
 
 # find tfdb
 tfdbFile <- 'data/tfdb/os.Rds'
