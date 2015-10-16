@@ -17,7 +17,7 @@ gtfLength <- data.table(readRDS(paste0(tpmDir, "/gtfLength.Rds")), keep.rownames
 
 # import GTF
 gtfFile <- "data/genome/os/Osativa_204_v7.0.gene_exons.cuffcomp.rRNAremoved.gtf"
-gtf <- rtracklayer::import.gff(gtfFile, format = 'gtf', genome = 'Osativa_204_v7.0', asRangedData=F, feature.type="exon")
+gtf <- rtracklayer::import.gff(gtfFile, format = 'gtf', genome = 'Osativa_204_v7.0', feature.type="exon")
 
 # make a dummy gff file with each 'gene' on the right chromosome but with the 
 # coordinates 1 --> CDS length. This will be shuffled by bedtools shuffle so
