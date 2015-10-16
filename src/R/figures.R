@@ -53,7 +53,7 @@ s_tableCount <- incCount(s_tableCount, "st_libStats")
 ################
 
 expressedGenes <- readRDS('output/expressedGenes/expressedGenesAll.Rds')
-vst <- BiocGenerics::updateObject(readRDS('output/DESeq2/vstAll.Rds'))
+vst <- readRDS('output/DESeq2/vstAll.Rds')
 
 exprVst <- GenomicRanges::assay(vst)[expressedGenes,]
 exprVst <- GenomicRanges::assay(vst)

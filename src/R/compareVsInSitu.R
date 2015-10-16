@@ -25,7 +25,7 @@ if (!file.exists(ddsFile)) {
   cat("ddsFile file not found, exiting\n", file = stderr())
   quit(save = "no", status = 1)
 }
-dds <- BiocGenerics::updateObject(readRDS(ddsFile))
+dds <- readRDS(ddsFile)
 
 # split the zhang genes expression field.
  trim <- function(x) {gsub("^\\s+|\\s+$", "", x)}
