@@ -1,5 +1,5 @@
 git branch: master
-git hash: 912c385092c05b9f1030a0dcf1364da568088d7f
+git hash: 82c779bf3ff62c0e1b94c6390400b6c1c55274b0
 R version 3.2.2 (2015-08-14)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 14.04.3 LTS
@@ -37,7 +37,7 @@ loaded via a namespace (and not attached):
 [16] gridExtra_2.0.0      oryzr_0.1.10         genefilter_1.52.0   
 [19] cluster_2.0.3        locfit_1.5-9.1       nnet_7.3-11         
 [22] grid_3.2.2           AnnotationDbi_1.32.0 XML_3.98-1.3        
-[25] survival_2.38-3      BiocParallel_1.3.54  foreign_0.8-66      
+[25] survival_2.38-3      BiocParallel_1.4.0   foreign_0.8-66      
 [28] latticeExtra_0.6-26  Formula_1.2-1        geneplotter_1.48.0  
 [31] lambda.r_1.1.7       scales_0.3.0         Hmisc_3.17-0        
 [34] splines_3.2.2        xtable_1.7-4         colorspace_1.2-6    

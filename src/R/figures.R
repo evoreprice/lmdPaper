@@ -364,9 +364,11 @@ tableCount <- incCount(tableCount, "t_hypergeom")
 
 svpMads <- c("LOC_Os02g52340", "LOC_Os03g08754", "LOC_Os06g11330")
 expG1s <- c("LOC_Os02g07030", "LOC_Os06g46030", "LOC_Os10g33780")
+ck <- c("LOC_Os01g51210","LOC_Os04g43840","LOC_Os01g40630", "LOC_Os01g10110")
 
 expTable <- rbind(data.table(msuId = svpMads, type = "mads"),
-data.table(msuId = expG1s, type = "g1l"))
+                  data.table(msuId = expG1s, type = "g1l"),
+                  data.table(msuId = ck, type = 'ck'))
 
 expTable[, symbol := oryzr::LocToGeneName(msuId)$symbols, by = msuId]
 
@@ -411,21 +413,21 @@ alogPlot <- function(plotData) {
       theme_minimal(base_size = 8, base_family = "Helvetica") +
       theme(axis.text.x = element_text(vjust = 0.5),
             strip.text = element_text(face = "italic"),
-            plot.title = element_text(hjust = 0, face = "bold")
-#            , plot.background = element_rect(colour = "grey50")
-            ) +
+            plot.title = element_text(hjust = 0, face = "bold"),
+            plot.background = element_rect(colour = "grey50")) +
       scale_colour_manual(values = cols, guide = FALSE) +
-      facet_wrap(~symbol, ncol = 1) +
       xlab(NULL) +
       stat_smooth(se = FALSE, colour = "grey", size = 0.5) +
       geom_point(shape = 16, alpha = 0.7, position = position_jitter(height = 0, width = 0.3))
   )
 }
-  
-f_alogFamily_a <- alogPlot(plotData[type == 'g1l']) + ggtitle("a")
-f_alogFamily_b <- alogPlot(plotData[type == 'mads']) + ggtitle("b") + ylab(NULL)
 
-f_alogFamily <- gridExtra::grid.arrange(f_alogFamily_a, f_alogFamily_b, ncol = 2)
+
+f_alogFamily_a <- alogPlot(plotData[type == 'ck']) + ggtitle("a") + facet_wrap(~symbol, ncol = 2)
+f_alogFamily_b <- alogPlot(plotData[type == 'g1l']) + ggtitle("b") + facet_wrap(~symbol, ncol = 1)
+f_alogFamily_c <- alogPlot(plotData[type == 'mads']) + ggtitle("c") + facet_wrap(~symbol, ncol = 1)
+
+#f_alogFamily <- gridExtra::grid.arrange(f_alogFamily_a, f_alogFamily_b, ncol = 2)
 
 figCount <- incCount(figCount, "f_alogFamily")
 

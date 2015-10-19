@@ -45,7 +45,8 @@ if (!dir.exists(tpmDir)) {
 
 # import GTF
 gtfFile <- list.files(shuffleDir, pattern = 'shuffled.gff3', full.names = TRUE)
-gtf <- import.gff(gtfFile, format = 'gff3', genome = 'Osativa_204_v7.0', asRangedData=F, feature.type="CDS")
+gtf <- import.gff(gtfFile, format = 'gff3', genome = 'Osativa_204_v7.0',
+                  feature.type="CDS")
 
 # reduce ranges by gene_name (MSU ID), i.e. merge overlapping exons
 grl <- reduce(split(gtf, elementMetadata(gtf)$ID))
