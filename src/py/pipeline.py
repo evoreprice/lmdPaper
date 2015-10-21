@@ -246,6 +246,21 @@ def define_review_inSituDB(outputFiles):
     pathToFile = 'data/zhangGenes.tab'
     assert os.path.isfile(pathToFile), "Error: in situ data file " + qualName + " missing"
     touch(outputFiles)
+    
+#---------------------------------------------------------------
+# download homeobox genes from Jain et al
+#
+@originate(['ruffus/hb.data'])
+
+def hbClasses_R(outputFiles):
+    jobScript = 'src/R/hbClasses.R'
+    ntasks = '1'
+    cpus_per_task = '1'
+    job_name = 'hbClass'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)
 
 #---------------------------------------------------------------
 # ANALYSIS TASKS
@@ -501,7 +516,7 @@ def gsea(inputFiles, outputFiles):
 # Compare published TF data
 #
 @merge([detect_expressed_genes, define_review_inSituDB, run_deseq2_os], 'ruffus/os.compare')
-def compare_inSitus(inputFiles, outputFiles):
+def compareVsInSitu_R(inputFiles, outputFiles):
     jobScript = 'src/R/compareVsInSitu.R'
     ntasks = '1'
     cpus_per_task = '1'
@@ -584,10 +599,10 @@ def f_madsTree(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # in situ comparisons
 #
-@merge(compare_inSitus, "ruffus/table.st_reviewInSitu")
+@merge(compareVsInSitu_R, "ruffus/table.st_reviewInSitu")
 def st_reviewInSitu(inputFiles, outputFiles):
     touch(outputFiles)
-@merge([compare_inSitus, calculate_tpm, run_deseq2_os], "ruffus/figure.sf_isGenesTpm")
+@merge([compareVsInSitu_R, calculate_tpm, run_deseq2_os], "ruffus/figure.sf_isGenesTpm")
 def sf_isGenesTpm(inputFiles, outputFiles):
     touch(outputFiles)
 

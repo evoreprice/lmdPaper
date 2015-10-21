@@ -362,6 +362,11 @@ tableCount <- incCount(tableCount, "t_hypergeom")
 ### ALOG ###
 ############
 
+# HDZIP4 <- c('LOC_Os02g45250', 'LOC_Os04g48070', 'LOC_Os04g53540', 'LOC_Os08g04190', 'LOC_Os08g08820', 'LOC_Os08g19590', 'LOC_Os09g35760', 'LOC_Os10g42490')
+# HDZIP3 <- c('LOC_Os01g48170', 'LOC_Os03g01890', 'LOC_Os03g43930', 'LOC_Os05g48820', 'LOC_Os06g39906', 'LOC_Os10g33960', 'LOC_Os12g41860')
+# 
+# expTable <- data.table(msuId = HDZIP3, type = 'hb')
+
 svpMads <- c("LOC_Os02g52340", "LOC_Os03g08754", "LOC_Os06g11330")
 expG1s <- c("LOC_Os02g07030", "LOC_Os06g46030", "LOC_Os10g33780")
 ck <- c("LOC_Os01g51210","LOC_Os04g43840","LOC_Os01g40630", "LOC_Os01g10110")
@@ -421,7 +426,6 @@ alogPlot <- function(plotData) {
       geom_point(shape = 16, alpha = 0.7, position = position_jitter(height = 0, width = 0.3))
   )
 }
-
 
 f_alogFamily_a <- alogPlot(plotData[type == 'ck']) + ggtitle("a") + facet_wrap(~symbol, ncol = 2)
 f_alogFamily_b <- alogPlot(plotData[type == 'g1l']) + ggtitle("b") + facet_wrap(~symbol, ncol = 1)

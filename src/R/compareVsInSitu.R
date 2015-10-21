@@ -89,7 +89,7 @@ expGenTT <- reshape2::melt(expGenTT.wide, id.vars = "id", variable.name = "lib",
 # add stage names from deseq2, but map "ePBM/SBM" to "SBM"
 colData <- data.table(as.data.frame(GenomicRanges::colData(
   readRDS('output/DESeq2/ddsLrt.Rds'))), keep.rownames = TRUE)
-expGenTT[, stage := colData[rn %in% as.character(lib), stage]]
+expGenTT[, stage := colData[rn %in% as.character(lib), stage], by = lib]
 expGenTT[, stage := plyr::mapvalues(stage, "ePBM/SBM", "SBM")]
 
 # call a gene expressed if it's detected in > 1 library per stage

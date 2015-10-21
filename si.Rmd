@@ -8,15 +8,16 @@ header-includes:
   \renewcommand{\thefigure}{S\arabic{figure}}
 output:
   rmarkdown::tufte_handout:
-    dev: "CairoPDF"
-  pdf_document:
-    fig_caption: yes
-    number_sections: yes
-    dev: "CairoPDF"
+    dev: CairoPDF
   BiocStyle::html_document:
+    dev: CairoPDF
     fig_caption: yes
     force_captions: yes
     highlight: pygments
+    number_sections: yes
+    toc: yes
+  pdf_document:
+    fig_caption: yes
     number_sections: yes
     dev: "CairoPDF"
   word_document:
@@ -28,8 +29,8 @@ bibliography: bib/papersLib.bibtex
 
 knitr::opts_chunk$set(fig.path='figures/',
                cache.path='cache/',
-#               fig.align = 'center', 
-               dev = "cairo_pdf",
+               fig.align = 'center', 
+#               dev=c("png", "cairo_pdf"),
                dpi=300,
                fig.show='hold',
                fig.height = 3.150,
@@ -47,11 +48,15 @@ source('src/R/figures.R')
 
 ```
 
-``` {r st_libStats, results = "asis", fig.cap = I(pasteLabel("**Table S", s_tableCount, "st_libStats"))}
+``` {r st_libStats, results = "asis", fig.fullwidth = TRUE, fig.cap = I(pasteLabel("**Table S", s_tableCount, "st_libStats"))}
 pander::set.caption(paste0(
   I(pasteLabel("**Table S", s_tableCount, "st_libStats")),
   "**: Library and sequencing statistics."))
-pander::pandoc.table(st_libStats, split.tables = Inf, missing = "", round = 1, emphasize.strong.cols = 1,
+pander::pandoc.table(st_libStats,
+                     missing = "",
+                     round = 1,
+                     emphasize.strong.cols = 1,
+                     split.tables = Inf,
                      justify = c("right", rep("center", length(names(st_libStats)) - 1)))
 ```
 
