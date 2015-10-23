@@ -5,11 +5,8 @@ header-includes:
   \usepackage{graphicx}
   \usepackage{caption}
   \usepackage{fixltx2e}
-  \usepackage{lscape}
   \usepackage{rotating}
-  \captionsetup[figure]{labelfont=bf}
   \renewcommand{\thefigure}{S\arabic{figure}}
-  \renewcommand{\tablename}{ \hfill \newline Table}
   \renewcommand{\thetable}{S\arabic{table}}
 documentclass: tufte-handout
 classoption: a4paper
@@ -17,19 +14,6 @@ output:
   rmarkdown::tufte_handout:
     dev: CairoPDF
     keep_tex: yes
-  BiocStyle::html_document:
-    dev: CairoPDF
-    fig_caption: yes
-    force_captions: yes
-    highlight: pygments
-    number_sections: yes
-    toc: yes
-  pdf_document:
-    fig_caption: yes
-    number_sections: yes
-    dev: "CairoPDF"
-  word_document:
-    fig_caption: yes
 bibliography: bib/papersLib.bibtex
 ---
 
@@ -38,34 +22,17 @@ bibliography: bib/papersLib.bibtex
 knitr::opts_chunk$set(fig.path='figures/',
                cache.path='cache/',
                fig.align = 'center', 
-#               dev=c("png", "cairo_pdf"),
-               dpi=300,
+               dpi=600,
                fig.show='hold',
                fig.height = 4.213,
                fig.width = 4.213,
                crop = FALSE,
-#               cache=FALSE,
                echo=FALSE,
                results="hide",
                message=FALSE,
                warning=FALSE)
 
-#pander::panderOptions("table.caption.prefix", "")
 source('src/R/figures.R')
-
-```
-
-``` {r st_libStats, results = "hide", fig.cap = I(pasteLabel("**Table S", s_tableCount, "st_libStats"))}
-
-pander::set.caption(paste0(
-  I(pasteLabel("**Table S", s_tableCount, "st_libStats")),
-  "**: Library and sequencing statistics."))
-pander::pandoc.table(st_libStats,
-                     missing = "",
-                     round = 1,
-                     emphasize.strong.cols = 1,
-                     split.tables = Inf,
-                     justify = c("right", rep("center", length(names(st_libStats)) - 1)))
 
 ```
 
@@ -75,14 +42,12 @@ pander::pandoc.table(st_libStats,
 \caption{\protect\label{tab:st_libstats}Library and sequencing statistics.}
 \end{longtable}
 
-``` {r st_libstats2, results = "asis"}
-
+``` {r st_libstats, results = "asis"}
 st_libStats_x <- as.data.frame(st_libStats)
 rownames(st_libStats_x) <- st_libStats_x$Library
 st_libStats_x$Library <- NULL
 st_libStats_x <- xtable::xtable(st_libStats_x)
 xtable::digits(st_libStats_x) <- c(0, rep(1, ncol(st_libStats_x) - 1), 0)
-#xtable::caption(st_libStats_x) <- "Library and sequencing statistics."
 
 st_libStats_x_print <- print(st_libStats_x,
       caption.placement = "top",
@@ -93,48 +58,21 @@ st_libStats_x_print <- print(st_libStats_x,
       print.results = FALSE)
 
 cat(st_libStats_x_print)
-
-#cat(sub("\\begin{table*}[ht]\n", "\\begin{table*}[ht]\n\\caption{Library and sequencing statistics.} \n", st_libStats_x_print, fixed = TRUE))
-
 ```
 
 \pagebreak
-
-```{r st_reviewInSitu, results = "hide"}
-pander::set.caption(paste0(
-  I(pasteLabel("**Table S", s_tableCount, "st_reviewInSitu")),
-  "**: Comparison of the dataset with published *in situ* expression profiles. '×' indicates that the gene was detected by both methods, '+' indicates that the gene was detected by *in situ* hybridisation but not by RNA sequencing and '·' indicates that the gene was detected by RNA sequencing but expression was not reported by *in situ*. The last category is not intended to be informative, because it relies on negative or unreported results. A blank cell indicates that the gene was not detected by either method."))
-pander::pandoc.table(st_reviewInSitu, split.tables = Inf,
-                     justify = c("right", rep("centre", length(names(st_reviewInSitu)) - 2), "left"),
-                     emphasize.cols = c(1,2), missing = "")
-```
-
 
 ```{r sf_pca, fig.cap = paste0("Principal components analysis of transformed read counts for each library. The two libraries made from degraded RNA did not cluster with other libraries (see Table \\ref{tab:st_libstats}), suggesting that the use of degraded RNA affected quantification of expression. For this reason these two libraries were not included in subsequent analyses.")}
 print(sf_pca)
 ```
 
-
 ```{r sf_isGenesTpm, fig.height = 9.535, fig.cap = paste0("\\protect\\label{fig:sf_isGenesTpm}","Comparison of the LMD RNA-sequencing dataset with published \\emph{in situ} results. Expression value in transcripts per million (TPM) is shown on the \\emph{y}-axis, and points are plotted as a triangle if the expression value was above the cutoff for that library or a circle if below. Grey shading indicates a meristem type for which expression was detected by \\emph{in situ} hybridisation. See Table \\ref{tab:refFrame_x} for references for the \\emph{in situ} expression patterns. [\\textbf{As this is now detable-ized include a separate supplemantary table of references}] Although four replicates were produced from each of the RM and PBM, only three replicates for each stage are included in the analysis (see Results).")}
-
 print(sf_isGenesTpm)
-
 ```
 
 \clearpage
 
 ```{r insituRefs, results = "asis"}
-
-# refFrame_x <- print(xtable::xtable(refFrame,
-#                                    caption = "References for Figure \\ref{fig:sf_isGenesTpm}",
-#                                    label = "tab:refFrame_x"),
-#       type = "latex",
-#       floating = TRUE,
-#       floating.environment = "table",
-#       rotate.colnames = FALSE,
-#       print.results = FALSE)
-
-
 setnames(refTable, c("msuId", "plotLabel"), c("MSU name", "CSGNL symbol"))
 pander::set.caption("\\protect\\label{tab:refFrame_x}References for Figure \\ref{fig:sf_isGenesTpm}.")
 pander::pandoc.table(refTable, emphasize.cols = c(1,2))
@@ -143,9 +81,7 @@ pander::pandoc.table(refTable, emphasize.cols = c(1,2))
 \clearpage
 
 ```{r sf_mfuzzCentroids, fig.cap = paste0("Minimum centroid distance for 2–", maxClust, " cluster cores (\\emph{c}). Eight cluster cores were indicated because the rate of change of the minimum centroid distance over \\emph{c} decreases after \\emph{c} = 8."), fig.scap = "Something", fig.scap = c("One plot", "Another plot")}
-
 print(sf_mfuzzCentroids)
-
 ```
 
 ``` {r sf_mfuzzPca, fig.cap = paste0("Classical multidimensional scaling (MDS) of Euclidean distances between transformed read counts for clustered genes. Genes are coloured by the cluster to which they were assigned. The separation of genes by cluster on the MDS plot supports the use of eight clusters.")}
@@ -153,7 +89,6 @@ print(sf_mfuzzPca)
 ```
 
 ```{r sf_madsTree, fig.height = 9.535, fig.cap = paste0("Differential expression of putatative MIKC proteins in \\emph{A. thaliana}, \\emph{Solanum lycopersicum} and \\emph{Oryza sativa} ssp. \\emph{japonica}. The tree is a neighbour-joining tree estimated from genetic distance of amino acid sequences. Named proteins starting with AT\\_ or OS\\_ are from Arabidopsis or rice respectively, with synonyms in parentheses, and other proteins are labelled with their unique identifiers.", "\\newline ", "The colour of the label represents the Log\\textsubscript{2}-fold change (L\\textsubscript{2}FC) in expression of the gene encoding that protein between undifferentiated and differentiated meristems. Where there is no coloured label, the adjusted \\emph{p}-value associated with the difference in expression was greater than 0.1, or the gene for the protein in question was excluded from the differential expression analysis by `DESeq2`, which may occur because of low read counts, an extreme count outlier or the gene failing independent filtering \\citep{@Love:2014do}.", "\\newline ", "For rice, L\\textsubscript{2}FC was estimated from the RM and SM samples reported here. For \\emph{A. thaliana}, L\\textsubscript{2}FC was estimated using the inflorescence meristem and floret meristem samples reported by \\citep{Mantegazza:2014di}. The sympodial inflorescence meristem and floret meristem samples generated by \\citep{Park:2012dg} were used to estimate L\\textsubscript{2}FC values for tomato genes. Clades are labelled following the nomenclature presented by \\citep{Arora:2007fa}.")}
-
 print(sf_madsTree)
 ```
 
