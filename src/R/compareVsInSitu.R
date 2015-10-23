@@ -10,6 +10,7 @@ if (!file.exists(zhangFile)) {
 }
 zhangGenes <- data.table(read.table(zhangFile, sep = "\t", header = TRUE,
                                     stringsAsFactors = FALSE))
+zhangGenes[, plotLabel := oryzr::LocToGeneName(msuId)$symbols, by = msuId]
 
 # load expressed genes
 exprGenFile <- "output/expressedGenes/expressedGenesByLibrary.Rds"
@@ -28,7 +29,7 @@ if (!file.exists(ddsFile)) {
 dds <- readRDS(ddsFile)
 
 # split the zhang genes expression field.
- trim <- function(x) {gsub("^\\s+|\\s+$", "", x)}
+trim <- function(x) {gsub("^\\s+|\\s+$", "", x)}
 zhangGenes <- zhangGenes[,.(
   geneExp = trim(unlist(strsplit(geneExp, "[,]")))
   ), by = c('msuId', 'zhangRef', 'plotLabel')]

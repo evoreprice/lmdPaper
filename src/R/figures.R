@@ -137,57 +137,118 @@ setcolorder(st_reviewInSitu, neworder =
 setkey(st_reviewInSitu, "Gene symbol")
 s_tableCount <- incCount(s_tableCount, "st_reviewInSitu")
 
-# tpm plots of some/all of these genes
-tpm <- data.table(readRDS('output/tpm/tpm.Rds'), keep.rownames = TRUE)
-setnames(tpm, 'rn', "MSU identifier")
-setkey(tpm, "MSU identifier")
-
-genes <- st_reviewInSitu[,.(`MSU identifier`, `Gene symbol`)]
-setkey(genes, "MSU identifier")
-genes <- unique(genes)
-genTpm <- tpm[genes]
-genTpm.long <- reshape2::melt(genTpm, id.vars = c('MSU identifier', 'Gene symbol'),
-                              variable.name = "lib", value.name = "Expression (transcripts per million)")
-
-# expression calls for these genes by library
-expGenTT <- data.table(readRDS('output/expressedGenes/expGenTT.Rds'), key = "id")
-expGenTT.wide <- expGenTT[genTpm[,`MSU identifier`]]
-expGenTT.long <- reshape2::melt(expGenTT.wide, id.vars = "id",
-                                variable.name = "lib", value.name = "expressed")
-
-setkey(genTpm.long, "MSU identifier", "lib")
-setkey(expGenTT.long, "id", "lib")
-
-plotData <- expGenTT.long[genTpm.long]
-
-# add stage names from deseq2
+# get long tpm data with stage
+tpm.wide <- data.table(readRDS('output/tpm/tpm.Rds'), keep.rownames = TRUE)
+setnames(tpm.wide, 'rn', "MSU identifier")
+tpm <- reshape2::melt(tpm.wide, id.vars = "MSU identifier",
+                      variable.name = "library", value.name = "tpm")
 colData <- data.table(as.data.frame(GenomicRanges::colData(
   readRDS('output/DESeq2/ddsLrt.Rds'))), keep.rownames = TRUE)
-plotData[, stage := colData[rn == as.character(lib), stage], by = lib]
+tpm[, stage := colData[rn %in% as.character(library), stage], by = library]
+
+setkey(tpm, "MSU identifier", "stage")
+
+# merge tpm data with compare calls
+genes <- compare[, .(msuId, stage, call.z)]
+setkey(genes, "msuId", "stage")
+genes <- unique(genes)
+genes[, stage := plyr::mapvalues(stage, "SBM", "ePBM/SBM")]
+
+# dirty kludge, fix in compareVsInSitu.R
+genes <- genes[!stage == "FM"]
+setkey(genes, "msuId", "stage")
+
+genTpm <- tpm[genes, .(
+  msuId = `MSU identifier`,
+  library,
+  stage,
+  call.z,
+  tpm
+)]
+
+# add call per library
+expGenTT.wide <- data.table(readRDS('output/expressedGenes/expGenTT.Rds'), key = "id")
+expGenTT <- reshape2::melt(expGenTT.wide, id.vars = "id",
+                           variable.name = "library", value.name = "isExpr")
+setkey(expGenTT, "id", "library")
+setkey(genTpm, "msuId", "library")
+
+genTpm <- expGenTT[genTpm]
+setnames(genTpm, "id", "msuId")
 
 # add replicate number to colour points
-plotData[, Replicate := sub(".*(\\d+)", "\\1", lib)]
+genTpm[, Replicate := sub(".*(\\d+)", "\\1", library)]
 
 # format gene name and stage for the plot
-plotData[, name:= oryzr::LocToGeneName(id)$symbols, by = id]
-plotData[!is.na(name), label := paste(name, "·", id)]
-plotData[is.na(name), label := id]
-plotData[, stage := plyr::mapvalues(stage, "ePBM/SBM", "ePBM/\nSBM")]
+genTpm[, name := oryzr::LocToGeneName(msuId)$symbols, by = msuId]
+genTpm[, plotLabel := name]
+genTpm[!is.na(plotLabel), plotLabel := paste(plotLabel, "·", msuId)]
+genTpm[is.na(plotLabel), plotLabel := msuId]
+genTpm[, stage := plyr::mapvalues(stage, "ePBM/SBM", "ePBM/\nSBM")]
 
 # order the plots
-setkey(plotData, "name")
-plotData[, label := factor(label, levels = unique(label))]
+setkey(genTpm, "name")
+genTpm[, plotLabel := factor(plotLabel, levels = unique(plotLabel))]
+
+# add coordinates for shading
+genTpm[, c("xmin", "xmax") := .(
+  as.numeric(substr(library, 2, 2)) - 0.2,
+  as.numeric(substr(library, 2, 2)) + 0.2) ]
 
 # draw it
-sf_isGenesTpm <- ggplot(plotData, aes(x = stage, y = `Expression (transcripts per million)`, colour = Replicate, shape = expressed)) +
+setkey(genTpm, "plotLabel", "stage")
+# sf_isGenesTpm <- ggplot(genTpm, aes(x = stage, y = tpm, colour = Replicate, shape = isExpr)) +
+#   theme_minimal(base_size = 8, base_family = "Helvetica") +
+#   theme(strip.text = element_text(face = "italic")) +
+#   xlab(NULL) +
+#   scale_color_brewer(palette = "Set1") +
+#   guides(shape = FALSE, size = FALSE) +
+#   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
+#             unique(genTpm[call.z == TRUE,]), colour = NA,  fill = "grey90", alpha = 0.75) +
+#   stat_smooth(aes(group = plotLabel), method = "loess", se = FALSE, colour = "grey", size = 0.5) + 
+#   geom_point(size = 1, alpha = 0.8, position = position_jitter(width = 0.2)) +
+#   facet_wrap(~ plotLabel, scales = "free_y", ncol = 4)
+
+# keep a subset of genes
+keep <- c("LOC_Os06g45460", "LOC_Os09g26999", "LOC_Os07g42410", "LOC_Os07g47330",
+          "LOC_Os10g33780", "LOC_Os03g60430", "LOC_Os01g61480", "LOC_Os03g11614",
+          "LOC_Os01g40630", "LOC_Os04g49150", "LOC_Os07g41370", "LOC_Os02g52340",
+          "LOC_Os09g32948", "LOC_Os06g11330", "LOC_Os08g41950", "LOC_Os02g45770",
+          "LOC_Os03g51690", "LOC_Os03g54170", "LOC_Os04g51000", "LOC_Os07g13170",
+          "LOC_Os08g39890")
+
+genTpm <- genTpm[msuId %in% keep]
+
+refTable <- compare[, .(msuId, plotLabel, Reference)]
+refTable <- refTable[msuId %in% keep]
+setkey(refTable, "msuId", "Reference")
+refTable <- unique(refTable)
+refTable[, Reference := paste(unlist(Reference), collapse = ", "), by = msuId]
+# refTable[, Reference := paste0("\\cite{", paste(Reference, collapse = ","), "}"), by = msuId]
+# refTable <- unique(refTable)
+# refTable[, Reference := gsub("@", "", Reference, fixed = TRUE)]
+setkey(refTable, "plotLabel")
+refTable <- unique(refTable)
+refFrame <- data.frame(refTable[, .(plotLabel, Reference)], row.names = "plotLabel")
+
+sf_isGenesTpm <- ggplot() +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
   theme(strip.text = element_text(face = "italic")) +
   xlab(NULL) +
   scale_color_brewer(palette = "Set1") +
   guides(shape = FALSE, size = FALSE) +
-  stat_smooth(aes(group = label), method = "loess", se = FALSE, colour = "grey", size = 0.5) + 
-  geom_point(size = 1, alpha = 0.8, position = position_jitter(width = 0.2)) +
-  facet_wrap(~ label, scales = "free_y", ncol = 4)
+  geom_blank(mapping = aes(x = stage, y = tpm), data = genTpm) +
+  geom_rect(mapping = aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
+            data = unique(genTpm[call.z == TRUE,]),
+            colour = NA,  fill = "grey90") +
+  stat_smooth(mapping = aes(x = stage, y = tpm, group = plotLabel),
+              data = genTpm,
+              method = "loess", se = FALSE, colour = "black", size = 0.25, alpha = 0.6) + 
+  geom_point(mapping = aes(x = stage, y = tpm, colour = Replicate, shape = isExpr),
+             data = genTpm,
+             size = 1, alpha = 0.6) +
+  facet_wrap(~ plotLabel, scales = "free_y", ncol = 2)
+
 s_figCount <- incCount(s_figCount, "sf_isGenesTpm")
 
 ##################
@@ -491,7 +552,7 @@ exprAnnot <- madsPeptides[unique(njTree$tip.label), .(name, log2FoldChange)]
 
 # draw a tree
 heatscale <- rev(RColorBrewer::brewer.pal(5, "PuOr"))
-f_madsTree <- ggtree::ggtree(njTree, aes(x = x, y = y, label = label), size = 0.025) +
+sf_madsTree <- ggtree::ggtree(njTree, aes(x = x, y = y, label = label), size = 0.025) +
   xlab(NULL) + ylab(NULL) +
   scale_y_continuous(expand = c(0,1)) +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
@@ -503,8 +564,8 @@ f_madsTree <- ggtree::ggtree(njTree, aes(x = x, y = y, label = label), size = 0.
         legend.position = c(0,0.5),
         legend.justification = c(0,0.5))
 # add expression values as an annotation
-f_madsTree <- f_madsTree %<+% exprAnnot
-f_madsTree <- f_madsTree +
+sf_madsTree <- sf_madsTree %<+% exprAnnot
+sf_madsTree <- sf_madsTree +
   scale_fill_gradient2(low = heatscale[1], mid = 'grey90', high = heatscale[5],
                        midpoint = 0, na.value = "white",
                        name = expression(L[2]*"FC")) +
@@ -517,31 +578,31 @@ f_madsTree <- f_madsTree +
   ggplot2::geom_text(size= 1.5, na.rm = TRUE, hjust = -0.01)
 
 # annotate clades
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 145, "AGL2-like",
+sf_madsTree <- ggtree::annotation_clade(sf_madsTree, node = 145, "AGL2-like",
                                        offset = 0.15, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 159, "AGL6-like",
+sf_madsTree <- ggtree::annotation_clade(sf_madsTree, node = 159, "AGL6-like",
                                        offset = 0.09, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 132, "TM3-like",
+sf_madsTree <- ggtree::annotation_clade(sf_madsTree, node = 132, "TM3-like",
                                        offset = 0.1, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 168, "AG-like",
+sf_madsTree <- ggtree::annotation_clade(sf_madsTree, node = 168, "AG-like",
                                        offset = 0.09, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 165, "AGL12-like",
+sf_madsTree <- ggtree::annotation_clade(sf_madsTree, node = 165, "AGL12-like",
                                        offset = 0.09, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 178, "SQUA-like",
+sf_madsTree <- ggtree::annotation_clade(sf_madsTree, node = 178, "SQUA-like",
                                        offset = 0.13, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 192, "STMADS11-like",
+sf_madsTree <- ggtree::annotation_clade(sf_madsTree, node = 192, "STMADS11-like",
                                        offset = 0.12, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 200, "AGL17-like",
+sf_madsTree <- ggtree::annotation_clade(sf_madsTree, node = 200, "AGL17-like",
                                        offset = 0.14, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 208, "FLC-like",
+sf_madsTree <- ggtree::annotation_clade(sf_madsTree, node = 208, "FLC-like",
                                        offset = 0.09, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 214, "GLO-like",
+sf_madsTree <- ggtree::annotation_clade(sf_madsTree, node = 214, "GLO-like",
                                        offset = 0.06, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 218, "DEF-like",
+sf_madsTree <- ggtree::annotation_clade(sf_madsTree, node = 218, "DEF-like",
                                        offset = 0.08, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 114, "MIKC*",
+sf_madsTree <- ggtree::annotation_clade(sf_madsTree, node = 114, "MIKC*",
                                        offset = 0.14, font.size = 1.5, bar.size = 0.5)
-f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 211, "GGM13-like",
+sf_madsTree <- ggtree::annotation_clade(sf_madsTree, node = 211, "GGM13-like",
                                        offset = 0.025, font.size = 1.5, bar.size = 0.5,
                                        angle = 0, offset.text = 0.04)
 
@@ -550,7 +611,7 @@ f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 211, "GGM13-like",
 # max width = 6.614
 # cairo_pdf(filename = "output/madsComp/clustal/tempTree.pdf", width = 3.150,
 #    height = 8.661)
-#  f_madsTree
+#  sf_madsTree
 #  dev.off()
 # 
 # quick print for node labels
@@ -563,4 +624,4 @@ f_madsTree <- ggtree::annotation_clade(f_madsTree, node = 211, "GGM13-like",
 
 detach("package:ggtree", unload=TRUE)
 
-figCount <- incCount(figCount, "f_madsTree")
+figCount <- incCount(figCount, "sf_madsTree")

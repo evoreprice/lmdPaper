@@ -1,5 +1,5 @@
 git branch: master
-git hash: b128e0a6cfee57a190efb9edd273218582ffa903
+git hash: ab24e57c4f0356b56060d0e90ee916c09582b77b
 catdoc version: NA
 R version 3.2.2 (2015-08-14)
 Platform: x86_64-pc-linux-gnu (64-bit)

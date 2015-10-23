@@ -1,48 +1,32 @@
 git branch: master
-git hash: 82c779bf3ff62c0e1b94c6390400b6c1c55274b0
+git hash: ab24e57c4f0356b56060d0e90ee916c09582b77b
 R version 3.2.2 (2015-08-14)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 14.04.3 LTS
 
 locale:
- [1] LC_CTYPE=en_AU.UTF-8       LC_NUMERIC=C              
- [3] LC_TIME=en_AU.UTF-8        LC_COLLATE=en_AU.UTF-8    
- [5] LC_MONETARY=en_AU.UTF-8    LC_MESSAGES=en_AU.UTF-8   
- [7] LC_PAPER=en_AU.UTF-8       LC_NAME=C                 
- [9] LC_ADDRESS=C               LC_TELEPHONE=C            
-[11] LC_MEASUREMENT=en_AU.UTF-8 LC_IDENTIFICATION=C       
+ [1] LC_CTYPE=en_AU.UTF-8       LC_NUMERIC=C               LC_TIME=en_AU.UTF-8        LC_COLLATE=en_AU.UTF-8    
+ [5] LC_MONETARY=en_AU.UTF-8    LC_MESSAGES=en_AU.UTF-8    LC_PAPER=en_AU.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=en_AU.UTF-8 LC_IDENTIFICATION=C       
 
 attached base packages:
-[1] methods   stats     graphics  grDevices utils     datasets  base     
+[1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
 [1] data.table_1.9.6
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.1                RColorBrewer_1.1-2        
- [3] futile.logger_1.4.1        plyr_1.8.3                
- [5] GenomeInfoDb_1.6.0         XVector_0.10.0            
- [7] tools_3.2.2                futile.options_1.0.0      
- [9] zlibbioc_1.16.0            rpart_4.1-10              
-[11] RSQLite_1.0.0              annotate_1.48.0           
-[13] gtable_0.1.2               lattice_0.20-33           
-[15] DBI_0.3.1                  parallel_3.2.2            
-[17] proto_0.3-10               RcppArmadillo_0.6.100.0.0 
-[19] gridExtra_2.0.0            stringr_1.0.0             
-[21] genefilter_1.52.0          cluster_2.0.3             
-[23] S4Vectors_0.8.0            IRanges_2.4.0             
-[25] locfit_1.5-9.1             stats4_3.2.2              
-[27] grid_3.2.2                 nnet_7.3-11               
-[29] Biobase_2.30.0             AnnotationDbi_1.32.0      
-[31] XML_3.98-1.3               survival_2.38-3           
-[33] BiocParallel_1.4.0         foreign_0.8-66            
-[35] latticeExtra_0.6-26        Formula_1.2-1             
-[37] magrittr_1.5               reshape2_1.4.1            
-[39] geneplotter_1.48.0         DESeq2_1.10.0             
-[41] ggplot2_1.0.1.9003         lambda.r_1.1.7            
-[43] scales_0.3.0               Hmisc_3.17-0              
-[45] BiocGenerics_0.16.0        GenomicRanges_1.22.0      
-[47] splines_3.2.2              SummarizedExperiment_1.0.0
-[49] xtable_1.7-4               colorspace_1.2-6          
-[51] stringi_0.5-5              acepack_1.3-3.3           
-[53] munsell_0.4.2              chron_2.3-47              
+ [1] Rcpp_0.12.1                RColorBrewer_1.1-2         futile.logger_1.4.1        GenomeInfoDb_1.6.0        
+ [5] plyr_1.8.3                 XVector_0.10.0             futile.options_1.0.0       tools_3.2.2               
+ [9] zlibbioc_1.16.0            rpart_4.1-10               RSQLite_1.0.0              annotate_1.48.0           
+[13] gtable_0.1.2               lattice_0.20-33            DBI_0.3.1                  parallel_3.2.2            
+[17] proto_0.3-10               RcppArmadillo_0.6.100.0.0  gridExtra_2.0.0            oryzr_0.1.10              
+[21] stringr_1.0.0              genefilter_1.52.0          cluster_2.0.3              S4Vectors_0.8.0           
+[25] IRanges_2.4.0              locfit_1.5-9.1             stats4_3.2.2               grid_3.2.2                
+[29] nnet_7.3-11                Biobase_2.30.0             AnnotationDbi_1.32.0       XML_3.98-1.3              
+[33] survival_2.38-3            BiocParallel_1.4.0         foreign_0.8-66             latticeExtra_0.6-26       
+[37] Formula_1.2-1              magrittr_1.5               reshape2_1.4.1             geneplotter_1.48.0        
+[41] DESeq2_1.10.0              ggplot2_1.0.1.9003         lambda.r_1.1.7             scales_0.3.0              
+[45] Hmisc_3.17-0               BiocGenerics_0.16.0        GenomicRanges_1.22.0       splines_3.2.2             
+[49] SummarizedExperiment_1.0.0 xtable_1.7-4               colorspace_1.2-6           stringi_0.5-5             
+[53] acepack_1.3-3.3            munsell_0.4.2              chron_2.3-47              
