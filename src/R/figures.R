@@ -41,6 +41,7 @@ capwords <- function(s, strict = FALSE) {
   sapply(strsplit(s, split = " "), cap, USE.NAMES = !is.null(names(s)))
 }
 
+
 ###################
 ### STATS TABLE ###
 ###################
@@ -92,6 +93,12 @@ sf_pca <- ggplot(data = pcaPlotData,
 
 s_figCount <- incCount(s_figCount, "sf_pca")
 
+######################
+### IN SITU FIGURE ###
+######################
+
+s_figCount <- incCount(s_figCount, "sf_inSitu")
+
 #######################
 ### COMPARE IN SITU ###
 #######################
@@ -135,7 +142,7 @@ setcolorder(st_reviewInSitu, neworder =
               c('Gene symbol', 'MSU identifier', 'RM', 'PBM', 'SBM', 'SM', 'FM',
                 'Reference'))
 setkey(st_reviewInSitu, "Gene symbol")
-s_tableCount <- incCount(s_tableCount, "st_reviewInSitu")
+#s_tableCount <- incCount(s_tableCount, "st_reviewInSitu")
 
 # get long tpm data with stage
 tpm.wide <- data.table(readRDS('output/tpm/tpm.Rds'), keep.rownames = TRUE)
@@ -228,8 +235,9 @@ refTable[, Reference := paste(unlist(Reference), collapse = ", "), by = msuId]
 # refTable <- unique(refTable)
 # refTable[, Reference := gsub("@", "", Reference, fixed = TRUE)]
 setkey(refTable, "plotLabel")
-refTable <- unique(refTable)
-refFrame <- data.frame(refTable[, .(plotLabel, Reference)], row.names = "plotLabel")
+st_refTable <- unique(refTable)
+setnames(st_refTable, c("msuId", "plotLabel"), c("MSU name", "CSGNL symbol"))
+s_tableCount <- incCount(s_tableCount, "st_refTable")
 
 sf_isGenesTpm <- ggplot() +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
@@ -264,6 +272,11 @@ figCount <- incCount(figCount, "f_lmdFigure")
 expressionMatrix <- readRDS('output/mfuzz/expressionMatrix.Rds')
 c1 <- readRDS('output/mfuzz/c1.Rds')
 memCutoff <- 0.5
+
+# Data S1
+annotatedClusters <- readRDS('output/mfuzz/annotatedClusters.Rds')
+write.table(annotatedClusters, file = "xlsx/Data S1.tsv", quote = FALSE,
+            sep = "\t", na = "", row.names = FALSE)
 
 # get clusters and membership
 cluster <- data.table(id = names(c1$cluster), Cluster = c1$cluster,
@@ -350,7 +363,7 @@ f_mfuzzClusters <- ggplot(plotData,
                               colour = Membership, group = id)) +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
-        legend.key.size = grid::unit(1, "lines")) +
+        legend.key.size = grid::unit(8, "point")) +
   xlab(NULL) +
   scale_colour_gradientn(colours = heatscale, limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
   geom_line(alpha = 0.8) +
@@ -369,33 +382,33 @@ getClusterName <- function(deln1n2, deln2n4){
 centroids <- readRDS('output/mfuzz/centroids.Rds')
 sf_mfuzzCentroids <- ggplot(centroids, aes(x = x, y = y)) +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
+  theme(plot.title = element_text(hjust = 0, face = "bold"),
+        plot.background = element_rect(colour = "black", size = 0.25)) +
   xlab(expression(Cluster~number~"("*italic(c)*")")) +
   ylab("Minimum centroid distance") +
-  stat_smooth(method = loess, se = FALSE) +
-  geom_point()
-
-s_figCount <- incCount(s_figCount, "sf_mfuzzCentroids")
+  ggtitle("a") +
+  stat_smooth(method = loess, se = FALSE, size = 0.5) +
+  geom_point(size = 1, alpha = 0.5)
 
 # MDS for SI
 vg.mds <- readRDS('output/mfuzz/vg.mds.Rds')
 sf_mfuzzPca <- ggplot(vg.mds, aes(x = MDS1, y=MDS2, colour = factor(cluster))) +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
-  coord_fixed(ratio = 1) +
+  theme(legend.key.size = grid::unit(8, "point"),
+        plot.title = element_text(hjust = 0, face = "bold"),
+        plot.background = element_rect(colour = "black", size = 0.25)) +
+  #coord_fixed(ratio = 1) +
+  ggtitle("b") +
   geom_point(aes(size=max.membership),alpha=0.5, shape = 16) +
   scale_colour_brewer(palette = "Set1", name = "Cluster") +
-  scale_size_area(guide = FALSE, max_size = 2)
+  scale_size_area(guide = FALSE, max_size = 1)
 
-s_figCount <- incCount(s_figCount, "sf_mfuzzPca")
+sf_mfuzzPcaCentroids <- gridExtra::arrangeGrob(
+  sf_mfuzzCentroids,
+  sf_mfuzzPca,
+  padding = unit(0, "lines"), ncol = 2)
 
-# # table of families/cluster
-# t_familiesPerCluster <- readRDS('output/mfuzz/familyClusters.Rds')
-# t_familiesPerCluster[!total == 0]
-# from <- grep("^C\\d+", names(t_familiesPerCluster), value = TRUE)
-# to <- sub("(\\d+)", "~\\1~", from)
-# setnames(t_familiesPerCluster, old = c("Fam", "n", "nexpr", "total", from),
-#          new = c("Family", "*n*", "*n*~expr~", "Total", to))
-# 
-# tableCount <- incCount(tableCount, "t_familiesPerCluster")
+s_figCount <- incCount(s_figCount, "sf_mfuzzPcaCentroids")
 
 #################
 ### HYPERGEOM ###
@@ -480,7 +493,7 @@ alogPlot <- function(plotData) {
       theme(axis.text.x = element_text(vjust = 0.5),
             strip.text = element_text(face = "italic"),
             plot.title = element_text(hjust = 0, face = "bold"),
-            plot.background = element_rect(colour = "grey50")) +
+            plot.background = element_rect(colour = "black", size = 0.25)) +
       scale_colour_manual(values = cols, guide = FALSE) +
       xlab(NULL) +
       stat_smooth(se = FALSE, colour = "grey", size = 0.5) +
@@ -520,7 +533,7 @@ heatscale <- rev(RColorBrewer::brewer.pal(6, "RdBu"))
 f_gsea <- ggplot(gsea, aes(x = Stage, y = rn, label = padj, fill = `Test\nstatistic`)) +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
   xlab(NULL) + ylab(NULL) +
-  theme(legend.key.size = grid::unit(1, "lines"),
+  theme(legend.key.size = grid::unit(8, "point"),
         axis.text.x = element_text(vjust = 0.5)) +
   scale_y_discrete(expand = c(0,0)) +
   scale_x_discrete(expand = c(0,0)) +
@@ -558,7 +571,7 @@ sf_madsTree <- ggtree::ggtree(njTree, aes(x = x, y = y, label = label), size = 0
   theme_minimal(base_size = 8, base_family = "Helvetica") +
   theme(axis.text = element_blank(),
         panel.grid = element_blank(),
-        legend.key.size = unit(0.5, "lines"),
+        legend.key.size = unit(8, "point"),
         legend.text = element_text(size = 4),
         legend.title = element_text(size = 5),
         legend.position = c(0,0.5),
@@ -624,4 +637,4 @@ sf_madsTree <- ggtree::annotation_clade(sf_madsTree, node = 211, "GGM13-like",
 
 detach("package:ggtree", unload=TRUE)
 
-figCount <- incCount(figCount, "sf_madsTree")
+s_figCount <- incCount(s_figCount, "sf_madsTree")
