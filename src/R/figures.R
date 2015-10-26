@@ -406,7 +406,7 @@ sf_mfuzzPca <- ggplot(vg.mds, aes(x = MDS1, y=MDS2, colour = factor(cluster))) +
 sf_mfuzzPcaCentroids <- gridExtra::arrangeGrob(
   sf_mfuzzCentroids,
   sf_mfuzzPca,
-  padding = unit(0, "lines"), ncol = 2)
+  padding = unit(0, "lines"), ncol = 1)
 
 s_figCount <- incCount(s_figCount, "sf_mfuzzPcaCentroids")
 

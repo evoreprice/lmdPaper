@@ -34,15 +34,15 @@ if (!dir.exists(outDir)) {
 # get DESeq2 results
 ddsOs <- readRDS(ddsOsFile)
 resOs <- data.table(as.data.frame(
-  DESeq2::results(ddsOs, contrast = c("stage", "SM", "RM"), lfcThreshold = 0.5, alpha = 0.1)),
+  DESeq2::results(ddsOs, contrast = c("stage", "SM", "RM"))),
   keep.rownames = TRUE, key = "rn")
 ddsAt <- readRDS(ddsAtFile)
 resAt <- data.table(as.data.frame(
-  DESeq2::results(ddsAt, contrast = c("stage", "FM", "IM"), lfcThreshold = 0.5, alpha = 0.1)),
+  DESeq2::results(ddsAt, contrast = c("stage", "FM", "IM"))),
   keep.rownames = TRUE, key = "rn")
 ddsSl <- readRDS(ddsSlFile)
 resSl <- data.table(as.data.frame(
-  DESeq2::results(ddsSl, contrast = c("stage", "fm", "sim"), lfcThreshold = 0.5, alpha = 0.1)),
+  DESeq2::results(ddsSl, contrast = c("stage", "fm", "sim"))),
   keep.rownames = TRUE, key = "rn")
 
 # make DESeq results data.table

@@ -14,11 +14,11 @@ output:
   rmarkdown::tufte_handout:
     dev: CairoPDF
     keep_tex: yes
+    fig_crop: no
 bibliography: bib/papersLib.bibtex
 ---
 
 ```{r Setup, include=FALSE, results="hide", warning=FALSE}
-
 knitr::opts_chunk$set(fig.path='figures/',
                cache.path='cache/',
                fig.align = 'center', 
@@ -26,29 +26,33 @@ knitr::opts_chunk$set(fig.path='figures/',
                fig.show='hold',
                fig.height = 4.213,
                fig.width = 4.213,
-               crop = FALSE,
                echo=FALSE,
                results="hide",
                message=FALSE,
                warning=FALSE)
 
 source('src/R/figures.R')
-
 ```
 
-\hfill\newline
-\hfill\newline
-\begin{longtable}[c]{@{}cc@{}}
-\caption{\protect\label{tab:st_libstats}Library and sequencing statistics.}
-\end{longtable}
+```{r sf_pca, fig.cap = paste0("Principal components analysis of transformed read counts for each library. The two libraries made from degraded RNA did not cluster with other libraries (see Table \\ref{tab:st_libstats}), suggesting that the use of degraded RNA affected quantification of expression. For this reason these two libraries were not included in subsequent analyses.")}
+print(sf_pca)
+```
+
+\clearpage
+\captionof{table}{\protect\label{tab:st_libstats}Library and sequencing statistics.}
 
 ``` {r st_libstats, results = "asis"}
 st_libStats_x <- as.data.frame(st_libStats)
+# colnames(st_libStats_x) <- gsub("Uniquely mapped reads (M)",
+#                                 "Uniquely mapped reads (M)",
+#                                 colnames(st_libStats_x),
+#                                 fixed = TRUE)
 rownames(st_libStats_x) <- st_libStats_x$Library
 st_libStats_x$Library <- NULL
+st_libStats_x$Sample <- sub("ePBM/SBM", "SBM¹", st_libStats_x$Sample, fixed = TRUE)
 st_libStats_x <- xtable::xtable(st_libStats_x)
-xtable::digits(st_libStats_x) <- c(0, rep(1, ncol(st_libStats_x) - 1), 0)
-
+xtable::align(st_libStats_x) <- rep("r", ncol(st_libStats_x) + 1)
+xtable::digits(st_libStats_x) <- c(rep(0, 3), 3, rep(1, 11), 0)
 st_libStats_x_print <- print(st_libStats_x,
       caption.placement = "top",
       comment = FALSE,
@@ -57,38 +61,35 @@ st_libStats_x_print <- print(st_libStats_x,
       floating.environment = "table*",
       print.results = FALSE)
 
+# add more space to the longest colname
+#st_libStats_x_print <- sub("Uniquely mapped reads (M)", "Uniquely mapped reads (M) \\hspace{3 mm}", st_libStats_x_print, fixed = TRUE)
+# OR remove the first hline?
+st_libStats_x_print <- sub("\\begin{tabular}{rrrrrrrrrrrrrrrr}\n  \\hline\n", "\\begin{tabular}{rrrrrrrrrrrrrrrr}\n", st_libStats_x_print, fixed = TRUE)
 cat(st_libStats_x_print)
+cat("¹ ePBM/SBM")
 ```
 
-\pagebreak
+\begin{figure*}
+ \includegraphics{data/lmdFigure.pdf}
+\caption{Placeholder for the \emph{in situ} results figure.}
+\end{figure*}
 
-```{r sf_pca, fig.cap = paste0("Principal components analysis of transformed read counts for each library. The two libraries made from degraded RNA did not cluster with other libraries (see Table \\ref{tab:st_libstats}), suggesting that the use of degraded RNA affected quantification of expression. For this reason these two libraries were not included in subsequent analyses.")}
-print(sf_pca)
-```
-
-```{r sf_isGenesTpm, fig.height = 9.535, fig.cap = paste0("\\protect\\label{fig:sf_isGenesTpm}","Comparison of the LMD RNA-sequencing dataset with published \\emph{in situ} results. Expression value in transcripts per million (TPM) is shown on the \\emph{y}-axis, and points are plotted as a triangle if the expression value was above the cutoff for that library or a circle if below. Grey shading indicates a meristem type for which expression was detected by \\emph{in situ} hybridisation. See Table \\ref{tab:refFrame_x} for references for the \\emph{in situ} expression patterns. [\\textbf{As this is now detable-ized include a separate supplemantary table of references}] Although four replicates were produced from each of the RM and PBM, only three replicates for each stage are included in the analysis (see Results).")}
+```{r sf_isGenesTpm, fig.height = 9.535, fig.cap = paste0("\\protect\\label{fig:sf_isGenesTpm}","Comparison of the LMD RNA-sequencing dataset with published \\emph{in situ} results. Expression value in transcripts per million (TPM) is shown on the \\emph{y}-axis, and points are plotted as a triangle if the expression value was above the cutoff for that library or a circle if below. Grey shading indicates a meristem type for which expression was detected by \\emph{in situ} hybridisation. See Table \\ref{tab:refFrame_x} for references for the \\emph{in situ} expression patterns. Although four replicates were produced from each of the RM and PBM, only three replicates for each stage are included in the analysis (see Results).", "\\newline ", "\\textbf{Do we need to discuss the results of individual genes?}")}
 print(sf_isGenesTpm)
 ```
 
 \clearpage
+\captionof{table}{\protect\label{tab:refFrame_x}References for Figure \ref{fig:sf_isGenesTpm}.}
 
 ```{r insituRefs, results = "asis"}
-setnames(refTable, c("msuId", "plotLabel"), c("MSU name", "CSGNL symbol"))
-pander::set.caption("\\protect\\label{tab:refFrame_x}References for Figure \\ref{fig:sf_isGenesTpm}.")
-pander::pandoc.table(refTable, emphasize.cols = c(1,2))
+pander::pandoc.table(st_refTable, emphasize.cols = c(1,2))
 ```
 
-\clearpage
-
-```{r sf_mfuzzCentroids, fig.cap = paste0("Minimum centroid distance for 2–", maxClust, " cluster cores (\\emph{c}). Eight cluster cores were indicated because the rate of change of the minimum centroid distance over \\emph{c} decreases after \\emph{c} = 8."), fig.scap = "Something", fig.scap = c("One plot", "Another plot")}
-print(sf_mfuzzCentroids)
+```{r sf_mfuzzPcaCentroids, fig.height = 6.741, fig.cap = paste0("Assessment of clustering results. \\textbf{a}. Minimum centroid distance for 2–", maxClust, " cluster cores (\\emph{c}). Eight cluster cores were indicated because the rate of change of the minimum centroid distance over \\emph{c} decreases after \\emph{c} = 8. \\textbf{b}. Classical multidimensional scaling (MDS) of Euclidean distances between transformed read counts for clustered genes. Genes are coloured by the cluster to which they were assigned. The separation of genes by cluster on the MDS plot supports the use of eight clusters.")}
+grid::grid.draw(sf_mfuzzPcaCentroids)
 ```
 
-``` {r sf_mfuzzPca, fig.cap = paste0("Classical multidimensional scaling (MDS) of Euclidean distances between transformed read counts for clustered genes. Genes are coloured by the cluster to which they were assigned. The separation of genes by cluster on the MDS plot supports the use of eight clusters.")}
-print(sf_mfuzzPca)
-```
-
-```{r sf_madsTree, fig.height = 9.535, fig.cap = paste0("Differential expression of putatative MIKC proteins in \\emph{A. thaliana}, \\emph{Solanum lycopersicum} and \\emph{Oryza sativa} ssp. \\emph{japonica}. The tree is a neighbour-joining tree estimated from genetic distance of amino acid sequences. Named proteins starting with AT\\_ or OS\\_ are from Arabidopsis or rice respectively, with synonyms in parentheses, and other proteins are labelled with their unique identifiers.", "\\newline ", "The colour of the label represents the Log\\textsubscript{2}-fold change (L\\textsubscript{2}FC) in expression of the gene encoding that protein between undifferentiated and differentiated meristems. Where there is no coloured label, the adjusted \\emph{p}-value associated with the difference in expression was greater than 0.1, or the gene for the protein in question was excluded from the differential expression analysis by `DESeq2`, which may occur because of low read counts, an extreme count outlier or the gene failing independent filtering \\citep{@Love:2014do}.", "\\newline ", "For rice, L\\textsubscript{2}FC was estimated from the RM and SM samples reported here. For \\emph{A. thaliana}, L\\textsubscript{2}FC was estimated using the inflorescence meristem and floret meristem samples reported by \\citep{Mantegazza:2014di}. The sympodial inflorescence meristem and floret meristem samples generated by \\citep{Park:2012dg} were used to estimate L\\textsubscript{2}FC values for tomato genes. Clades are labelled following the nomenclature presented by \\citep{Arora:2007fa}.")}
+```{r sf_madsTree, fig.height = 9.535, fig.cap = paste0("Differential expression of genes encoding putatative MIKC proteins in \\emph{A. thaliana}, \\emph{Solanum lycopersicum} and \\emph{Oryza sativa} ssp. \\emph{japonica}. The tree is a neighbour-joining tree estimated from genetic distance of amino acid sequences. Named proteins starting with AT\\_ or OS\\_ are from Arabidopsis or rice respectively, with synonyms in parentheses, and other proteins are labelled with their unique identifiers.", "\\newline ", "The colour of the label represents the Log\\textsubscript{2}-fold change (L\\textsubscript{2}FC) in expression of the gene encoding that protein between undifferentiated and differentiated meristems. Where there is no coloured label, the adjusted \\emph{p}-value associated with the difference in expression was greater than 0.1, or the gene for the protein in question was excluded from the differential expression analysis by \\texttt{DESeq2}, which may occur because of low read counts, an extreme count outlier or the gene failing independent filtering \\citep{@Love:2014do}.", "\\newline ", "For rice, L\\textsubscript{2}FC was estimated from the RM and SM samples reported here. For \\emph{A. thaliana}, L\\textsubscript{2}FC was estimated using the inflorescence meristem and floret meristem samples reported by \\citep{Mantegazza:2014di}. The sympodial inflorescence meristem and floret meristem samples generated by \\citep{Park:2012dg} were used to estimate L\\textsubscript{2}FC values for tomato genes. Clades are labelled following the nomenclature presented by \\citep{Arora:2007fa}.")}
 print(sf_madsTree)
 ```
 

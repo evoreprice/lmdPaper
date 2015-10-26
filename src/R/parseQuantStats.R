@@ -39,7 +39,10 @@ RIN <- c(7.08,6.1,8,7.6, # N1
          7.05,5.4,8,8.7, # N2
          7,7.05,8.1, # N3
          7.08,7.05,7.0) # N4
-
+area <- c(727647,511191,300886,848070, # N1
+          600176,2735798,394641,439534, # N2
+          1563411,1574719,1109344, # N3
+          975315,758919,2347647) # N4
 
 # function to get required info from STAR output
 parseStarInfo <- function(x){
@@ -94,7 +97,7 @@ if (!file.exists(expGenFile)) {
 expGen <- readRDS(expGenFile)
 expGenPerLib <- as.data.table(sapply(expGen, function(x) length(unique(x))),
                               keep.rownames = TRUE)
-setnames(expGenPerLib, c('lib', "Expressed genes"))
+setnames(expGenPerLib, c('lib', "Detected genes"))
 
 # merge
 setkey(starInfo, 'lib')
@@ -103,6 +106,7 @@ setkey(readsPerLib, 'lib')
 setkey(rnaStats, 'lib')
 libStats <- expGenPerLib[readsPerLib][rnaStats[starInfo]]
 libStats[, "Yield (ng)" := round(inputRNA, 1)][, RIN := RIN ]
+libStats[, "Dissected area (mm²)" := area/1000000] 
 
 # make all columns except 'lib' numeric
 libStats <- libStats[, lapply(.SD, as.numeric), by = lib]
@@ -114,9 +118,18 @@ libStats[, "tRNA (%)" := round(`tRNA reads (M)`/`Reads (M)`*100, 1)]
 # library names in upper case!
 libStats[, lib := toupper(lib)]
 
+# stage and replicate number
+libStats[, Sample := levels(GenomicRanges::colData(dds)$stage)[
+  as.integer(gsub("N([[:digit:]+]).*", "\\1", lib))]]
+libStats[, Replicate := as.integer(gsub(".*R(\\d+)", "\\1", lib))]
+
 # arrange table
-paste(colnames(libStats)[c(1, 10, 6, 4,11,5,12,7:9,3,2)], collapse = "', '")
-setcolorder(libStats, c('lib', 'Yield (ng)', 'RIN', 'Reads (M)', 'rRNA reads (M)', 'rRNA (%)', 'tRNA reads (M)', 'tRNA (%)', 'Uniquely mapped reads (M)', 'Multimapped reads (M)', 'Total mapping percentage', 'Reads in genes (M)', 'Expressed genes'))
+setcolorder(libStats, c('lib', "Sample", "Replicate", "Dissected area (mm²)", 'Yield (ng)', 'RIN',
+                        'Reads (M)', 'rRNA reads (M)', 'rRNA (%)',
+                        'tRNA reads (M)', 'tRNA (%)',
+                        'Uniquely mapped reads (M)', 'Multimapped reads (M)',
+                        'Total mapping percentage', 'Reads in genes (M)',
+                        'Detected genes'))
 setnames(libStats, 'lib', "Library")
 
 # save output
