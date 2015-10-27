@@ -541,6 +541,20 @@ def madsCompTree(inputFiles, outputFiles):
     touch(outputFiles)
 
 #---------------------------------------------------------------
+# make dendogram of MADS genes
+#
+@merge([hbClasses_R, download_tfdb, detect_expressed_genes, run_deseq2_os], 'ruffus/hb.heatmap')
+def homeobox_R(inputFiles, outputFiles):
+    jobScript = 'src/R/homeobox.R'
+    ntasks = '1'
+    cpus_per_task = '1'
+    job_name = 'homeobox'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)
+
+#---------------------------------------------------------------
 # FIGURES AND TABLES
 #---------------------------------------------------------------
 
@@ -611,6 +625,13 @@ def sf_isGenesTpm(inputFiles, outputFiles):
 #
 @merge([calculate_tpm, detect_expressed_genes], "ruffus/figure.f_alogFamily")
 def f_alogFamily(inputFiles, outputFiles):
+    touch(outputFiles)
+
+#---------------------------------------------------------------
+# homeobox figure
+#
+@merge(homeobox_R, "ruffus/figure.f_hb")
+def f_hb(inputFiles, outputFiles):
     touch(outputFiles)
 
 

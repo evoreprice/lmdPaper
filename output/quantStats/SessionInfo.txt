@@ -1,5 +1,5 @@
 git branch: master
-git hash: 82c779bf3ff62c0e1b94c6390400b6c1c55274b0
+git hash: 18b8315343bc1c8267b6bff9620f5740b7eaff9e
 R version 3.2.2 (2015-08-14)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 14.04.3 LTS
@@ -29,7 +29,7 @@ loaded via a namespace (and not attached):
 [15] parallel_3.2.2             proto_0.3-10              
 [17] RcppArmadillo_0.6.100.0.0  gridExtra_2.0.0           
 [19] genefilter_1.52.0          cluster_2.0.3             
-[21] S4Vectors_0.8.0            IRanges_2.4.0             
+[21] S4Vectors_0.8.0            IRanges_2.4.1             
 [23] locfit_1.5-9.1             stats4_3.2.2              
 [25] grid_3.2.2                 nnet_7.3-11               
 [27] Biobase_2.30.0             AnnotationDbi_1.32.0      

@@ -1,5 +1,5 @@
 git branch: master
-git hash: 1efbda9367d142b20d624871b68578d01c234326
+git hash: 18b8315343bc1c8267b6bff9620f5740b7eaff9e
 clustalo version: 1.2.1
 R version 3.2.2 (2015-08-14)
 Platform: x86_64-pc-linux-gnu (64-bit)
@@ -32,7 +32,7 @@ loaded via a namespace (and not attached):
 [19] proto_0.3-10               RcppArmadillo_0.6.100.0.0 
 [21] gridExtra_2.0.0            oryzr_0.1.10              
 [23] genefilter_1.52.0          cluster_2.0.3             
-[25] S4Vectors_0.8.0            IRanges_2.4.0             
+[25] S4Vectors_0.8.0            IRanges_2.4.1             
 [27] ade4_1.7-2                 locfit_1.5-9.1            
 [29] stats4_3.2.2               grid_3.2.2                
 [31] nnet_7.3-11                Biobase_2.30.0            

@@ -1,5 +1,5 @@
 git branch: master
-git hash: 82c779bf3ff62c0e1b94c6390400b6c1c55274b0
+git hash: 18b8315343bc1c8267b6bff9620f5740b7eaff9e
 R version 3.2.2 (2015-08-14)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 14.04.3 LTS
@@ -21,7 +21,7 @@ other attached packages:
  [3] RcppArmadillo_0.6.100.0.0  Rcpp_0.12.1               
  [5] SummarizedExperiment_1.0.0 Biobase_2.30.0            
  [7] GenomicRanges_1.22.0       GenomeInfoDb_1.6.0        
- [9] IRanges_2.4.0              S4Vectors_0.8.0           
+ [9] IRanges_2.4.1              S4Vectors_0.8.0           
 [11] BiocGenerics_0.16.0        gage_2.20.0               
 
 loaded via a namespace (and not attached):
@@ -37,7 +37,7 @@ loaded via a namespace (and not attached):
 [28] xtable_1.7-4         scales_0.3.0         Hmisc_3.17-0        
 [31] graph_1.48.0         annotate_1.48.0      XVector_0.10.0      
 [34] gridExtra_2.0.0      ggplot2_1.0.1.9003   png_0.1-7           
-[37] stringi_0.5-5        grid_3.2.2           tools_3.2.2         
+[37] stringi_1.0-1        grid_3.2.2           tools_3.2.2         
 [40] magrittr_1.5         RSQLite_1.0.0        Formula_1.2-1       
 [43] cluster_2.0.3        futile.options_1.0.0 httr_1.0.0          
 [46] R6_2.1.1             rpart_4.1-10         nnet_7.3-11         

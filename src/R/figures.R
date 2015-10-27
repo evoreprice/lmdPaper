@@ -638,3 +638,35 @@ sf_madsTree <- ggtree::annotation_clade(sf_madsTree, node = 211, "GGM13-like",
 detach("package:ggtree", unload=TRUE)
 
 s_figCount <- incCount(s_figCount, "sf_madsTree")
+
+################
+### HOMEOBOX ###
+################
+
+plotData.long <- readRDS("output/homeobox/plotData.long.Rds")
+segData <- readRDS("output/homeobox/segData.Rds")
+
+library(ggplot2)
+heatscale <- RColorBrewer::brewer.pal(6, "YlOrRd")
+
+f_hb <- ggplot() +
+  theme_minimal(base_size = 8, base_family = "Helvetica") +
+  theme(
+    legend.key.size = grid::unit(8, "points"),
+    legend.text	= element_text(size = 5.5),
+    axis.text.x = element_text(vjust = 0.5, hjust = 1, angle = 90),
+    axis.text.y = element_text(face = "italic", size = 5.5),
+    #legend.title = element_text(size = 6),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()) +
+  xlab(NULL) + ylab(NULL) +
+  scale_y_discrete(expand = c(0,0)) +
+  scale_x_discrete(expand = c(0,0)) +
+  geom_raster(aes(x = Stage, y = symbol, fill = `Scaled reads`),
+              data = plotData.long) +
+  scale_fill_gradientn(colours = heatscale) +
+  geom_segment(aes(x = 0.255, y = y, xend = 0.255, yend = yend, colour = class),
+               data = segData, size = 5) +
+  scale_colour_brewer(palette = "Set3", guide = guide_legend(title = NULL))
+
+figCount <- incCount(figCount, "f_hb")
