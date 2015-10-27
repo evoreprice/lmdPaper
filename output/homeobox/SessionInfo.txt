@@ -1,6 +1,5 @@
 git branch: master
-git hash: ab24e57c4f0356b56060d0e90ee916c09582b77b
-catdoc version: NA
+git hash: 9fd382f434d559c6aa89f73e604672182f1da1e1
 R version 3.2.2 (2015-08-14)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 14.04.3 LTS
@@ -14,10 +13,30 @@ locale:
 [11] LC_MEASUREMENT=en_AU.UTF-8 LC_IDENTIFICATION=C       
 
 attached base packages:
-[1] stats     graphics  grDevices utils     datasets  base     
+[1] parallel  stats4    methods   stats     graphics  grDevices utils    
+[8] datasets  base     
 
 other attached packages:
-[1] data.table_1.9.6
+ [1] DESeq2_1.10.0              RcppArmadillo_0.6.100.0.0 
+ [3] Rcpp_0.12.1                SummarizedExperiment_1.0.0
+ [5] Biobase_2.30.0             GenomicRanges_1.22.0      
+ [7] GenomeInfoDb_1.6.0         IRanges_2.4.1             
+ [9] S4Vectors_0.8.0            BiocGenerics_0.16.0       
+[11] data.table_1.9.6          
 
 loaded via a namespace (and not attached):
-[1] oryzr_0.1.10  methods_3.2.2 chron_2.3-47 
+ [1] RColorBrewer_1.1-2   futile.logger_1.4.1  plyr_1.8.3          
+ [4] XVector_0.10.0       tools_3.2.2          futile.options_1.0.0
+ [7] zlibbioc_1.16.0      rpart_4.1-10         RSQLite_1.0.0       
+[10] annotate_1.48.0      gtable_0.1.2         lattice_0.20-33     
+[13] DBI_0.3.1            proto_0.3-10         gridExtra_2.0.0     
+[16] stringr_1.0.0        oryzr_0.1.10         genefilter_1.52.0   
+[19] cluster_2.0.3        locfit_1.5-9.1       grid_3.2.2          
+[22] nnet_7.3-11          AnnotationDbi_1.32.0 XML_3.98-1.3        
+[25] survival_2.38-3      BiocParallel_1.4.0   foreign_0.8-66      
+[28] latticeExtra_0.6-26  Formula_1.2-1        magrittr_1.5        
+[31] reshape2_1.4.1       geneplotter_1.48.0   ggplot2_1.0.1.9003  
+[34] lambda.r_1.1.7       scales_0.3.0         Hmisc_3.17-0        
+[37] splines_3.2.2        xtable_1.7-4         colorspace_1.2-6    
+[40] stringi_1.0-1        acepack_1.3-3.3      munsell_0.4.2       
+[43] chron_2.3-47        

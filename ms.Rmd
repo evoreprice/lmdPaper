@@ -64,10 +64,13 @@ Thomas W.R. Harrop^§,1^, Israr Ud Din^¶,^[^1], Veronica Gregis^¶^, Michela Os
 
 # Introduction
 
-## Rice inflorescence development
-## Branching & grain yield
-## Sequential changes in meristem activity
-## Discuss a few key genes?
+Agricultural development is essential to ensure food production and security for a growing population, particularly in developing countries [@Borlaug:2007cp]. Rice is a staple food for over half the world's population, including a large number of developing countries. A sustainable increase in the production of rice against a backdrop of climate change and diminishing water and land availability will require plants with improved grain output, and the establishment of high-yield varieties is a major goal of modern breeding programs [@Peng:2008jb]. Rice yield is a complex trait influenced by genetic factors, as well as environmental and other epigenetic factors, and is progressively defined during the life cycle of the plant, first during the vegetative phase, where the number of fertile tillers is established, and then during the reproductive phase and grain-filling phase. Yield is directly dependent on the architecture of the inflorescence [@Ikeda:2004tk], which is the flower-bearing structure. The rice inflorescence (or panicle) is a branched structure composed of a rachis (the main axis), primary branches, higher order branches, and spikelets. Spikelets are short branches that form on other branches of the panicle and bear a single flower. They are the primary unit of grass inflorescence, with one spikelet bearing one floret, meaning that grain yield is determined by the number of spikelets [@Ikeda:2004tk; @Yoshida:2011bo].
+
+During panicle development, the undifferentiated cells in the primary axis (i.e. the rachis meristem, RM) undergo transitions through a series of meristem identities. After the establishment of the rachis some RM cells differentiate into branch meristem (BM) **PBM/SBM** for the formation and elongation of primary branches and the establishment of higher-order branches. The axillary BM cells differentiate into spikelet meristems (SM), which develop into floret meristems (FM) and produce flowers. After spikelet differentiation, panicle branching complexity is fixed and the rachis and branches elongate rapidly and heading and flowering occurs [@Ikeda:2004tk]. 
+
+The landscape of gene expression is a characteristic factor that differentiates meristem cell types, and is involved in the control of transitions between meristem identities and therefore panicle phenotype. Mutant analyses and map-based cloning of quantitative trait loci have identified a number of genes required for the initiation and development of panicles, as well as genes controlling the number and size of grains and panicles [@Xing:2010de; @Wang:2011kq]. Some of these genes are involved in the patterning of axillary meristem and panicle branching, such as the nuclear regulatory factor-encoding genes *MONOCULM 1*, *LAX PANICLE 1* and *LAX PANICLE 2* [@Wang:2011kq]. A large set of genes related to floral development, which may also affect panicle architecture, has been identified [@Yoshida:2011bo], and some of them may have been under selection during domestication or are associated with crop improvement in Asian rice  [@Xing:2010de; @He:2011io; @Wang:2011kq; @Xu:2012hq; @Ikeda:2013go].
+
+Understanding of the events that occur during development that determine panicle characteristics such as branching complexity and its plasticity will be vital for sustainable improvement of rice yield potential using targeted breeding programs. Despite advances in characterization at the level of individual genes or interactions, a complete understanding of the control of panicle morphology and grain yield will require mechanistic studies explaining the interactions of gene regulatory network components with each other and the environment [@Azpeitia:2013jia]. One step towards this goal is to describe the changes in gene expression that occur during development. In this report, we describe the measurement and analysis of genome-wide expression in meristematic tissues from the early stages of rice panicle development, using a sensitive LASER microdissection and RNA sequencing approach.
 
 # Results
 
@@ -105,12 +108,13 @@ The strong enrichment of SQUAMOSA promoter binding protein-like (SPL/SBP) genes 
 
 A homolog of *LOG1*, *LONELY GUY LIKE PHOSPHORIBOHYDROLASE 1* (*LOGL1*), is present in cluster `r getClusterName('inc', 'inc')` with genes that increase in expression between RM and SM. In rice, cytokinins may increase branching complexity by promoting IM or BM activity [reviewed by **ref Han et al 2014**]. The LOG1 enzyme converts cytokinin nucleotides to the active form *in vitro*, and *log1* mutants have lower expression of two cytokinin-inducible *RESPONSE REGULATOR* genes, resulting in early termination of BM and IM, small panicles with small SAMs and branching defects [@Kurakawa:2007go]. Similarly, reduced expression of a cytokinin oxidase gene, *GRAIN NUMBER 1A* (*GN1A*/*CKX2*), which encodes an enzyme that inactivates cytokinin, is associated with increased grain production in several high-yield *O. sativa* ssp. *indica* varieties [@Ashikari:2005eg]. Although *GN1A* transcripts were not detected in this LMD dataset (`r I(pasteLabel("Figure ", figCount, "f_alogFamily"))`a), these results suggest that an increase in active cytokinin is associated with grain yield via an effect on meristem activity, but the *LONG AND BARBED AWN1* (*LABA1*/*LOGL6*/*An-2*) gene provides evidence for an inverse role. The LABA1 protein present in *O. rufipogon*, which has an identical primary sequence to the protein from *O. sativa* ssp. *japonica* cv. Nipponbare, also activates cytokinin *in vitro* [@Gu:2015hy; @Hua:2015bs], and introduction of the *Laba1* allele from *O. rufipogon* into an *O. sativa* ssp *indica* background that contains a non-functional *laba1* allele results in a higher concentration of endogenous cytokinins and higher expression of *RESPONSE REGULATOR* genes [@Hua:2015bs], but reduces the number of grains per panicle and the number of tillers per plant [@Gu:2015hy]. *laba1* is a domestication allele found at high frequencies in cultivated accessions, implying that it was affected by artificial selection either for awn phenotype or grain yield [@Gu:2015hy; @Hua:2015bs]. *LABA1* was detected in the ePBM/SBM and SM samples but not the RM or PBM samples. Although the function of LOGL1 has not been reported, the expression patterns of *LABA1* and *LOGL1* suggest increasing cytokinin activation along the course of axillary meristem determination (`r I(pasteLabel("Figure ", figCount, "f_alogFamily"))`a). Such a mechanism would support a cytokinin function secondary to the maintenance of IM and BM, but it is currently not clear how this would influence meristem identity or panicle branching at the molecular level. A type-A *RESPONSE REGULATOR* (*RR3*) is present in cluster `r getClusterName('dec', 'small')` (containing genes more highly expressed in RM), highlighting the possible complexity of the roles of cytokinins in inflorescence development.
 
-## Dynamic expression of homeodomain genes
+## Patterns of expression of homeodomain genes
 
 Can link via WUS (HB, target of cytokinin, e.g. Han mini-review) and/or OSH1 (HB, downregulated in LOG mutant, e.g. Kurakawa 2007).
 
+## Summary
 
-
+This report describes the changes in gene expression that occur during the early stages of rice panicle development. A switch in expression between apical and axillary meristems followed by gradual changes between PBM and SM were observed, based on changes in expression of uncharacterized genes, transcription factors and genes with functions potentially related to hormone signalling. These results are expected to lead to mechanistic studies of the regulatory networks that establish gene expression in these tissues as well as functional studies of the individual components, both of which will be vital for understanding the genetic factors influencing rice yield via panicle morphology.
 
 ## Orphan text (don't know where to put, consider deleting)
 
@@ -144,9 +148,9 @@ The primary sequences of *Arabidopsis thaliana*, *Solanum lycopersicum* and *Ory
 
 **`r I(pasteLabel("Figure S", s_figCount, "sf_pca"))`**: Principal components analysis of transformed read counts for each library.
 
-**`r I(pasteLabel("Figure S", s_figCount, "sf_inSitu"))`**: Placeholder for the *in situ* results figure.
-
 **`r I(pasteLabel("Figure S", s_figCount, "sf_isGenesTpm"))`**: Comparison of the LMD RNA-sequencing dataset with published *in situ* results.
+
+**`r I(pasteLabel("Figure S", s_figCount, "sf_inSitu"))`**: Placeholder for the *in situ* results figure.
 
 **`r I(pasteLabel("Figure S", s_figCount, "sf_mfuzzPcaCentroids"))`**: Assessment of clustering results.
 
@@ -187,6 +191,14 @@ print(f_mfuzzClusters)
 
 ----
 
+```{r f_gsea, fig.height = 8.661 / 2}
+print(f_gsea)
+```
+
+**`r I(pasteLabel("Figure ", figCount, "f_gsea"))`**. Geneset enrichment analysis (GSEA) for transcription factor and other transcriptional regulator families. Test statistics were calculated from the L~2~FC values between the stage of interest and all other stages for the expressed genes in each geneset. The absolute value of the test statistic indicates the magnitude of the geneset-level change, and a positive test statistic indicates enrichment and a negative statistic indicates depletion. Although some test statistics had low *p*-values none were lower than 0.10 after Benjamini-Hochberg correction.
+
+----
+
 ```{r f_alogFamily, fig.width = 3.150, fig.height = 3.150 * 5/2}
 #grid::grid.draw(f_alogFamily)
 
@@ -201,14 +213,6 @@ print(f_alogFamily_c, vp = grid::viewport(layout.pos.row = 3:5, layout.pos.col =
 ```
 
 **`r I(pasteLabel("Figure ", figCount, "f_alogFamily"))`**. Expression of selected cytokinin-related genes (**a**), detected G1-Like (G1L/ALOG) genes (**b**) and *STMADS11*-like MADS genes (**c**) in inflorescence meristems in transcripts per million (TPM). A red point indicates that the gene was above the detection cutoff, and blue represents that the gene was not detected. *GN1A* (*CKX2*) was not detected in the LMD dataset, but *LOG1* is expressed in all meristem types, and two other genes possibly related to cytokinin activation, *LABA1* (*LOGL6*) and *LOGL1*, are expressed more highly in ePBM/SBM and SM than in RM and PBM. Only three G1L genes (*G1L1*, *G1L2* and *G1L5*/*TAWAWA1*) were detected, but they share a similar pattern of expression. Two reported *STMADS11*-like (*SVP*-like) targets of G1L5, *MADS22* and *MADS55* [@Yoshida:2013ff], are also more strongly expressed in the RM than in other meristems, but the other *STMADS11*-like gene, *MADS47*, was only detected in one library.
-
-----
-
-```{r f_gsea, fig.height = 8.661 / 2}
-print(f_gsea)
-```
-
-**`r I(pasteLabel("Figure ", figCount, "f_gsea"))`**. Geneset enrichment analysis (GSEA) for transcription factor and other transcriptional regulator families. Test statistics were calculated from the L~2~FC values between the stage of interest and all other stages for the expressed genes in each geneset. The absolute value of the test statistic indicates the magnitude of the geneset-level change, and a positive test statistic indicates enrichment and a negative statistic indicates depletion. Although some test statistics had low *p*-values none were lower than 0.10 after Benjamini-Hochberg correction.
 
 ----
 

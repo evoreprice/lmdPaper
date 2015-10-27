@@ -69,14 +69,14 @@ cat(st_libStats_x_print)
 cat("¹ ePBM/SBM")
 ```
 
+```{r sf_isGenesTpm, fig.height = 9.535, fig.cap = paste0("\\protect\\label{fig:sf_isGenesTpm}","Comparison of the LMD RNA-sequencing dataset with published \\emph{in situ} results. Expression value in transcripts per million (TPM) is shown on the \\emph{y}-axis, and points are plotted as a triangle if the expression value was above the cutoff for that library or a circle if below. Grey shading indicates a meristem type for which expression was detected by \\emph{in situ} hybridisation. See Table \\ref{tab:refFrame_x} for references for the \\emph{in situ} expression patterns. Although four replicates were produced from each of the RM and PBM, only three replicates for each stage are included in the analysis (see Results).", "\\newline ", "\\textbf{Do we need to discuss the results of individual genes?}")}
+print(sf_isGenesTpm)
+```
+
 \begin{figure*}
  \includegraphics{data/lmdFigure.pdf}
 \caption{Placeholder for the \emph{in situ} results figure.}
 \end{figure*}
-
-```{r sf_isGenesTpm, fig.height = 9.535, fig.cap = paste0("\\protect\\label{fig:sf_isGenesTpm}","Comparison of the LMD RNA-sequencing dataset with published \\emph{in situ} results. Expression value in transcripts per million (TPM) is shown on the \\emph{y}-axis, and points are plotted as a triangle if the expression value was above the cutoff for that library or a circle if below. Grey shading indicates a meristem type for which expression was detected by \\emph{in situ} hybridisation. See Table \\ref{tab:refFrame_x} for references for the \\emph{in situ} expression patterns. Although four replicates were produced from each of the RM and PBM, only three replicates for each stage are included in the analysis (see Results).", "\\newline ", "\\textbf{Do we need to discuss the results of individual genes?}")}
-print(sf_isGenesTpm)
-```
 
 \clearpage
 \captionof{table}{\protect\label{tab:refFrame_x}References for Figure \ref{fig:sf_isGenesTpm}.}
