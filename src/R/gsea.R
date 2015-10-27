@@ -72,10 +72,12 @@ gageFrame <- gageFrame[complete.cases(gageFrame), ]
 
 # get the family order for the plot. Cluster on TFs and others separately since
 # they will be facetted in the plot.
+dm <- "minkowski"
+hm <- "ward.D2"
 tfFrame <- gageFrame[(rownames(gageFrame) %in% famCat[Category == 'TF', Family]),]
-tfOrder <- rownames(tfFrame)[hclust(dist(tfFrame))$order]
+tfOrder <- rownames(tfFrame)[hclust(dist(tfFrame, method = dm), method = hm)$order]
 otherFrame <- gageFrame[(rownames(gageFrame) %in% famCat[Category == 'Other', Family]),]
-otherOrder <- rownames(otherFrame)[hclust(dist(otherFrame))$order]
+otherOrder <- rownames(otherFrame)[hclust(dist(otherFrame, method = dm), method = hm)$order]
 
 famOrder <- c(tfOrder, otherOrder)
 
