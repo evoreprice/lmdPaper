@@ -1,0 +1,64 @@
+---
+title: "Figures"
+csl: csl/the-plant-journal.csl
+header-includes:
+  \usepackage{graphicx}
+  \usepackage{caption}
+  \usepackage{fixltx2e}
+  \usepackage{rotating}
+  \renewcommand{\thefigure}{S\arabic{figure}}
+  \renewcommand{\thetable}{S\arabic{table}}
+documentclass: tufte-handout
+classoption: a4paper
+output:
+  rmarkdown::tufte_handout:
+    dev: CairoPDF
+    keep_tex: yes
+    fig_crop: no
+bibliography: bib/papersLib.bibtex
+---
+
+```{r Setup, include=FALSE, results="hide", warning=FALSE}
+knitr::opts_chunk$set(fig.path='figures/',
+               cache.path='cache/',
+               fig.align = 'center', 
+               dpi=600,
+               fig.show='hold',
+               fig.width=3.150,
+               fig.height=8.661,
+               echo=FALSE,
+               results="hide",
+               message=FALSE,
+               warning=FALSE)
+
+source('src/R/figures.R')
+```
+
+\begin{figure*}
+ \includegraphics{data/lmdFigure.pdf}
+\caption{Laser microdissection of meristem samples in the early stages of inflorescence development. Samples were collected from the rachis meristem (\textbf{a} and \textbf{e}), the primary branch meristem (\textbf{b} and \textbf{f}), the elongating primary branch meristem and secondary branch meristem (\textbf{c} and \textbf{g}) and the spikelet meristem (\textbf{d} and \textbf{h}). Images show the samples before (\textbf{a}–\textbf{d}) and after (\textbf{e}–\textbf{h}) dissection.}
+\end{figure*}
+
+```{r f_mfuzzClusters, fig.height = 8.661 / 2, fig.cap = paste0("Common patterns of gene expression in developing inflorescences. Fuzzy \\emph{c}-means clustering of normalised, variance-stabilised read counts was used to recover ", as.character(english::english(c)), " common patterns of expression. Each line describes the expression pattern of one gene, with the gene's membership to the cluster represented by the colour of the line. The core values for each cluster are plotted in black. The ordering of the panels in the plot was rearranged to enable side-by-side comparison of complementary clusters.")}
+print(f_mfuzzClusters)
+```
+
+```{r f_gsea, fig.height = 8.661 / 2, fig.cap = "Geneset enrichment analysis (GSEA) for transcription factor and other transcriptional regulator families. Test statistics were calculated from the L\\textsubscript{2}FC values between the stage of interest and all other stages for the expressed genes in each geneset. The absolute value of the test statistic indicates the magnitude of the geneset-level change, and a positive test statistic indicates enrichment and a negative statistic indicates depletion. Although some test statistics had low \\emph{p}-values none were lower than 0.10 after Benjamini-Hochberg correction."}
+print(f_gsea)
+```
+
+```{r f_alogFamily, fig.width = 3.150, fig.height = 3.150 * 5/2, fig.cap = "Expression of selected cytokinin-related genes (\\textbf{a}), detected \\emph{G1}-Like (G1L/ALOG) genes (\\textbf{b}) and \\emph{STMADS11}-like MADS genes (\\textbf{c}) in inflorescence meristems in transcripts per million (TPM). A red point indicates that the gene was above the detection cutoff, and blue represents that the gene was not detected. \\emph{GN1A} (\\emph{CKX2}) was not detected in the LMD dataset, but \\emph{LOG1} is expressed in all meristem types, and two other genes possibly related to cytokinin activation, \\emph{LABA1} (\\emph{LOGL6}) and \\emph{LOGL1}, are expressed more highly in ePBM/SBM and SM than in RM and PBM. Only three G1L genes (\\emph{G1L1}, \\emph{G1L2} and \\emph{G1L5}/\\emph{TAWAWA1}) were detected, but they share a similar pattern of expression. Two reported \\emph{STMADS11}-like (\\emph{SVP}-like) targets of G1L5, \\emph{MADS22} and \\emph{MADS55} [@Yoshida:2013ff], are also more strongly expressed in the RM than in other meristems, but the other \\emph{STMADS11}-like gene, \\emph{MADS47}, was only detected in one library."}
+# set layout
+grid::grid.newpage()
+grid::pushViewport(grid::viewport(layout = grid::grid.layout(5, 2)))
+
+# print the plots
+print(f_alogFamily_a, vp = grid::viewport(layout.pos.row = 1:2, layout.pos.col = 1:2))
+print(f_alogFamily_b, vp = grid::viewport(layout.pos.row = 3:5, layout.pos.col = 1))
+print(f_alogFamily_c, vp = grid::viewport(layout.pos.row = 3:5, layout.pos.col = 2))
+```
+
+```{r f_hb, fig.height = 8.661, fig.cap = "Patterns of expression of homeobox genes in the meristem samples. The heatscale represents scaled, VST-transformed read counts for detected homeobox genes, and the coloured bar next to the \\emph{y}-axis shows the homeobox clade for each gene [@Jain:2008kg]. There is a set of homeobox genes that peak in expression in the RM, and another set that have their lowest expression in the RM and highest expression in PBM and SBM samples. The former group contains \\emph{OSH1}, whilst the latter contains five of the eight expressed HD-ZIP IV homeobox genes."}
+print(f_hb)
+```
+
