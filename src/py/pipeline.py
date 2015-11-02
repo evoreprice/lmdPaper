@@ -127,7 +127,7 @@ def touch(fname, mode=0o666, dir_fd=None, **kwargs):
 #
 @originate(['ruffus/os.genome'], jgiLogon, jgiPassword)
 
-def download_os_genome(outputFiles, jgiLogon, jgiPassword):
+def downloadGenomes_sh(outputFiles, jgiLogon, jgiPassword):
     jobScript = 'src/sh/downloadGenomes.sh'
     job_name = 'osGen'
     jobId = submit_download_job(jobScript, job_name, jgiLogon, jgiPassword)
@@ -141,7 +141,7 @@ def download_os_genome(outputFiles, jgiLogon, jgiPassword):
 #
 @originate(['ruffus/sl.genome'], jgiLogon, jgiPassword)
 
-def download_sl_genome(outputFiles, jgiLogon, jgiPassword):
+def downloadSlGenome_sh(outputFiles, jgiLogon, jgiPassword):
     jobScript = 'src/sh/downloadSlGenome.sh'
     job_name = 'slGen'
     jobId = submit_download_job(jobScript, job_name, jgiLogon, jgiPassword)
@@ -154,7 +154,7 @@ def download_sl_genome(outputFiles, jgiLogon, jgiPassword):
 #
 @originate(['ruffus/at.genome'], jgiLogon, jgiPassword)
 
-def download_at_genome(outputFiles, jgiLogon, jgiPassword):
+def downloadAtGenome_sh(outputFiles, jgiLogon, jgiPassword):
     jobScript = 'src/sh/downloadAtGenome.sh'
     job_name = 'atGen'
     jobId = submit_download_job(jobScript, job_name, jgiLogon, jgiPassword)
@@ -167,7 +167,7 @@ def download_at_genome(outputFiles, jgiLogon, jgiPassword):
 #
 @originate(['ruffus/sl.reads'])
 
-def download_sl_reads(outputFiles):
+def downloadSlReads_sh(outputFiles):
     jobScript = 'src/sh/downloadSlReads.sh'
     ntasks = '2'
     cpus_per_task = '1'
@@ -182,7 +182,7 @@ def download_sl_reads(outputFiles):
 #
 @originate(['ruffus/at.reads'])
 
-def download_at_reads(outputFiles):
+def downloadAtReads_sh(outputFiles):
     jobScript = 'src/sh/downloadAtReads.sh'
     ntasks = '1'
     cpus_per_task = '1'
@@ -197,7 +197,7 @@ def download_at_reads(outputFiles):
 #
 @originate(['ruffus/tfdb.data'])
 
-def download_tfdb(outputFiles):
+def downloadTfdb_sh(outputFiles):
     jobScript = 'src/sh/downloadTfdb.sh'
     ntasks = '1'
     cpus_per_task = '1'
@@ -212,7 +212,7 @@ def download_tfdb(outputFiles):
 #
 @originate(['ruffus/attfdb.data'])
 
-def download_atTfdb(outputFiles):
+def atTfdb_R(outputFiles):
     jobScript = 'src/R/atTfdb.R'
     ntasks = '1'
     cpus_per_task = '1'
@@ -271,7 +271,7 @@ def hbClasses_R(outputFiles):
 #
 @transform(define_os_reads, suffix('.reads'), '.trimmedReads')
 
-def trim_os_reads(inputFiles, outputFiles):
+def cutadapt_sh(inputFiles, outputFiles):
     jobScript = 'src/sh/cutadapt.sh'
     ntasks = '7'
     cpus_per_task = '1'
@@ -284,9 +284,9 @@ def trim_os_reads(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # generate STAR index for OS
 #
-@transform(download_os_genome, suffix('.genome'), '.index')
+@transform(downloadGenomes_sh, suffix('.genome'), '.index')
 
-def generate_os_index(inputFiles, outputFiles):
+def starGenomeGenerate_sh(inputFiles, outputFiles):
     jobScript = 'src/sh/starGenomeGenerate.sh'
     ntasks = '1'
     cpus_per_task = '1'
@@ -299,9 +299,9 @@ def generate_os_index(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # map rice reads
 #
-@merge([trim_os_reads, generate_os_index], output = 'ruffus/os.bamfiles')
+@merge([cutadapt_sh, starGenomeGenerate_sh], output = 'ruffus/os.bamfiles')
            
-def map_os_reads(inputFiles, outputFiles):
+def starMappingTwoStep_sh(inputFiles, outputFiles):
     jobScript = 'src/sh/starMappingTwoStep.sh'
     ntasks = '1'
     cpus_per_task = '7'
@@ -314,9 +314,9 @@ def map_os_reads(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # map tomato reads
 #
-@merge([download_sl_reads, download_sl_genome], output = "ruffus/sl.bamfiles")
+@merge([downloadSlReads_sh, downloadSlGenome_sh], output = "ruffus/sl.bamfiles")
 
-def map_sl_reads(inputFiles, outputFiles):
+def pipelineSl_sh(inputFiles, outputFiles):
     jobScript = 'src/sh/pipelineSl.sh'
     ntasks = '1'
     cpus_per_task = '4'
@@ -329,8 +329,8 @@ def map_sl_reads(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # map arabidopsis reads
 #
-@merge([download_at_reads, download_at_genome], output = "ruffus/at.bamfiles")
-def map_at_reads(inputFiles, outputFiles):
+@merge([downloadAtReads_sh, downloadAtGenome_sh], output = "ruffus/at.bamfiles")
+def pipelineAt_sh(inputFiles, outputFiles):
     jobScript = 'src/sh/pipelineAt.sh'
     ntasks = '1'
     cpus_per_task = '4'
@@ -343,8 +343,8 @@ def map_at_reads(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # Run DESeq2 on tomato and arabidopsis bamfiles
 #
-@merge([map_at_reads, map_sl_reads], output = "ruffus/comp.deseq2")
-def run_deseq_comp(inputFiles, outputFiles):
+@merge([pipelineAt_sh, pipelineSl_sh], output = "ruffus/comp.deseq2")
+def runDeseqComp_R(inputFiles, outputFiles):
     jobScript = 'src/R/runDeseqComp.R'
     ntasks = '1'
     cpus_per_task = '1'
@@ -357,9 +357,9 @@ def run_deseq_comp(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # run DESeq2
 #
-@transform(map_os_reads, suffix(".bamfiles"), ".deseq2")
+@transform(starMappingTwoStep_sh, suffix(".bamfiles"), ".deseq2")
 
-def run_deseq2_os(inputFiles, outputFiles):
+def runDeseq_R(inputFiles, outputFiles):
     jobScript = 'src/R/runDeseq.R'
     ntasks = '1'
     cpus_per_task = '1'
@@ -372,9 +372,9 @@ def run_deseq2_os(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # calculate TPM
 #
-@merge([run_deseq2_os, map_os_reads, download_os_genome], 'ruffus/os.tpm')
+@merge([runDeseq_R, starMappingTwoStep_sh, downloadGenomes_sh], 'ruffus/os.tpm')
 
-def calculate_tpm(inputFiles, outputFiles):
+def calculateTpm_R(inputFiles, outputFiles):
     jobScript = 'src/R/calculateTpm.R'
     ntasks = '1'
     cpus_per_task = '1'
@@ -387,9 +387,9 @@ def calculate_tpm(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # shuffle GTF
 #
-@merge([download_os_genome, calculate_tpm], 'ruffus/os.shuffle')
+@merge([downloadGenomes_sh, calculateTpm_R], 'ruffus/os.shuffle')
 
-def shuffle_gtf(inputFiles, outputFiles):
+def shuffle_sh(inputFiles, outputFiles):
     jobScript = 'src/sh/shuffle.sh'
     ntasks = '1'
     cpus_per_task = '1'
@@ -402,9 +402,9 @@ def shuffle_gtf(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # count reads in shuffled gtf
 #
-@merge([map_os_reads, shuffle_gtf], 'ruffus/os.shufCounts')
+@merge([starMappingTwoStep_sh, shuffle_sh], 'ruffus/os.shufCounts')
 
-def shuffled_counts(inputFiles, outputFiles):
+def htseqShuffle_sh(inputFiles, outputFiles):
     jobScript = 'src/sh/htseqShuffle.sh'
     ntasks = '7'
     cpus_per_task = '1'
@@ -417,8 +417,8 @@ def shuffled_counts(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # calculate intergenic tpms
 #
-@merge([shuffle_gtf, shuffled_counts, map_os_reads, run_deseq2_os, calculate_tpm], 'ruffus/os.intTpm')
-def intergenic_tpm(inputFiles, outputFiles):
+@merge([shuffle_sh, htseqShuffle_sh, starMappingTwoStep_sh, runDeseq_R, calculateTpm_R], 'ruffus/os.intTpm')
+def shuffledTpm_R(inputFiles, outputFiles):
     jobScript = 'src/R/shuffledTpm.R'
     ntasks = '1'
     cpus_per_task = '1'
@@ -431,8 +431,8 @@ def intergenic_tpm(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # calculate list of expressed genes
 #
-@merge([shuffle_gtf, intergenic_tpm, calculate_tpm], 'ruffus/os.expgen')
-def detect_expressed_genes(inputFiles, outputFiles):
+@merge([shuffle_sh, shuffledTpm_R, calculateTpm_R], 'ruffus/os.expgen')
+def calculateCutoffs_R(inputFiles, outputFiles):
     jobScript = 'src/R/calculateCutoffs.R'
     ntasks = '1'
     cpus_per_task = '1'
@@ -445,8 +445,8 @@ def detect_expressed_genes(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # fuzzy c-means clustering
 #
-@merge([detect_expressed_genes, run_deseq2_os, download_os_genome], 'ruffus/os.mfuzz')
-def clustering(inputFiles, outputFiles):
+@merge([calculateCutoffs_R, runDeseq_R, downloadGenomes_sh], 'ruffus/os.mfuzz')
+def mfuzz_R(inputFiles, outputFiles):
     jobScript = 'src/R/mfuzz.R'
     ntasks = '1'
     cpus_per_task = '1'
@@ -459,8 +459,8 @@ def clustering(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # hypergeometric tests for enrichment of TFs
 #
-@merge([clustering, download_tfdb], 'ruffus/os.hypergeom')
-def hypergeom(inputFiles, outputFiles):
+@merge([mfuzz_R, downloadTfdb_sh], 'ruffus/os.hypergeom')
+def tfHypergeom_R(inputFiles, outputFiles):
     jobScript = 'src/R/tfHypergeom.R'
     ntasks = '1'
     cpus_per_task = '1'
@@ -473,8 +473,8 @@ def hypergeom(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # count tRNA/rRNA in libraries
 #
-@merge([download_os_genome, map_os_reads], 'ruffus/os.rnaStats')
-def rnaStats(inputFiles, outputFiles):
+@merge([downloadGenomes_sh, starMappingTwoStep_sh], 'ruffus/os.rnaStats')
+def countRTrna_sh(inputFiles, outputFiles):
     jobScript = 'src/sh/countRTrna.sh'
     ntasks = '2'
     cpus_per_task = '1'
@@ -487,8 +487,8 @@ def rnaStats(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # parse library stats
 #
-@merge([map_os_reads, rnaStats, run_deseq2_os, detect_expressed_genes], 'ruffus/os.libStats')
-def libStats(inputFiles, outputFiles):
+@merge([starMappingTwoStep_sh, countRTrna_sh, runDeseq_R, calculateCutoffs_R], 'ruffus/os.libStats')
+def parseQuantStats_R(inputFiles, outputFiles):
     jobScript = 'src/R/parseQuantStats.R'
     ntasks = '1'
     cpus_per_task = '1'
@@ -501,8 +501,8 @@ def libStats(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # Geneset enrichment analysis
 #
-@merge([download_tfdb, run_deseq2_os, detect_expressed_genes], 'ruffus/os.gsea')
-def gsea(inputFiles, outputFiles):
+@merge([downloadTfdb_sh, runDeseq_R, calculateCutoffs_R], 'ruffus/os.gsea')
+def gsea_R(inputFiles, outputFiles):
     jobScript = 'src/R/gsea.R'
     ntasks = '1'
     cpus_per_task = '1'
@@ -515,7 +515,7 @@ def gsea(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # Compare published TF data
 #
-@merge([detect_expressed_genes, define_review_inSituDB, run_deseq2_os], 'ruffus/os.compare')
+@merge([calculateCutoffs_R, define_review_inSituDB, runDeseq_R], 'ruffus/os.compare')
 def compareVsInSitu_R(inputFiles, outputFiles):
     jobScript = 'src/R/compareVsInSitu.R'
     ntasks = '1'
@@ -529,8 +529,8 @@ def compareVsInSitu_R(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # make dendogram of MADS genes
 #
-@merge([run_deseq_comp, download_atTfdb, run_deseq2_os], 'ruffus/madsComp.dendro')
-def madsCompTree(inputFiles, outputFiles):
+@merge([runDeseqComp_R, atTfdb_R, runDeseq_R], 'ruffus/madsComp.dendro')
+def madsCompTree_R(inputFiles, outputFiles):
     jobScript = 'src/R/madsCompTree.R'
     ntasks = '1'
     cpus_per_task = '6'
@@ -543,7 +543,7 @@ def madsCompTree(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # make dendogram of MADS genes
 #
-@merge([hbClasses_R, download_tfdb, detect_expressed_genes, run_deseq2_os], 'ruffus/hb.heatmap')
+@merge([hbClasses_R, downloadTfdb_sh, calculateCutoffs_R, runDeseq_R], 'ruffus/hb.heatmap')
 def homeobox_R(inputFiles, outputFiles):
     jobScript = 'src/R/homeobox.R'
     ntasks = '1'
@@ -561,69 +561,60 @@ def homeobox_R(inputFiles, outputFiles):
 #---------------------------------------------------------------
 # library stats table
 #
-@merge(libStats, "ruffus/table.st_libStats")
+@merge(parseQuantStats_R, "ruffus/table.st_libStats")
 def st_libStats(inputFiles, outputFiles):
     touch(outputFiles)
 
 #---------------------------------------------------------------
 # Hypergeometric tests table
 #
-@merge(hypergeom, "ruffus/table.t_hypergeom")
+@merge(tfHypergeom_R, "ruffus/table.t_hypergeom")
 def t_hypergeom(inputFiles, outputFiles):
     touch(outputFiles)
-@merge(hypergeom, "ruffus/table.t_familiesPerCluster")
-def t_familiesPerCluster(inputFiles, outputFiles):
-    touch(outputFiles)
-
 
 #---------------------------------------------------------------
 # PCA plot
 #
-@merge([run_deseq2_os, detect_expressed_genes], "ruffus/figure.sf_pca")
+@merge([runDeseq_R, calculateCutoffs_R], "ruffus/figure.sf_pca")
 def sf_pca(inputFiles, outputFiles):
     touch(outputFiles)
 
 #---------------------------------------------------------------
 # Clustering figures
 #
-@merge(clustering, "ruffus/figure.f_mfuzzClusters")
+@merge(mfuzz_R, "ruffus/figure.f_mfuzzClusters")
 def f_mfuzzClusters(inputFiles, outputFiles):
     touch(outputFiles)
-@merge(clustering, "ruffus/figure.sf_mfuzzCentroids")
-def sf_mfuzzCentroids(inputFiles, outputFiles):
+@merge(mfuzz_R, "ruffus/figure.sf_mfuzzQA")
+def sf_mfuzzQA(inputFiles, outputFiles):
     touch(outputFiles)
-@merge(clustering, "ruffus/figure.sf_mfuzzPca")
-def sf_mfuzzPca(inputFiles, outputFiles):
-    touch(outputFiles)
+
 
 #---------------------------------------------------------------
 # GSEA plot
 #
-@merge(gsea, "ruffus/figure.f_gsea")
+@merge(gsea_R, "ruffus/figure.f_gsea")
 def f_gsea(inputFiles, outputFiles):
     touch(outputFiles)
 
 #---------------------------------------------------------------
 # MADS tree
 #
-@merge(madsCompTree, "ruffus/figure.f_madsTree")
-def f_madsTree(inputFiles, outputFiles):
+@merge(madsCompTree_R, "ruffus/figure.sf_madsTree")
+def sf_madsTree(inputFiles, outputFiles):
     touch(outputFiles)
 
 #---------------------------------------------------------------
 # in situ comparisons
 #
-@merge(compareVsInSitu_R, "ruffus/table.st_reviewInSitu")
-def st_reviewInSitu(inputFiles, outputFiles):
-    touch(outputFiles)
-@merge([compareVsInSitu_R, calculate_tpm, run_deseq2_os], "ruffus/figure.sf_isGenesTpm")
+@merge([compareVsInSitu_R, calculateTpm_R, runDeseq_R], "ruffus/figure.sf_isGenesTpm")
 def sf_isGenesTpm(inputFiles, outputFiles):
     touch(outputFiles)
 
 #---------------------------------------------------------------
 # ALOG TPM plot
 #
-@merge([calculate_tpm, detect_expressed_genes], "ruffus/figure.f_alogFamily")
+@merge([calculateTpm_R, calculateCutoffs_R], "ruffus/figure.f_alogFamily")
 def f_alogFamily(inputFiles, outputFiles):
     touch(outputFiles)
 
