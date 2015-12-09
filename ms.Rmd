@@ -1,6 +1,5 @@
 ---
-title: Genome-wide changes in expression during inflorescence architecture development
-  in rice
+title: Changes in gene expression associated with transitions in reproductive meristem identity during early development of rice inflorescence.
 csl: csl/the-plant-journal.csl
 header-includes:
   \usepackage{graphicx}
