@@ -481,10 +481,13 @@ figCount <- incCount(figCount, "f_gsea")
 svpMads <- c("LOC_Os02g52340", "LOC_Os03g08754", "LOC_Os06g11330")
 expG1s <- c("LOC_Os02g07030", "LOC_Os06g46030", "LOC_Os10g33780")
 ck <- c("LOC_Os01g51210","LOC_Os04g43840","LOC_Os01g40630", "LOC_Os01g10110")
+spl <- c("LOC_Os02g04680", "LOC_Os06g49010", "LOC_Os09g31438", "LOC_Os07g32170",
+         "LOC_Os08g39890", "LOC_Os01g46984")
 
 expTable <- rbind(data.table(msuId = svpMads, type = "mads"),
                   data.table(msuId = expG1s, type = "g1l"),
-                  data.table(msuId = ck, type = 'ck'))
+                  data.table(msuId = ck, type = 'ck'),
+                  data.table(msuId = spl, type = 'spl'))
 
 expTable[, symbol := oryzr::LocToGeneName(msuId)$symbols, by = msuId]
 
@@ -516,9 +519,10 @@ old <- c("n1", "n2", "n3", "n4")
 new <- c("RM", "PBM", "ePBM/\nSBM", "SM")
 plotData[, stage := factor(plyr::mapvalues(stage, from = old, to = new), levels = new)]
 
-# set up labels
+# set up labels and order by msuId
 plotData[!is.na(symbol), symbol := paste(symbol, "·", id)]
 plotData[is.na(symbol), symbol := id]
+plotData[, symbol := factor(symbol, levels = unique(symbol))]
 
 # make a plot
 cols <- RColorBrewer::brewer.pal(3, "Set1")[c(2,1)]
@@ -538,9 +542,14 @@ alogPlot <- function(plotData) {
   )
 }
 
-f_alogFamily_a <- alogPlot(plotData[type == 'ck']) + ggtitle("a") + facet_wrap(~symbol, ncol = 2)
-f_alogFamily_b <- alogPlot(plotData[type == 'g1l']) + ggtitle("b") + facet_wrap(~symbol, ncol = 1)
-f_alogFamily_c <- alogPlot(plotData[type == 'mads']) + ggtitle("c") + facet_wrap(~symbol, ncol = 1)
+f_alogFamily_d <- alogPlot(plotData[type == 'ck']) + ggtitle("d") +
+  facet_wrap(~symbol, ncol = 4)
+f_alogFamily_b <- alogPlot(plotData[type == 'g1l']) + ggtitle("b") +
+  facet_wrap(~symbol, ncol = 1)
+f_alogFamily_a <- alogPlot(plotData[type == 'mads']) + ggtitle("a") +
+  facet_wrap(~symbol, ncol = 1)
+f_alogFamily_c <- alogPlot(plotData[type == 'spl']) + ggtitle("c") +
+  facet_wrap(~symbol, ncol = 2) #, scales = "free_y")
 
 #f_alogFamily <- gridExtra::grid.arrange(f_alogFamily_a, f_alogFamily_b, ncol = 2)
 

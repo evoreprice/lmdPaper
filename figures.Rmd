@@ -1,24 +1,27 @@
 ---
 title: "Figures"
+date: "\\vspace{0 mm}"
 csl: csl/the-plant-journal.csl
 header-includes:
   \usepackage{graphicx}
   \usepackage{caption}
   \usepackage{fixltx2e}
   \usepackage{rotating}
-  \renewcommand{\thefigure}{S\arabic{figure}}
-  \renewcommand{\thetable}{S\arabic{table}}
+  \renewcommand{\thefigure}{\arabic{figure}}
+  \renewcommand{\thetable}{\arabic{table}}
 documentclass: tufte-handout
 classoption: a4paper
 output:
   rmarkdown::tufte_handout:
     dev: CairoPDF
-    keep_tex: yes
     fig_crop: no
 bibliography: bib/papersLib.bibtex
 ---
 
 ```{r Setup, include=FALSE, results="hide", warning=FALSE}
+## grep queries:
+  # bold: \*\*(\w*)\*\* -> \\\\textbf{\1}
+  # italic: \*(\w*)\* -> \\\\emph{\1}
 knitr::opts_chunk$set(fig.path='figures/',
                cache.path='cache/',
                fig.align = 'center', 
@@ -47,15 +50,16 @@ print(f_mfuzzClusters)
 print(f_gsea)
 ```
 
-```{r f_alogFamily, fig.width = 3.150, fig.height = 3.150 * 5/2, fig.cap = "Expression of selected cytokinin-related genes (\\textbf{a}), detected \\emph{G1}-Like (G1L/ALOG) genes (\\textbf{b}) and \\emph{STMADS11}-like MADS genes (\\textbf{c}) in inflorescence meristems in transcripts per million (TPM). A red point indicates that the gene was above the detection cutoff, and blue represents that the gene was not detected. \\emph{GN1A} (\\emph{CKX2}) was not detected in the LMD dataset, but \\emph{LOG1} is expressed in all meristem types, and two other genes possibly related to cytokinin activation, \\emph{LABA1} (\\emph{LOGL6}) and \\emph{LOGL1}, are expressed more highly in ePBM/SBM and SM than in RM and PBM. Only three G1L genes (\\emph{G1L1}, \\emph{G1L2} and \\emph{G1L5}/\\emph{TAWAWA1}) were detected, but they share a similar pattern of expression. Two reported \\emph{STMADS11}-like (\\emph{SVP}-like) targets of G1L5, \\emph{MADS22} and \\emph{MADS55} [@Yoshida:2013ff], are also more strongly expressed in the RM than in other meristems, but the other \\emph{STMADS11}-like gene, \\emph{MADS47}, was only detected in one library."}
+```{r f_alogFamily, fig.width = 6.614, fig.height = 6.614, fig.cap = paste0("Expression of selected \\emph{STMADS11}-like MADS genes (\\textbf{a}), detected \\emph{G1}-Like (G1L/ALOG) genes (\\textbf{b}), \\emph{SPL} genes and a microRNA precursor (\\textbf{c}) and cytokinin-related genes (\\textbf{d}) in inflorescence meristems in transcripts per million (TPM). A red point indicates that the gene was above the detection cutoff, and blue represents that the gene was not detected. Two reported \\emph{STMADS11}-like (\\emph{SVP}-like) targets of G1L5, \\emph{MADS22} and \\emph{MADS55} [@Yoshida:2013ff], are also more strongly expressed in the RM than in other meristems, but the other \\emph{STMADS11}-like gene, \\emph{MADS47}, was only detected in one library. Only three G1L genes (\\emph{G1L1}, \\emph{G1L2} and \\emph{G1L5}/\\emph{TAWAWA1}) were detected, but they share a similar pattern of expression. Several \\emph{SPL} genes and a co-regulated microRNA precursor, \\emph{MIR319A}, recovered from cluster ", getClusterName('small', 'dec'), ", are highly expressed in RM and PBM before decreasing in expression in ePBM/SBM and SM. \\emph{GN1A} (\\emph{CKX2}) was not detected in the LMD dataset, but \\emph{LOG1} is expressed in all meristem types, and two other genes possibly related to cytokinin activation, \\emph{LABA1} (\\emph{LOGL6}) and \\emph{LOGL1}, are expressed more highly in ePBM/SBM and SM than in RM and PBM.")}
 # set layout
 grid::grid.newpage()
-grid::pushViewport(grid::viewport(layout = grid::grid.layout(5, 2)))
+grid::pushViewport(grid::viewport(layout = grid::grid.layout(4, 4)))
 
 # print the plots
-print(f_alogFamily_a, vp = grid::viewport(layout.pos.row = 1:2, layout.pos.col = 1:2))
-print(f_alogFamily_b, vp = grid::viewport(layout.pos.row = 3:5, layout.pos.col = 1))
-print(f_alogFamily_c, vp = grid::viewport(layout.pos.row = 3:5, layout.pos.col = 2))
+print(f_alogFamily_a, vp = grid::viewport(layout.pos.row = 1:3, layout.pos.col = 1))
+print(f_alogFamily_b, vp = grid::viewport(layout.pos.row = 1:3, layout.pos.col = 2))
+print(f_alogFamily_c, vp = grid::viewport(layout.pos.row = 1:3, layout.pos.col = 3:4))
+print(f_alogFamily_d, vp = grid::viewport(layout.pos.row = 4, layout.pos.col = 1:4))
 ```
 
 ```{r f_hb, fig.height = 8.661, fig.cap = "Patterns of expression of homeobox genes in the meristem samples. The heatscale represents scaled, VST-transformed read counts for detected homeobox genes, and the coloured bar next to the \\emph{y}-axis shows the homeobox clade for each gene [@Jain:2008kg]. There is a set of homeobox genes that peak in expression in the RM, and another set that have their lowest expression in the RM and highest expression in PBM and SBM samples. The former group contains \\emph{OSH1}, whilst the latter contains five of the eight expressed HD-ZIP IV homeobox genes."}
