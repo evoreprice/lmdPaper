@@ -198,25 +198,14 @@ genTpm[, c("xmin", "xmax") := .(
 
 # draw it
 setkey(genTpm, "plotLabel", "stage")
-# sf_isGenesTpm <- ggplot(genTpm, aes(x = stage, y = tpm, colour = Replicate, shape = isExpr)) +
-#   theme_minimal(base_size = 8, base_family = "Helvetica") +
-#   theme(strip.text = element_text(face = "italic")) +
-#   xlab(NULL) +
-#   scale_color_brewer(palette = "Set1") +
-#   guides(shape = FALSE, size = FALSE) +
-#   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
-#             unique(genTpm[call.z == TRUE,]), colour = NA,  fill = "grey90", alpha = 0.75) +
-#   stat_smooth(aes(group = plotLabel), method = "loess", se = FALSE, colour = "grey", size = 0.5) + 
-#   geom_point(size = 1, alpha = 0.8, position = position_jitter(width = 0.2)) +
-#   facet_wrap(~ plotLabel, scales = "free_y", ncol = 4)
 
 # keep a subset of genes
 keep <- c("LOC_Os06g45460", "LOC_Os09g26999", "LOC_Os07g42410", "LOC_Os07g47330",
-          "LOC_Os10g33780", "LOC_Os03g60430", "LOC_Os01g61480", "LOC_Os03g11614",
-          "LOC_Os01g40630", "LOC_Os04g49150", "LOC_Os07g41370", "LOC_Os02g52340",
-          "LOC_Os09g32948", "LOC_Os06g11330", "LOC_Os08g41950", "LOC_Os02g45770",
+          "LOC_Os10g33780", "LOC_Os01g61480", "LOC_Os03g11614",
+          "LOC_Os01g40630", "LOC_Os07g41370", "LOC_Os02g52340",
+          "LOC_Os09g32948", "LOC_Os06g11330", "LOC_Os08g41950",
           "LOC_Os03g51690", "LOC_Os03g54170", "LOC_Os04g51000", "LOC_Os07g13170",
-          "LOC_Os08g39890")
+          "LOC_Os08g39890", "LOC_Os01g10110", "LOC_Os08g07740")
 
 genTpm <- genTpm[msuId %in% keep]
 
@@ -225,9 +214,6 @@ refTable <- refTable[msuId %in% keep]
 setkey(refTable, "msuId", "Reference")
 refTable <- unique(refTable)
 refTable[, Reference := paste(unlist(Reference), collapse = ", "), by = msuId]
-# refTable[, Reference := paste0("\\cite{", paste(Reference, collapse = ","), "}"), by = msuId]
-# refTable <- unique(refTable)
-# refTable[, Reference := gsub("@", "", Reference, fixed = TRUE)]
 setkey(refTable, "plotLabel")
 st_refTable <- unique(refTable)
 setnames(st_refTable, c("msuId", "plotLabel"), c("MSU name", "CSGNL symbol"))
@@ -236,7 +222,7 @@ s_tableCount <- incCount(s_tableCount, "st_refTable")
 sf_isGenesTpm <- ggplot() +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
   theme(strip.text = element_text(face = "italic")) +
-  xlab(NULL) +
+  xlab(NULL) + ylab("Epxression (TPM)") +
   scale_color_brewer(palette = "Set1") +
   guides(shape = FALSE, size = FALSE) +
   geom_blank(mapping = aes(x = stage, y = tpm), data = genTpm) +
@@ -252,6 +238,11 @@ sf_isGenesTpm <- ggplot() +
   facet_wrap(~ plotLabel, scales = "free_y", ncol = 2)
 
 s_figCount <- incCount(s_figCount, "sf_isGenesTpm")
+
+# count the number that match for text
+nIS <- genTpm[, length(unique(msuId))]
+nPos <- genTpm[, sum(isExpr) > 1, by = .(msuId, stage)][
+  , any(V1), by = msuId][, sum(V1)]
 
 ######################
 ### IN SITU FIGURE ###

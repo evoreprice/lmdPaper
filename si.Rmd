@@ -1,6 +1,7 @@
 ---
 title: "Supporting Information"
 csl: csl/the-plant-journal.csl
+date: "\\vspace{0 mm}"
 header-includes:
   \usepackage{graphicx}
   \usepackage{caption}
@@ -43,10 +44,6 @@ print(sf_pca)
 
 ``` {r st_libstats, results = "asis"}
 st_libStats_x <- as.data.frame(st_libStats)
-# colnames(st_libStats_x) <- gsub("Uniquely mapped reads (M)",
-#                                 "Uniquely mapped reads (M)",
-#                                 colnames(st_libStats_x),
-#                                 fixed = TRUE)
 rownames(st_libStats_x) <- st_libStats_x$Library
 st_libStats_x$Library <- NULL
 st_libStats_x$Sample <- sub("ePBM/SBM", "SBM¹", st_libStats_x$Sample, fixed = TRUE)
@@ -61,15 +58,13 @@ st_libStats_x_print <- print(st_libStats_x,
       floating.environment = "table*",
       print.results = FALSE)
 
-# add more space to the longest colname
-#st_libStats_x_print <- sub("Uniquely mapped reads (M)", "Uniquely mapped reads (M) \\hspace{3 mm}", st_libStats_x_print, fixed = TRUE)
-# OR remove the first hline?
+# remove the first hline
 st_libStats_x_print <- sub("\\begin{tabular}{rrrrrrrrrrrrrrrr}\n  \\hline\n", "\\begin{tabular}{rrrrrrrrrrrrrrrr}\n", st_libStats_x_print, fixed = TRUE)
 cat(st_libStats_x_print)
 cat("¹ ePBM/SBM")
 ```
 
-```{r sf_isGenesTpm, fig.height = 9.535, fig.cap = paste0("\\protect\\label{fig:sf_isGenesTpm}","Comparison of the LMD RNA-sequencing dataset with published \\emph{in situ} results. Expression value in transcripts per million (TPM) is shown on the \\emph{y}-axis, and points are plotted as a triangle if the expression value was above the cutoff for that library or a circle if below. Grey shading indicates a meristem type for which expression was detected by \\emph{in situ} hybridisation. See Table \\ref{tab:refFrame_x} for references for the \\emph{in situ} expression patterns. Although four replicates were produced from each of the RM and PBM, only three replicates for each stage are included in the analysis (see Results).", "\\newline ", "\\textbf{Do we need to discuss the results of individual genes?}")}
+```{r sf_isGenesTpm, fig.height = 9.535, fig.cap = paste0("\\protect\\label{fig:sf_isGenesTpm}","Comparison of the LMD RNA-sequencing dataset with published \\emph{in situ} results. Expression value in transcripts per million (TPM) is shown on the \\emph{y}-axis, and points are plotted as a triangle if the expression value was above the cutoff for that library or a circle if below. Grey shading indicates a meristem type for which expression was detected by \\emph{in situ} hybridisation. See Table \\ref{tab:refFrame_x} for references for the \\emph{in situ} expression patterns. Although four replicates were produced from each of the RM and PBM, only three replicates for each stage are included in the analysis (see Results).", "\\newline ", "Gene expression measured by RNAseq may differ from the qualitative patterns measured by RNA \\emph{in situ} hybridization for several reasons, including the relative sensitivity of the techniques, the specificity of the \\emph{in situ} probe, and differences in growth conditions (\\emph{e.g. HD5}) or the accession under study (\\emph{e.g. GN1A}).")}
 print(sf_isGenesTpm)
 ```
 
