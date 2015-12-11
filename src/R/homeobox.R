@@ -67,9 +67,12 @@ hbVstScaled <- t(scale(t(hbVst), center = TRUE))
 dm <- "minkowski"
 hm <- "ward.D2"
 
+# cut the tree into 5 groups of expression
+hc <- hclust(dist(hbVstScaled, method = dm), method = hm)
+cuts <- cutree(hc, k = 5)
+
 # get the order for the x-axis
-geneOrder <- rownames(hbVstScaled)[
-  hclust(dist(hbVstScaled, method = dm), method = hm)$order]
+geneOrder <- rownames(hbVstScaled)[hc$order]
 
 # merge scaled vst to hb data
 hbVstScaled.table <- data.table(hbVstScaled, keep.rownames = TRUE, key = 'rn')
@@ -98,6 +101,14 @@ segData[, colour := plyr::mapvalues(
   from = unique(class),
   to = RColorBrewer::brewer.pal(length(unique(class)), "Set3")
   )]
+
+# add cuts to plotdata and segdata
+plotData.long[, cut := cuts[as.character(msuId)], by = msuId]
+segData[, cut := cuts[as.character(msuId)], by = msuId]
+
+# rescale y for segData relative to each facet
+segData[, minY := min(y), by = cut]
+segData[, yRel := y - minY + 0.5]
 
 # MAKE OUTPUT FOLDER
 outDir <- "output/homeobox"

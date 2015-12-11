@@ -658,15 +658,18 @@ f_hb <- ggplot() +
     axis.text.y = element_text(face = "italic", size = 5.5),
     #legend.title = element_text(size = 6),
     panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()) +
+    panel.grid.minor = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_blank()) +
   xlab(NULL) + ylab(NULL) +
+  facet_grid(cut ~ ., space = "free", scales = "free") +
   scale_y_discrete(expand = c(0,0)) +
   scale_x_discrete(expand = c(0,0)) +
   geom_raster(aes(x = Stage, y = symbol, fill = `Scaled reads`),
               data = plotData.long) +
-  scale_fill_gradientn(colours = heatscale) +
-  geom_segment(aes(x = 0.255, y = y, xend = 0.255, yend = yend, colour = class),
+  geom_segment(aes(x = 0.255, y = yRel, xend = 0.255, yend = yRel + 1, colour = class),
                data = segData, size = 5) +
+  scale_fill_gradientn(colours = heatscale) +
   scale_colour_brewer(palette = "Set3", guide = guide_legend(title = NULL))
 
 figCount <- incCount(figCount, "f_hb")
