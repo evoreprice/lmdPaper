@@ -1,5 +1,7 @@
 ## 2015-12-11
+* wrote a new abstract
 * rewrote meristem section of intro (para 2)
+* integrated comments from Martin and Israr (from early Dec)
 
 ## 2015-12-10
 * re-ordered figure 4, added SPL genes and updated legend
