@@ -6,16 +6,16 @@ header-includes:
   \usepackage[utf8]{inputenc}
   \DeclareUnicodeCharacter{2265}{$\geq$}
 output:
+  word_document:
+    fig_caption: yes
+    reference_docx: csl/wordStyles.docx
+    toc: yes
   BiocStyle::html_document:
     dev: CairoPDF
     fig_caption: yes
     force_captions: yes
     highlight: pygments
     number_sections: yes
-  word_document:
-    fig_caption: yes
-    reference_docx: csl/wordStyles.docx
-    toc: yes
 bibliography: bib/papersLib.bibtex
 ---
 
@@ -75,7 +75,7 @@ The branched inflorescence of rice is a compound raceme, classified as a panicle
 
 The landscape of gene expression is a characteristic factor that differentiates meristem cell types, and is involved in the control of transitions between meristem identities and therefore panicle phenotype. Mutant analyses and map-based cloning of quantitative trait loci have identified a number of genes required for the initiation and development of panicles, as well as genes controlling the number and size of grains and panicles [@Xing:2010de; @Wang:2011kq]. Some of these genes are involved in the patterning of axillary meristem and panicle branching, such as the nuclear regulatory factor-encoding genes *MONOCULM 1*, *LAX PANICLE 1* and *LAX PANICLE 2* [@Wang:2011kq]. A large set of genes related to floral development, which may also affect panicle architecture, has been identified [@Yoshida:2011bo], some of which may have been under selection during domestication or are associated with crop improvement in Asian rice  [@Xing:2010de; @He:2011io; @Wang:2011kq; @Xu:2012hq; @Ikeda:2013go].
 
-Understanding the events that occur during development that determine panicle characteristics, such as branching complexity and its plasticity, will be vital for sustainable improvement of rice yield potential using targeted breeding programs. Despite advances in characterization at the level of individual genes and interactions, a complete understanding of the control of panicle morphology and grain yield will require mechanistic studies explaining the interactions of gene regulatory network components with each other and the environment [@Azpeitia:2013jia]. One step towards this goal is to describe the changes in gene expression between different cell types during development. In this article, we describe the measurement and analysis of genome-wide expression in meristematic tissues from the early stages of rice panicle development, using a precise laser microdissection and RNA sequencing approach.
+Understanding the events that occur during development that determine panicle characteristics, such as branching complexity and its plasticity, will be vital for sustainable improvement of rice yield potential using targeted breeding programs. Despite advances in characterization at the level of individual genes and interactions, a complete understanding of the control of panicle morphology and grain yield will require mechanistic studies explaining the interactions of gene regulatory network components with each other and the environment [@Azpeitia:2013jia]. One step towards this goal is to describe the changes in gene expression between different cell types during development. In this article, we describe the measurement and analysis of genome-wide expression in meristematic tissues from the early stages of panicle development in *O. sativa* ssp. *japonica* cv. Nipponbare, using a precise laser microdissection and RNA sequencing approach.
 
 # Results
 
@@ -133,17 +133,17 @@ This report describes the changes in gene expression that occur during the early
 
 ## Tissue embedding, laser microdissection and sequencing
 
-Each inflorescence was harvested in 2 mL ice-cold 3:1 ethanol:acetic acid fixative solution, infiltrated (**filtered?**) twice under a mild vacuum for 15 minutes and stored for 20 hours in fresh fixative at 4°C. Embedding for dissection was performed as described by @Mantegazza:2014di. Tissues were cut into 8 µm sections on an RM2155 or RM2255 microtome (Leica) and dissected on a LMD6000 or LMD7000 laser dissector (Leica). RNA was amplified using the ARCTURUS PicoPure RNA Isolation Kit (ThermoFisher) and assayed on a 2100 Bioanalyzer with the RNA 6000 Pico Kit (Agilent) before amplification and cDNA synthesis with the Ovation RNA-Seq System V2 (NuGEN). Library preparation with **which kit** and 50-base, single-end sequencing on the HiSeq 2000 platform (Illumina) were performed by IGA Technology Services (Udine, Italy).
+Each inflorescence was harvested in 2 mL ice-cold 3:1 ethanol:acetic acid fixative solution, infiltrated twice under a mild vacuum for 15 minutes and stored for 20 hours in fresh fixative at 4°C. Embedding for dissection was performed as described by @Mantegazza:2014di. Tissues were cut into 8 µm sections on an RM2155 or RM2255 microtome (Leica) and dissected on a LMD6000 or LMD7000 laser dissector (Leica). RNA was amplified using the ARCTURUS PicoPure RNA Isolation Kit (ThermoFisher) and assayed on a 2100 Bioanalyzer with the RNA 6000 Pico Kit (Agilent) before amplification and cDNA synthesis with the Ovation RNA-Seq System V2 (NuGEN). Library preparation with the Ovation Ultralow Library Sytem (NuGEN) and 50-base, single-end sequencing on the HiSeq 2000 platform (Illumina) were performed by IGA Technology Services (Udine, Italy).
+
+## RNA *in situ* hybridization
+
+Samples harvested from the main stem from four developmental stages of panicle development were embedded in Paraplast X-TRA (Sigma-Aldrich) as described by (**ref Huijser 1992**). Digoxigenin-labelled antisense and sense RNA probes were generated with the DIG RNA Labeling Kit SP6/T7 (Roche) according to the manufacturer's instructions. To generate the probes, cDNA was amplified using the following primers: *LOC_Os01g04670*, 5′-GTGTCAAGGCATCGCCAAC-3′ and 5′-CATCAGCTGGCTGCTTTACC-3′; *LOC_Os10g04270*, 5′-TCCCAGTTGACCGAGAACTG-3′ and 5′-TGAACTTCCGTCACGAACTCC-3′; *LOC_Os10g05990*, 5′-CCTCCGGCAAAGAACTGATG-3′ and 5′-CCGTCATTGGGACTAGTTTGTCAG-3′. For detection of *LOC_Os09g27730*, an Digoxigenin-labelled LNA probe with the sequence 5′-TCTG{A}CGACG{T}GCG{A}C{T}GGT-3′ was synthesised (Eurogentec, Liège, Belgium). Hybridization was performed as described by **ref Coen 1990** using NBT/BCIP (Roche) or VECTOR Blue Alkaline Phosphatase Substrate Kit (Vector Laboratories) for detection.
 
 ## Data analyses
 
 Analysis of the sequenced libraries was carried out with `bash` and `R` scripts [@RALanguageandEn:2015wf], which were arranged into a pipeline using the `ruffus` package for `python3` [@Goodstadt:2010jp]. All of the code used for the analysis and to generate text, figures and tables for this report, along with the versions and paramaters of the software used, are available with revision history in a public GitHub repository at https://github.com/evoreprice/lmdPaper.
 
 Briefly, adaptor trimming was performed with `cutadapt` [@Martin:2011eu] and reads were mapped against the MSUv7 genome and annotation [@Kawahara:2013gh; @Ouyang:2007il] downloaded from Phytozome 10.3 [@Goodstein:2012ho] using `STAR` [@Dobin:2012fg] in 2-pass mode. The `'quantMode'` argument of `STAR` was used for read counting. rRNA and tRNA contamination was estimated using `htseq-count` [@Anders:2014gf] to count the number of reads that mapped to regions annotated as tRNA or rRNA on the Rap-DB [@Ohyanagi:2006go] or to regions where reads simulated with `wgsim` (https://github.com/lh3/wgsim) from rRNA sequences in the TIGR Plant Repeats Database [@Ouyang:2004ia] also mapped. Differential expression analysis to calculate Log~2~-fold change (L~2~FC) values and transformed read counts was performed with the `DESeq2` package [@Love:2014do]. To determine a strict cut-off for unexpressed genes, expression values in transcripts per million were calculated for each gene [@Li:2010cl; @Wagner:2012jf]. These values were compared to pseudo-expression values calculated from intergenic regions of the genome, using intervals of a similar size distribution to those used for calculating the 'genic' expression values. For each library, the cut-off was placed at the 95^th^ percentile of the distribution of intergenic expression values. Transformed counts and L~2~FC values from expressed genes were used for soft clustering with the `Mfuzz` package [@Kumar:2007uw] and geneset enrichment analysis with the `gage` package [@Luo:2009kp] respectively. All plots were produced with the `ggplot2` package [@Wickham:2009tn].
-
-### Comparative analysis of MADS family
-
-The primary sequences of *Arabidopsis thaliana*, *Solanum lycopersicum* and *Oryza sativa* MADS proteins were downloaded by querying Phytozome 10.3 [@Goodstein:2012ho] for the PANTHER family PTHR11945 ('MADS BOX PROTEIN') via the `biomaRt` interface [@Thomas:2003db; @Durinck:2009ki]. An initial alignment of all proteins was performed with `Clustal Omega` using a full distance matrix [@Sievers:2011fn]. To clean the alignment, poorly conserved regions where greater than `r minpcnongap` percent of sequences had gaps or less than `r minpcident` percent of pairwise comparisons between sequences had identical residues were removed. To recover MADS genes related to the Arabidopsis MIKC clade, a UGPMA tree was estimated from the cleaned alignment and the tree was cut at the lowest height that returned a clade including all type II Arabidopsis MADS proteins listed in the Arabidopsis transcription factor database on the Arabidopsis Gene Regulatory Information Server [@Yilmaz:2011ew], with as few type I proteins as possible. Protein sequences in this clade that were longer than `r minProtLength` amino acids were realigned using `Clustal Omega`, and the alignment was cleaned as described above and used to estimate a neighbour-joining tree with the `bionj` algorithm implemented in the `ape` package [@Paradis:2004dv] rooted to type I MADS sequences (`r og`). L~2~FC change expression values for tomato and Arabidopsis genes were estimated from samples that have previously been described [@Mantegazza:2014di; @Park:2012dg] using the same method described above for the rice samples. The tree was plotted using the `ggtree` extension for `ggplot2` (**ref ggtree**).
 
 # Accession Numbers
 

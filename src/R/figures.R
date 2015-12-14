@@ -146,6 +146,7 @@ tpm <- reshape2::melt(tpm.wide, id.vars = "MSU identifier",
 colData <- data.table(as.data.frame(GenomicRanges::colData(
   readRDS('output/DESeq2/ddsLrt.Rds'))), keep.rownames = TRUE)
 tpm[, stage := colData[rn %in% as.character(library), stage], by = library]
+tpm[, stage := plyr::mapvalues(stage, "ePBM/SBM", "ePBM/AM")]
 
 setkey(tpm, "MSU identifier", "stage")
 
