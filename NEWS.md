@@ -1,3 +1,6 @@
+## 2015-12-14
+* added number of genes per class and number expressed to HB figure
+
 ## 2015-12-11
 * wrote a new abstract
 * rewrote meristem section of intro (para 2)

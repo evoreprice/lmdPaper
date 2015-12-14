@@ -30,7 +30,6 @@ tfdb <- readRDS(tfdbFile)
 
 # add tfdb Hbs missing from Jain et. al data
 missingHbs <- tfdb[Family == "HB", Protein.ID[which(!(Protein.ID %in% hbGenes[, msuId]))]]
-oryzr::LocToGeneName(missingHbs)
 if (length(missingHbs) >0 ){
   warning(paste(
     "The following msuIds were not found in the Jain et. al data:\n",
@@ -38,11 +37,15 @@ if (length(missingHbs) >0 ){
     "\nThey will be categorized as \"Not annotated\""))
   notAnn <- data.table(
     class = "Not annotated",
-    msuId = missingHbs
+    msuId = missingHbs,
+    
   )
   notAnn[, symbol := oryzr::LocToGeneName(msuId)$symbols, by = msuId]
   hbGenes <- rbind(hbGenes, notAnn)
 }
+
+# number per class
+hbGenes[, nClass := length(unique(msuId)), by = class]
 
 # expressed genes
 expressedGenesAll <- readRDS(expressedGenesAllFile)
@@ -79,11 +82,16 @@ hbVstScaled.table <- data.table(hbVstScaled, keep.rownames = TRUE, key = 'rn')
 setnames(hbVstScaled.table, 'rn', 'msuId')
 setkey(expHb, 'msuId')
 plotData <- expHb[hbVstScaled.table, ]
+plotData[, nExprPerClass := length(unique(msuId)), by = class]
+plotData[, class := paste0(class, " (", nExprPerClass, "/", nClass, ")")]
 
 # set up plot
 plotData[!is.na(symbol), symbol := paste(symbol, msuId, sep = "\n")]
 plotData[is.na(symbol), symbol := msuId, by = msuId]
-plotData.long <- reshape2::melt(plotData, id.vars = c('msuId', 'symbol', 'class'), variable.name = 'Stage',
+plotData.long <- reshape2::melt(plotData,
+                                #id.vars = c('msuId', 'symbol', 'class', 'nClass'),
+                                measure.vars = c("RM", "PBM", "ePBM/SBM", "SM"),
+                                variable.name = 'Stage',
                                 value.name = 'Scaled reads')
 plotData.long[, msuId := factor(msuId, levels = geneOrder)]
 plotData.long[, symbol := factor(symbol, levels = plotData[geneOrder, symbol])]
