@@ -460,92 +460,6 @@ if (gsea[,any(showPval)]){
 
 figCount <- incCount(figCount, "f_gsea")
 
-############
-### ALOG ###
-############
-
-# HDZIP4 <- c('LOC_Os02g45250', 'LOC_Os04g48070', 'LOC_Os04g53540', 'LOC_Os08g04190', 'LOC_Os08g08820', 'LOC_Os08g19590', 'LOC_Os09g35760', 'LOC_Os10g42490')
-# HDZIP3 <- c('LOC_Os01g48170', 'LOC_Os03g01890', 'LOC_Os03g43930', 'LOC_Os05g48820', 'LOC_Os06g39906', 'LOC_Os10g33960', 'LOC_Os12g41860')
-# 
-# expTable <- data.table(msuId = HDZIP3, type = 'hb')
-
-svpMads <- c("LOC_Os02g52340", "LOC_Os03g08754", "LOC_Os06g11330")
-expG1s <- c("LOC_Os02g07030", "LOC_Os06g46030", "LOC_Os10g33780")
-ck <- c("LOC_Os01g51210","LOC_Os04g43840","LOC_Os01g40630", "LOC_Os01g10110")
-spl <- c("LOC_Os02g04680", "LOC_Os06g49010", "LOC_Os09g31438", "LOC_Os07g32170",
-         "LOC_Os08g39890", "LOC_Os01g46984")
-
-expTable <- rbind(data.table(msuId = svpMads, type = "mads"),
-                  data.table(msuId = expG1s, type = "g1l"),
-                  data.table(msuId = ck, type = 'ck'),
-                  data.table(msuId = spl, type = 'spl'))
-
-expTable[, symbol := oryzr::LocToGeneName(msuId)$symbols, by = msuId]
-
-# add expression values
-tpm <- data.table(readRDS('output/tpm/tpm.Rds'), keep.rownames = TRUE)
-setkey(tpm, "rn")
-plotData.wide <- tpm[expTable]
-
-# convert to long
-plotData <- reshape2::melt(plotData.wide, id.vars = c("rn", "type", "symbol"),
-                           variable.name = "library", value.name = "Expression (TPM)")
-setkey(plotData, "rn", "library")
-
-# add expression calls
-expGenTT.wide <- data.table(readRDS('output/expressedGenes/expGenTT.Rds'), key = "id")
-expGenTT <- reshape2::melt(expGenTT.wide, id.vars = "id", variable = "library", value = "isExpr")
-setkey(expGenTT, "id", "library")
-plotData <- expGenTT[plotData, .(
-  id,
-  type,
-  library,
-  symbol,
-  `Expression (TPM)`,
-  isExpr)]
-
-# add stage
-plotData[, stage := substr(library, start = 1, stop = 2)]
-old <- c("n1", "n2", "n3", "n4")
-new <- c("RM", "PBM", "ePBM/\nSBM", "SM")
-plotData[, stage := factor(plyr::mapvalues(stage, from = old, to = new), levels = new)]
-
-# set up labels and order by msuId
-plotData[!is.na(symbol), symbol := paste(symbol, "·", id)]
-plotData[is.na(symbol), symbol := id]
-plotData[, symbol := factor(symbol, levels = unique(symbol))]
-
-# make a plot
-cols <- RColorBrewer::brewer.pal(3, "Set1")[c(2,1)]
-alogPlot <- function(plotData) {
-  return(
-    ggplot(plotData, aes(x = stage, y = `Expression (TPM)`, group = symbol,
-                         colour = isExpr)) +
-      theme_minimal(base_size = 8, base_family = "Helvetica") +
-      theme(axis.text.x = element_text(vjust = 0.5),
-            strip.text = element_text(face = "italic"),
-            plot.title = element_text(hjust = 0, face = "bold"),
-            plot.background = element_rect(colour = "black", size = 0.25)) +
-      scale_colour_manual(values = cols, guide = FALSE) +
-      xlab(NULL) +
-      stat_smooth(se = FALSE, colour = "grey", size = 0.5) +
-      geom_point(shape = 16, alpha = 0.7, position = position_jitter(height = 0, width = 0.3))
-  )
-}
-
-f_alogFamily_d <- alogPlot(plotData[type == 'ck']) + ggtitle("d") +
-  facet_wrap(~symbol, ncol = 4)
-f_alogFamily_b <- alogPlot(plotData[type == 'g1l']) + ggtitle("b") +
-  facet_wrap(~symbol, ncol = 1)
-f_alogFamily_a <- alogPlot(plotData[type == 'mads']) + ggtitle("a") +
-  facet_wrap(~symbol, ncol = 1)
-f_alogFamily_c <- alogPlot(plotData[type == 'spl']) + ggtitle("c") +
-  facet_wrap(~symbol, ncol = 2) #, scales = "free_y")
-
-#f_alogFamily <- gridExtra::grid.arrange(f_alogFamily_a, f_alogFamily_b, ncol = 2)
-
-figCount <- incCount(figCount, "f_alogFamily")
-
 #################
 ### MADS TREE ###
 #################
@@ -673,3 +587,89 @@ f_hb <- ggplot() +
   scale_colour_brewer(palette = "Set3", guide = guide_legend(title = NULL))
 
 figCount <- incCount(figCount, "f_hb")
+
+############
+### ALOG ###
+############
+
+# HDZIP4 <- c('LOC_Os02g45250', 'LOC_Os04g48070', 'LOC_Os04g53540', 'LOC_Os08g04190', 'LOC_Os08g08820', 'LOC_Os08g19590', 'LOC_Os09g35760', 'LOC_Os10g42490')
+# HDZIP3 <- c('LOC_Os01g48170', 'LOC_Os03g01890', 'LOC_Os03g43930', 'LOC_Os05g48820', 'LOC_Os06g39906', 'LOC_Os10g33960', 'LOC_Os12g41860')
+# 
+# expTable <- data.table(msuId = HDZIP3, type = 'hb')
+
+svpMads <- c("LOC_Os02g52340", "LOC_Os03g08754", "LOC_Os06g11330")
+expG1s <- c("LOC_Os02g07030", "LOC_Os06g46030", "LOC_Os10g33780")
+ck <- c("LOC_Os01g51210","LOC_Os04g43840","LOC_Os01g40630", "LOC_Os01g10110")
+spl <- c("LOC_Os02g04680", "LOC_Os06g49010", "LOC_Os09g31438", "LOC_Os07g32170",
+         "LOC_Os08g39890", "LOC_Os01g46984")
+
+expTable <- rbind(data.table(msuId = svpMads, type = "mads"),
+                  data.table(msuId = expG1s, type = "g1l"),
+                  data.table(msuId = ck, type = 'ck'),
+                  data.table(msuId = spl, type = 'spl'))
+
+expTable[, symbol := oryzr::LocToGeneName(msuId)$symbols, by = msuId]
+
+# add expression values
+tpm <- data.table(readRDS('output/tpm/tpm.Rds'), keep.rownames = TRUE)
+setkey(tpm, "rn")
+plotData.wide <- tpm[expTable]
+
+# convert to long
+plotData <- reshape2::melt(plotData.wide, id.vars = c("rn", "type", "symbol"),
+                           variable.name = "library", value.name = "Expression (TPM)")
+setkey(plotData, "rn", "library")
+
+# add expression calls
+expGenTT.wide <- data.table(readRDS('output/expressedGenes/expGenTT.Rds'), key = "id")
+expGenTT <- reshape2::melt(expGenTT.wide, id.vars = "id", variable = "library", value = "isExpr")
+setkey(expGenTT, "id", "library")
+plotData <- expGenTT[plotData, .(
+  id,
+  type,
+  library,
+  symbol,
+  `Expression (TPM)`,
+  isExpr)]
+
+# add stage
+plotData[, stage := substr(library, start = 1, stop = 2)]
+old <- c("n1", "n2", "n3", "n4")
+new <- c("RM", "PBM", "ePBM/\nSBM", "SM")
+plotData[, stage := factor(plyr::mapvalues(stage, from = old, to = new), levels = new)]
+
+# set up labels and order by msuId
+plotData[!is.na(symbol), symbol := paste(symbol, "·", id)]
+plotData[is.na(symbol), symbol := id]
+plotData[, symbol := factor(symbol, levels = unique(symbol))]
+
+# make a plot
+cols <- RColorBrewer::brewer.pal(3, "Set1")[c(2,1)]
+alogPlot <- function(plotData) {
+  return(
+    ggplot(plotData, aes(x = stage, y = `Expression (TPM)`, group = symbol,
+                         colour = isExpr)) +
+      theme_minimal(base_size = 8, base_family = "Helvetica") +
+      theme(axis.text.x = element_text(vjust = 0.5),
+            strip.text = element_text(face = "italic"),
+            plot.title = element_text(hjust = 0, face = "bold"),
+            plot.background = element_rect(colour = "black", size = 0.25)) +
+      scale_colour_manual(values = cols, guide = FALSE) +
+      xlab(NULL) +
+      stat_smooth(se = FALSE, colour = "grey", size = 0.5) +
+      geom_point(shape = 16, alpha = 0.7, position = position_jitter(height = 0, width = 0.3))
+  )
+}
+
+f_alogFamily_d <- alogPlot(plotData[type == 'ck']) + ggtitle("d") +
+  facet_wrap(~symbol, ncol = 4)
+f_alogFamily_b <- alogPlot(plotData[type == 'g1l']) + ggtitle("b") +
+  facet_wrap(~symbol, ncol = 1)
+f_alogFamily_a <- alogPlot(plotData[type == 'mads']) + ggtitle("a") +
+  facet_wrap(~symbol, ncol = 1)
+f_alogFamily_c <- alogPlot(plotData[type == 'spl']) + ggtitle("c") +
+  facet_wrap(~symbol, ncol = 2) #, scales = "free_y")
+
+#f_alogFamily <- gridExtra::grid.arrange(f_alogFamily_a, f_alogFamily_b, ncol = 2)
+
+figCount <- incCount(figCount, "f_alogFamily")
