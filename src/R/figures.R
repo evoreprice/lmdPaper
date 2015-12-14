@@ -74,7 +74,7 @@ opIdx <- pcaPlotData[c('n2r3', 'n4r1'),'rIdx']
 
 # format legend
 pcaPlotData$Stage <- plyr::mapvalues(pcaPlotData$Stage, from = "ePBM/SBM",
-                                     to = "ePBM/\nSBM")
+                                     to = "ePBM/\nAM")
 
 sf_pca <- ggplot(data = pcaPlotData,
                  aes(x = PCA1, y = PCA2, colour = Stage, label = label)) +
@@ -153,7 +153,7 @@ setkey(tpm, "MSU identifier", "stage")
 genes <- compare[, .(msuId, stage, call.z)]
 setkey(genes, "msuId", "stage")
 genes <- unique(genes)
-genes[, stage := plyr::mapvalues(stage, "SBM", "ePBM/SBM")]
+genes[, stage := plyr::mapvalues(stage, "SBM", "ePBM/AM")]
 
 # dirty kludge, fix in compareVsInSitu.R
 genes <- genes[!stage == "FM"]
@@ -185,7 +185,7 @@ genTpm[, name := oryzr::LocToGeneName(msuId)$symbols, by = msuId]
 genTpm[, plotLabel := name]
 genTpm[!is.na(plotLabel), plotLabel := paste(plotLabel, "·", msuId)]
 genTpm[is.na(plotLabel), plotLabel := msuId]
-genTpm[, stage := plyr::mapvalues(stage, "ePBM/SBM", "ePBM/\nSBM")]
+genTpm[, stage := plyr::mapvalues(stage, "ePBM/AM", "ePBM/\nAM")]
 
 # order the plots
 setkey(genTpm, "name")
@@ -221,7 +221,8 @@ s_tableCount <- incCount(s_tableCount, "st_refTable")
 
 sf_isGenesTpm <- ggplot() +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
-  theme(strip.text = element_text(face = "italic")) +
+  theme(strip.text = element_text(face = "italic"),
+        axis.text.x = element_text(vjust = 0.5)) +
   xlab(NULL) + ylab("Epxression (TPM)") +
   scale_color_brewer(palette = "Set1") +
   guides(shape = FALSE, size = FALSE) +
@@ -332,7 +333,7 @@ plotData <- reshape2::melt(plotData.wide,
                            value.name = "Scaled, transformed read counts")
 
 # fix stage label
-plotData[, Stage := plyr::mapvalues(Stage, "ePBM.SBM", "ePBM/SBM")]
+plotData[, Stage := plyr::mapvalues(Stage, "ePBM.SBM", "ePBM/AM")]
 
 # set up heatscale
 heatscale <- RColorBrewer::brewer.pal(n = 6, name = "YlOrRd")
@@ -342,7 +343,7 @@ centres <- reshape2::melt(centres.wide, id.vars = 'label',
                           measure.vars = c("RM", "PBM", "ePBM.SBM", "SM"),
                           variable.name = 'Stage',
                           value.name = "Scaled, transformed read counts")
-centres[, Stage := plyr::mapvalues(Stage, "ePBM.SBM", "ePBM/SBM")]
+centres[, Stage := plyr::mapvalues(Stage, "ePBM.SBM", "ePBM/AM")]
 
 # number of clusters (for text)
 c <- length(unique(c1$cluster))
@@ -432,7 +433,7 @@ famCat <- readRDS("data/tfdb/famCat.Rds")
 
 # format some labels
 setnames(gsea, old = "Test statistic", new = "Test\nstatistic")
-gsea[, Stage := plyr::mapvalues(Stage, "ePBM/SBM", "ePBM/\nSBM")]
+gsea[, Stage := plyr::mapvalues(Stage, "ePBM/SBM", "ePBM/\nAM")]
 
 # separate by TF / other proteins
 setkey(famCat, 'Family')
@@ -560,6 +561,8 @@ s_figCount <- incCount(s_figCount, "sf_madsTree")
 plotData.long <- readRDS("output/homeobox/plotData.long.Rds")
 segData <- readRDS("output/homeobox/segData.Rds")
 
+plotData.long[, Stage := plyr::mapvalues(Stage, "ePBM/SBM", "ePBM\n/AM")]
+
 library(ggplot2)
 heatscale <- RColorBrewer::brewer.pal(6, "YlOrRd")
 
@@ -568,7 +571,7 @@ f_hb <- ggplot() +
   theme(
     legend.key.size = grid::unit(8, "points"),
     legend.text	= element_text(size = 5.5),
-    axis.text.x = element_text(vjust = 0.5, hjust = 1, angle = 90),
+    axis.text.x = element_text(vjust = 0.5),
     axis.text.y = element_text(face = "italic", size = 5.5),
     #legend.title = element_text(size = 6),
     panel.grid.major = element_blank(),
@@ -635,7 +638,7 @@ plotData <- expGenTT[plotData, .(
 # add stage
 plotData[, stage := substr(library, start = 1, stop = 2)]
 old <- c("n1", "n2", "n3", "n4")
-new <- c("RM", "PBM", "ePBM/\nSBM", "SM")
+new <- c("RM", "PBM", "ePBM/\nAM", "SM")
 plotData[, stage := factor(plyr::mapvalues(stage, from = old, to = new), levels = new)]
 
 # set up labels and order by msuId
