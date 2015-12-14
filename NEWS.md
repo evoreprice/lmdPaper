@@ -5,6 +5,7 @@
 * added number of genes per class and number expressed to HB figure
 * more details in the legend for the homeobox figure
 * Updated M&M
+* Added in situ figure to SI and results
 
 ## 2015-12-11
 * wrote a new abstract
