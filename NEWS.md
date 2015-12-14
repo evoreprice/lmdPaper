@@ -2,6 +2,7 @@
 * Couple of lines on class III HD-Zips (hb section)
 * Added homeodomain figure description to results (n.b. this means the order of figures 4 & 5 had to be swapped)
 * added number of genes per class and number expressed to HB figure
+* more details in the legend for the homeobox figure
 
 ## 2015-12-11
 * wrote a new abstract

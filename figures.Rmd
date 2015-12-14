@@ -50,7 +50,7 @@ print(f_mfuzzClusters)
 print(f_gsea)
 ```
 
-```{r f_hb, fig.height = 8.661, fig.cap = "Patterns of expression of homeobox genes in the meristem samples. The heatscale represents scaled, VST-transformed read counts for detected homeobox genes, and the coloured bar next to the \\emph{y}-axis shows the homeobox clade for each gene [@Jain:2008kg]. There is a set of homeobox genes that peak in expression in the RM, and another set that have their lowest expression in the RM and highest expression in PBM and SBM samples. The former group contains \\emph{OSH1}, whilst the latter contains five of the eight expressed HD-ZIP IV homeobox genes."}
+```{r f_hb, fig.height = 8.661, fig.cap = "Patterns of expression of homeobox genes that were detected in the meristem samples. The heatscale represents the mean scaled, VST-transformed read count, and the coloured bar next to the \\emph{y}-axis shows the homeobox subfamily for each gene (Jain \\emph{et al}., 2008). The number of genes detected and the total number of genes for each subfamily is given in brackets after the subfamily name in the legend. The expression patterns were separated into five groups using heirarchical clustering. The set of homeobox genes with lowest expression in the RM and highest expression in indeterminate axillary meristems contains \\emph{OSH1} and five of the eight expressed class IV HD-Zip genes."}
 print(f_hb)
 ```
 
