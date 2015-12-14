@@ -1,4 +1,5 @@
 ## 2015-12-14
+* Couple of lines on class III HD-Zips (hb section)
 * added number of genes per class and number expressed to HB figure
 
 ## 2015-12-11
