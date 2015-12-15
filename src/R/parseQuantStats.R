@@ -43,6 +43,10 @@ area <- c(727647,511191,300886,848070, # N1
           600176,2735798,394641,439534, # N2
           1563411,1574719,1109344, # N3
           975315,758919,2347647) # N4
+nb <- c(7, 7, 5, 4, # N1
+        5, 4, 2, 3, # N2
+        5, 5, 4, # N3
+        5, 4, 4) # N4
 
 # function to get required info from STAR output
 parseStarInfo <- function(x){
@@ -107,6 +111,7 @@ setkey(rnaStats, 'lib')
 libStats <- expGenPerLib[readsPerLib][rnaStats[starInfo]]
 libStats[, "Yield (ng)" := round(inputRNA, 1)][, RIN := RIN ]
 libStats[, "Dissected area (mm²)" := area/1000000] 
+libStats[, "Number of panicles" := nb]
 
 # make all columns except 'lib' numeric
 libStats <- libStats[, lapply(.SD, as.numeric), by = lib]
@@ -124,7 +129,8 @@ libStats[, Sample := levels(GenomicRanges::colData(dds)$stage)[
 libStats[, Replicate := as.integer(gsub(".*R(\\d+)", "\\1", lib))]
 
 # arrange table
-setcolorder(libStats, c('lib', "Sample", "Replicate", "Dissected area (mm²)", 'Yield (ng)', 'RIN',
+setcolorder(libStats, c('lib', "Sample", "Replicate", "Number of panicles",
+                        "Dissected area (mm²)", 'Yield (ng)', 'RIN',
                         'Reads (M)', 'rRNA reads (M)', 'rRNA (%)',
                         'tRNA reads (M)', 'tRNA (%)',
                         'Uniquely mapped reads (M)', 'Multimapped reads (M)',

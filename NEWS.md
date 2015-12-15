@@ -1,4 +1,5 @@
 ## 2015-12-15
+* Added number of panicles column to table S1
 * Added biology to conclusion
 * Added acknowldgements
 * Added statement to "Accession numbers" section
