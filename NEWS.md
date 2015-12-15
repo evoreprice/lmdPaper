@@ -1,3 +1,11 @@
+## 2015-12-15
+* Added biology to conclusion
+* Added acknowldgements
+* Added statement to "Accession numbers" section
+* Added significance statement and running title
+* Added a sentence about MIR319a, maybe we need to remove the reference to this?
+* Hélène and Stefan's comments
+
 ## 2015-12-14
 * Changed sample name SBM -> AM
 * Couple of lines on class III HD-Zips (hb section)

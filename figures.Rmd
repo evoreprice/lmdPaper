@@ -39,8 +39,9 @@ source('src/R/figures.R')
 
 \begin{figure*}
  \includegraphics{data/lmdFigure.pdf}
-\caption{Laser microdissection of meristem samples in the early stages of inflorescence development. Samples were collected from the rachis meristem (\textbf{a} and \textbf{e}), the primary branch meristem (\textbf{b} and \textbf{f}), the elongating primary branch meristem and axillary meristem (\textbf{c} and \textbf{g}) and the spikelet meristem (\textbf{d} and \textbf{h}). Images show the samples before (\textbf{a}–\textbf{d}) and after (\textbf{e}–\textbf{h}) dissection.}
 \end{figure*}
+\captionof{figure}{Laser microdissection of meristem samples in the early stages of inflorescence development. Samples were collected from the rachis meristem (\textbf{a} and \textbf{e}), the primary branch meristem (\textbf{b} and \textbf{f}), the elongating primary branch meristem and axillary meristem (\textbf{c} and \textbf{g}) and the spikelet meristem (\textbf{d} and \textbf{h}). Images show the samples before (\textbf{a}–\textbf{d}) and after (\textbf{e}–\textbf{h}) dissection.}
+\clearpage
 
 ```{r f_mfuzzClusters, fig.height = 8.661 / 2, fig.cap = paste0("Common patterns of gene expression in developing inflorescences. Fuzzy \\emph{c}-means clustering of normalised, variance-stabilised read counts was used to recover ", as.character(english::english(c)), " common patterns of expression. Each line describes the expression pattern of one gene, with the gene's membership to the cluster represented by the colour of the line. The core values for each cluster are plotted in black. The ordering of the panels in the plot was rearranged to enable side-by-side comparison of complementary clusters.")}
 print(f_mfuzzClusters)
@@ -50,7 +51,7 @@ print(f_mfuzzClusters)
 print(f_gsea)
 ```
 
-```{r f_hb, fig.height = 8.661, fig.cap = "Patterns of expression of homeobox genes that were detected in the meristem samples. The heatscale represents the geometric mean of scaled, VST-transformed read counts, and the coloured bar next to the \\emph{y}-axis shows the homeobox subfamily for each gene (Jain \\emph{et al}., 2008). The number of genes detected and the total number of genes for each subfamily is given in brackets after the subfamily name in the legend. The expression patterns were separated into five groups using heirarchical clustering. The set of homeobox genes with lowest expression in the RM and highest expression in indeterminate axillary meristems contains \\emph{OSH1} and five of the eight expressed class IV HD-Zip genes."}
+```{r f_hb, fig.height = 8.661, fig.cap = "Patterns of expression of homeobox genes that were detected in the meristem samples. The heatscale represents the geometric mean of scaled, VST-transformed read counts, and the coloured bar next to the \\emph{y}-axis shows the homeobox subfamily for each gene (Jain \\emph{et al}., 2008). The number of genes detected and the total number of genes for each subfamily is given in brackets after the subfamily name in the legend. The expression patterns were separated into five groups using hierarchical clustering. The set of homeobox genes with lowest expression in the RM and highest expression in indeterminate axillary meristems contains \\emph{OSH1} and five of the eight expressed class IV HD-Zip genes."}
 print(f_hb)
 ```
 
