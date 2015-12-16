@@ -1,5 +1,5 @@
 ---
-title: "Figures"
+title: ""
 date: "\\vspace{0 mm}"
 csl: csl/the-plant-journal.csl
 header-includes:
@@ -7,6 +7,7 @@ header-includes:
   \usepackage{caption}
   \usepackage{fixltx2e}
   \usepackage{rotating}
+  \usepackage{siunitx}
   \renewcommand{\thefigure}{\arabic{figure}}
   \renewcommand{\thetable}{\arabic{table}}
 documentclass: tufte-handout

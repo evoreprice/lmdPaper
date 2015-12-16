@@ -119,6 +119,9 @@ citekeys <- structure(c("@Ikeda:2007ja", "@Li:2011es", "@Ren:2013jv", "@Suzaki:2
 
 compare[, Reference := citekeys[as.character(zhangRef)]]
 
+# remove phantom OSH1 reference
+compare <- compare[!Reference == "**m.Komatsu2009**"]
+
 # SI table
 st_reviewInSitu <- data.table(reshape2::dcast(compare, msuId + Reference ~ stage,
                                               value.var = 'compare'))

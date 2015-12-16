@@ -1,5 +1,5 @@
 ---
-title: "Supporting Information"
+title: ""
 csl: csl/the-plant-journal.csl
 date: "\\vspace{0 mm}"
 header-includes:

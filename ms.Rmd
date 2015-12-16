@@ -58,7 +58,9 @@ Expression profile of rice inflorescence meristems
 
 ## Keywords
 
-## SRA details for libraries
+Inflorescence development, rice, reproductive meristems, RNA sequencing
+
+## **Sequencing library repository**
 
 ## Word count
 
@@ -68,7 +70,7 @@ In rice, inflorescence architecture is established at early stages of reproducti
 
 # Significance statement
 
-Rice inflorescence meristems undergo a series of transitions during development, and control of these transitions impacts the morphology of the adult inflorescence and hence grain yield. We use laser microdissection and RNA sequencing to describe the transcriptional changes that occur during this process.
+Rice inflorescence meristems undergo a series of transitions during differentiation, and control of these transitions impacts the morphology of the adult inflorescence and hence grain yield. We use laser microdissection and RNA sequencing to describe the transcriptional changes that occur during this process.
 
 # Introduction
 
@@ -126,7 +128,7 @@ In *A. thaliana*, class III homeodomain-leucine-zipper (HD-Zip) genes are involv
 
 ## Conclusion
 
-This report describes the changes in gene expression that occur during the early stages of rice panicle development. Based on changes in expression of uncharacterized genes, transcription factors and genes with functions potentially related to hormone signalling, a switch in expression between apical and axillary meristems was evident, followed by gradual changes during transitions between PBM and SM. This could be explained by the difference between the fates of the rachis meristem, which aborts after PBM differentiation [@Ikeda:2004tk], and the axillary meristems, which transition to determinate SMs in a process that may be more comparable to the gradual meristem maturation during tomato inflorescence development than to the continual production of determinate floral meristems from the Arabidopsis inflorescence meristem [@Park:2012dg]. These results are expected to lead to mechanistic studies of the regulatory networks that establish gene expression in these tissues, as well as functional studies of the individual components, both of which will be vital for understanding the genetic factors influencing rice yield via panicle morphology.
+This report describes the changes in gene expression that occur during the early stages of rice panicle development. Based on expression patterns of uncharacterized genes, transcription factors and genes with functions potentially related to hormone signalling, a switch between apical and axillary meristems was evident, followed by gradual changes during transitions between PBM and SM. This could be explained by the difference between the fates of the rachis meristem, which aborts after PBM differentiation [@Ikeda:2004tk], and the axillary meristems, which transition to determinate SM. The latter process may be comparable to the gradual meristem maturation during tomato inflorescence development [@Park:2012dg], rather than to the continual production of determinate floral meristems from the Arabidopsis inflorescence meristem. These results are expected to lead to mechanistic studies of the regulatory networks that establish gene expression in these tissues, as well as functional studies of the individual components, both of which will be vital for understanding the genetic factors influencing rice yield via panicle morphology.
 
 # Experimental procedures
 

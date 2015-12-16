@@ -1,6 +1,7 @@
 ## 2015-12-16
 * Final references
 * Figure 1 legend
+* Added keywords
  
 ## 2015-12-15
 * Changed figure 5 legend
