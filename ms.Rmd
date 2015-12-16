@@ -6,15 +6,15 @@ header-includes:
   \usepackage[utf8]{inputenc}
   \DeclareUnicodeCharacter{2265}{$\geq$}
 output:
+  word_document:
+    fig_caption: yes
+    reference_docx: csl/wordStyles.docx
   BiocStyle::html_document:
     dev: CairoPDF
     fig_caption: yes
     force_captions: yes
     highlight: pygments
     number_sections: yes
-word_document:
-    fig_caption: yes
-    reference_docx: csl/wordStyles.docx
 bibliography: bib/papersLib.bibtex
 ---
 
