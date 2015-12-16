@@ -191,7 +191,7 @@ pander::pandoc.table(t_hypergeom, split.tables = Inf, emphasize.rownames = FALSE
 
 ![](data/lmdFigure.pdf)
 
-**`r I(pasteLabel("Figure ", figCount, "f_lmdFigure"))`**. Laser microdissection of meristem samples in the early stages of inflorescence development. Samples were collected from the rachis meristem (**a** and **e**), the primary branch meristem (**b** and **f**), the elongating primary branch meristem and axillary meristem (**c** and **g**) and the spikelet meristem (**d** and **h**). Images show the samples before (**a**–**d**) and after (**e**–**h**) dissection.
+**`r I(pasteLabel("Figure ", figCount, "f_lmdFigure"))`**. Laser microdissection of meristem samples in the early stages of inflorescence development. Samples were collected from the rachis meristem (**a** and **e**), the primary branch meristem (**b** and **f**), the elongating primary branch meristem and axillary meristem (**c** and **g**) and the spikelet meristem (**d** and **h**). Images show the samples before (**a**–**d**) and after (**e**–**h**) dissection. Scale bars represent 200 µm (red, **a**–**c** and **e**–**g**) or 320 µm (blue, **d** and **h**).
 
 ----
 

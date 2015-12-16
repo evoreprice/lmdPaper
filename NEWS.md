@@ -1,6 +1,7 @@
 ## 2015-12-16
 * Final references
-
+* Figure 1 legend
+ 
 ## 2015-12-15
 * Changed figure 5 legend
 * Added number of panicles column to table S1
