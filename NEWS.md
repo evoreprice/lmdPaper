@@ -1,7 +1,7 @@
 ## 2015-12-18
+* Checked systematic species names
 * Added morphology to LMD figure
 * uploaded libraries to SRA
-
 
 ## 2015-12-17
 * combined intro para 2 and panicle morphology results section
