@@ -71,12 +71,6 @@ print(sf_isGenesTpm)
 ```
 
 \clearpage
-\begin{figure*}
-  \includegraphics{data/isFigure.pdf}
-\end{figure*}
-\captionof{figure}{RNA \emph{in situ} hybridization analysis to confirm the specific expression patterns of four genes detected in the RNA sequencing dataset. Expression of \emph{LOC\_Os09g27730} (a--d), \emph{LOC\_Os01g04670} (e--h), \emph{LOC\_Os10g04270} (i--l) and \emph{LOC\_Os10g05990} (m--p) was analysed at the rachis meristem (a, e, i and m), primary branch meristem (b, f, j and n), elongating primary branch meristem plus axillary meristem (c, g, k and o) and spikelet meristem (d, h, l and p) stages. Each gene was detected in the same stage by \emph{in situ} hybridization as by RNA sequencing. The scale bars represent \SI{100}{\micro\metre}.}
-
-\clearpage
 \captionof{table}{\protect\label{tab:refFrame_x}References for Figure \ref{fig:sf_isGenesTpm}.}
 
 ```{r insituRefs, results = "asis"}

@@ -41,8 +41,14 @@ source('src/R/figures.R')
 \begin{figure*}
  \includegraphics{data/lmdFigure.pdf}
 \end{figure*}
-\captionof{figure}{Laser microdissection of meristem samples in the early stages of inflorescence development. Samples were collected from the rachis meristem (\textbf{a} and \textbf{e}), the primary branch meristem (\textbf{b} and \textbf{f}), the elongating primary branch meristem and axillary meristem (\textbf{c} and \textbf{g}) and the spikelet meristem (\textbf{d} and \textbf{h}). Images show the samples before (\textbf{a}–\textbf{d}) and after (\textbf{e}–\textbf{h}) dissection. Scale bars represent \SI{200}{\micro\metre} (red, \textbf{a}--\textbf{c} and \textbf{e}--\textbf{g}) or \SI{320}{\micro\metre} (blue, \textbf{d} and \textbf{h}).}
+\captionof{figure}{Morphology of the early stages of inflorescence development and laser microdissection of meristem samples. Toluidine blue stained sections of developing panicles at rachis meristem (RM; \textbf{a}), primary branch meristem (PBM; \textbf{b}), elongating primary branch meristem with axillary merisem (ePBM/AM; \textbf{c}) and spikelet meristem (SM; \textbf{d}) stages of differentiation. Laser microdissection (LMD) samples were collected from RM (\textbf{e} and \textbf{i}), PBM (\textbf{f} and \textbf{j}), ePBM/AM (\textbf{g} and \textbf{k}) and SM (\textbf{h} and \textbf{l}). Images show the samples before (\textbf{e}--\textbf{f}) and after (\textbf{i}--\textbf{l}) dissection. Scale bars represent \SI{100}{\micro\metre} (black, \textbf{a}--\textbf{d}), \SI{200}{\micro\metre} (red, \textbf{e}--\textbf{g} and \textbf{i}--\textbf{k}) or \SI{320}{\micro\metre} (blue, \textbf{h} and \textbf{l}).}
 \clearpage
+
+\begin{figure*}
+  \includegraphics{data/isFigure.pdf}
+\end{figure*}
+\captionof{figure}{RNA \emph{in situ} hybridization analysis to confirm the specific expression patterns of four genes detected in the RNA sequencing dataset. Expression of \emph{LOC\_Os09g27730} (a--d), \emph{LOC\_Os01g04670} (e--h), \emph{LOC\_Os10g04270} (i--l) and \emph{LOC\_Os10g05990} (m--p) was analysed at the rachis meristem (a, e, i and m), primary branch meristem (b, f, j and n), elongating primary branch meristem plus axillary meristem (c, g, k and o) and spikelet meristem (d, h, l and p) stages. Each gene was detected in the same stage by \emph{in situ} hybridization as by RNA sequencing. The scale bars represent \SI{100}{\micro\metre}.}
+
 
 ```{r f_mfuzzClusters, fig.height = 8.661 / 2, fig.cap = paste0("Common patterns of gene expression in developing inflorescences. Fuzzy \\emph{c}-means clustering of normalised, variance-stabilised read counts was used to recover ", as.character(english::english(c)), " common patterns of expression. Each line describes the expression pattern of one gene, with the gene's membership to the cluster represented by the colour of the line. The core values for each cluster are plotted in black. The ordering of the panels in the plot was rearranged to enable side-by-side comparison of complementary clusters.")}
 print(f_mfuzzClusters)

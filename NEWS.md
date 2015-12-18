@@ -1,3 +1,14 @@
+## 2015-12-18
+* Added morphology to LMD figure
+* uploaded libraries to SRA
+
+
+## 2015-12-17
+* combined intro para 2 and panicle morphology results section
+* combined panicle morphology into lmd figure, updated legend
+* added m+m for morphology sections
+* moved in situ figure to main article
+
 ## 2015-12-16
 * Final references
 * Figure 1 legend

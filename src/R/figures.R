@@ -249,17 +249,17 @@ nIS <- genTpm[, length(unique(msuId))]
 nPos <- genTpm[, sum(isExpr) > 1, by = .(msuId, stage)][
   , any(V1), by = msuId][, sum(V1)]
 
-######################
-### IN SITU FIGURE ###
-######################
-
-s_figCount <- incCount(s_figCount, "sf_inSitu")
-
 ##################
 ### LMD FIGURE ###
 ##################
 
 figCount <- incCount(figCount, "f_lmdFigure")
+
+######################
+### IN SITU FIGURE ###
+######################
+
+figCount <- incCount(figCount, "f_inSitu")
 
 #############
 ### Mfuzz ###
