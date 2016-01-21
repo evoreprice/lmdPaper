@@ -625,6 +625,20 @@ def f_alogFamily(inputFiles, outputFiles):
 def f_hb(inputFiles, outputFiles):
     touch(outputFiles)
 
+#---------------------------------------------------------------
+# data s1
+#
+@merge([calculateTpm_R, downloadGenomes_sh], "ruffus/datas1")
+def datas1_R(inputFiles, outputFiles):
+    jobScript = 'src/R/datas1.R'
+    ntasks = '1'
+    cpus_per_task = '1'
+    job_name = 'datas1_R'
+    jobId = submit_job(jobScript, ntasks, cpus_per_task, job_name)
+    # update ruffus flag
+    print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
+    touch(outputFiles)
+
 
 
 # options for visualising
