@@ -639,8 +639,6 @@ def datas1_R(inputFiles, outputFiles):
     print("[", print_now(), ": Job " + job_name + " run with JobID " + jobId + " ]")
     touch(outputFiles)
 
-
-
 # options for visualising
 pipeline_printout()
 pipeline_printout_graph("ruffus/flowchart." + slurm_jobid + ".pdf", "pdf")

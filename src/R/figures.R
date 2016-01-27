@@ -130,6 +130,8 @@ st_reviewInSitu <- st_reviewInSitu[, .(
   Reference = paste(Reference, collapse = ", "))
   , by = c("msuId", "RM", "PBM", "SBM", "SM", "FM")]
 
+### THIS IS FAILING ###
+
 st_reviewInSitu[, `Gene symbol` :=
                   oryzr::LocToGeneName(msuId)$symbols,
                 by = msuId]
@@ -508,35 +510,58 @@ sf_madsTree <- sf_madsTree +
              label.r = unit(0.05, "lines")) +
   ggplot2::geom_text(size= 1.5, na.rm = TRUE, hjust = -0.01)
 
-# annotate clades
+# annotate the clades
 sf_madsTree <- sf_madsTree +
-  geom_cladelabel(node = 145, "AGL2-like",
-                  offset = 0.10, fontsize = 1.5, barsize = 0.5) +
-  geom_cladelabel(node = 159, "AGL6-like",
-                  offset = 0.06, fontsize = 1.5, barsize = 0.5) +
-  geom_cladelabel(node = 132, "TM3-like",
-                  offset = 0.06, fontsize = 1.5, barsize = 0.5) +
-  geom_cladelabel(node = 168, "AG-like",
-                  offset = 0.06, fontsize = 1.5, barsize = 0.5) +
-  geom_cladelabel(node = 165, "AGL12-like",
-                  offset = 0.06, fontsize = 1.5, barsize = 0.5) +
-  geom_cladelabel(node = 178, "SQUA-like",
-                  offset = 0.08, fontsize = 1.5, barsize = 0.5) +
-  geom_cladelabel(node = 192, "STMADS11-like",
-                  offset = 0.08, fontsize = 1.5, barsize = 0.5) +
-  geom_cladelabel(node = 200, "AGL17-like",
-                  offset = 0.09, fontsize = 1.5, barsize = 0.5) +
-  geom_cladelabel(node = 208, "FLC-like",
-                  offset = 0.06, fontsize = 1.5, barsize = 0.5) +
-  geom_cladelabel(node = 214, "GLO-like",
-                  offset = 0.03, fontsize = 1.5, barsize = 0.5) +
-  geom_cladelabel(node = 218, "DEF-like",
-                  offset = 0.04, fontsize = 1.5, barsize = 0.5) +
-  geom_cladelabel(node = 114, "MIKC*",
-                  offset = 0.11, fontsize = 1.5, barsize = 0.5) +
-  geom_cladelabel(node = 211, "GGM13-like",
-                  offset = 0.00, fontsize = 1.5, barsize = 0.5,
-                  angle = 0, offset.text = 0.04)
+  geom_cladelabel(node = 145, "AGL2-like", align = TRUE,
+                  offset = 0.09, fontsize = 1.5, barsize = 0.5,
+                  angle = 270, hjust = 0.5, offset.text = 0.005) +
+  geom_cladelabel(node = 159, "AGL6-like", align = TRUE,
+                  offset = 0.05, fontsize = 1.5, barsize = 0.5,
+                  angle = 270, hjust = 0.5, offset.text = 0.005) +
+  geom_cladelabel(node = 132, "TM3-like", align = TRUE,
+                  offset = 0.05, fontsize = 1.5, barsize = 0.5,
+                  angle = 270, hjust = 0.5, offset.text = 0.005) +
+  geom_cladelabel(node = 168, "AG-like", align = TRUE,
+                  offset = 0.05, fontsize = 1.5, barsize = 0.5,
+                  angle = 270, hjust = 0.5, offset.text = 0.005) +
+  geom_cladelabel(node = 165, "AGL12-like", align = TRUE,
+                  offset = 0.05, fontsize = 1.5, barsize = 0.5,
+                  angle = 270, hjust = 0.5, offset.text = 0.005) +
+  geom_cladelabel(node = 178, "SQUA-like", align = TRUE,
+                  offset = 0.07, fontsize = 1.5, barsize = 0.5,
+                  angle = 270, hjust = 0.5, offset.text = 0.005) +
+  geom_cladelabel(node = 192, "STMADS11-like", align = TRUE,
+                  offset = 0.07, fontsize = 1.5, barsize = 0.5,
+                  angle = 270, hjust = 0.5, offset.text = 0.005) +
+  geom_cladelabel(node = 200, "AGL17-like", align = TRUE,
+                  offset = 0.07, fontsize = 1.5, barsize = 0.5,
+                  angle = 270, hjust = 0.5, offset.text = 0.005) +
+  geom_cladelabel(node = 208, "FLC-like", align = TRUE,
+                  offset = 0.05, fontsize = 1.5, barsize = 0.5,
+                  angle = 270, hjust = 0.5, offset.text = 0.005) +
+  geom_cladelabel(node = 214, "GLO-like", align = TRUE,
+                  offset = 0.02, fontsize = 1.5, barsize = 0.5,
+                  angle = 270, hjust = 0.5, offset.text = 0.005) +
+  geom_cladelabel(node = 218, "DEF-like", align = TRUE,
+                  offset = 0.03, fontsize = 1.5, barsize = 0.5,
+                  angle = 270, hjust = 0.5, offset.text = 0.005) +
+  geom_cladelabel(node = 211, "GGM13-like", align = TRUE,
+                  offset = 0.00, fontsize = 1.5, barsize = 0.5) +
+  geom_cladelabel(node = 114, "MIKC*", align = TRUE,
+                  offset = 0.10, fontsize = 1.5, barsize = 0.5,
+                  angle = 270, hjust = 0.5, offset.text = 0.005)
+# # enable this chunk to view the divisions
+# sf_madsTree <- sf_madsTree +
+#   geom_cladelabel(node = 113, "2", align = TRUE,
+#                   offset = 0.02, fontsize = 0.5, barsize = 0.1) +
+#   geom_cladelabel(node = 113, "4", align = TRUE,
+#                   offset = 0.04, fontsize = 0.5, barsize = 0.1) +
+#   geom_cladelabel(node = 113, "6", align = TRUE,
+#                   offset = 0.06, fontsize = 0.5, barsize = 0.1) +
+#   geom_cladelabel(node = 113, "8", align = TRUE,
+#                   offset = 0.08, fontsize = 0.5, barsize = 0.1)
+
+# test prints of tree for optimising
 
 # 1-col width=3.150,
 # max height=8.661,
@@ -546,13 +571,13 @@ sf_madsTree <- sf_madsTree +
 #  sf_madsTree
 #  dev.off()
 # 
-# quick print for node labels
-# cairo_pdf(filename = "output/madsComp/clustal/nodes.pdf", width = 6.614,
-#           height = 8.661)
-# ggtree(njTree) + ggplot2::geom_text(aes(label = label), hjust = -0.1, size = 2) + 
-#   ggplot2::geom_text(mapping = aes(x = branch, label = node), vjust = -0.3, size = 2)
-# 
-# dev.off()
+#  quick print for node labels
+#  cairo_pdf(filename = "output/madsComp/clustal/nodes.pdf", width = 6.614,
+#            height = 8.661)
+#  ggtree(njTree) + ggplot2::geom_text(aes(label = label), hjust = -0.1, size = 2) + 
+#    ggplot2::geom_text(mapping = aes(x = branch, label = node), vjust = -0.3, size = 2)
+#  
+#  dev.off()
 
 detach("package:ggtree", unload=TRUE)
 

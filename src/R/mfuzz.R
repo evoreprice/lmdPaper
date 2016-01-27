@@ -3,7 +3,6 @@
 library(Mfuzz)
 library(ggplot2)
 library(data.table)
-library(xlsx)
 
 # check for DESeq2 output
 deseqDir <- "output/DESeq2"
@@ -101,35 +100,16 @@ clusterExpr <- do.call(rbind, clusterExpr)
 
 # get gene names from LocToGeneName
 setkey(clusterExpr, 'NAME')
-clusterExpr[, c("RapID", "symbols", "names") := oryzr::LocToGeneName(NAME), by = NAME]
-
-# get MSU annotation from all.locus_brief_info.7.0.tab
-acNAME <- as.character(clusterExpr[,NAME])
-msuAnn <- data.table(read.delim(file = msuAnn.file, sep = "\t",header = TRUE,
-                                fill = TRUE), key = 'locus')  
-# data.table magic to get 1 annotation per LOC ID
-anns <- msuAnn[acNAME, .(annotation = paste(unique(annotation), sep = ",")), by = locus]
-clusterExpr[, MSU.annotation := as.character(anns[, annotation])]
+clusterExpr[, c("RapID", "symbols", "names", "MsuAnnotation", "OgroObjective",
+                "OgroRef") := oryzr::LocToGeneName(NAME), by = NAME]
 
 # rename and reorder columns
-clusterExpr[, gene_id := NAME][, membership := MEM.SHIP][, c('NAME', 'MEM.SHIP') := NULL]
-setcolorder(clusterExpr, c('gene_id', 'Cluster', 'membership', 'RapID',
-                                 'symbols', 'names', 'MSU.annotation'))
+setnames(clusterExpr, c("MEM.SHIP", "NAME"), c("membership", "MsuID"))
+setcolorder(clusterExpr, c('MsuID', 'Cluster', 'membership', 'RapID',
+                                 'symbols', 'names', 'MsuAnnotation',
+                           "OgroObjective", "OgroRef"))
 
-# create a workbook
-wb <- xlsx::createWorkbook()
-
-# add sheet for each cluster
-for(i in 1:max(clusterExpr[,Cluster])){
-  sheet <- xlsx::createSheet(wb, sheetName = paste("Cluster", i))
-  xlsx::addDataFrame(clusterExpr[Cluster == i], sheet = sheet,
-                     showNA = FALSE, row.names = FALSE)
-}
-
-# write the wb
-saveWorkbook(wb, "xlsx/annotatedClusters.xlsx")
-
-# do mds here (takes to long to do at compile time)
+# do mds here (takes too long to do at compile time)
 clustered <- unique(names(c1$cluster))
 vg.d <- dist(Biobase::exprs(vg.s[clustered,]))
 vg.mds <- cmdscale(vg.d, 2)
