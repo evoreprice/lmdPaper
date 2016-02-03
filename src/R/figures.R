@@ -19,7 +19,8 @@ pasteLabel <- function(preText, inObj, objName, insLink=FALSE){
   useText
 }
 
-# this increments the counter, and gives a name to the number so we can reference it later
+# this increments the counter, and gives a name to the number so we can
+# reference it later
 incCount <- function(inObj, useName){
   nObj <- length(inObj)
   useNum <- max(inObj) + 1
@@ -122,7 +123,8 @@ compare[, Reference := citekeys[as.character(zhangRef)]]
 compare <- compare[!Reference == "**m.Komatsu2009**"]
 
 # SI table
-st_reviewInSitu <- data.table(reshape2::dcast(compare, msuId + Reference ~ stage,
+st_reviewInSitu <- data.table(reshape2::dcast(compare,
+                                              msuId + Reference ~ stage,
                                               value.var = 'compare'))
 
 # deal with genes that have the same expression pattern in >1 report
@@ -173,7 +175,8 @@ genTpm <- tpm[genes, .(
 )]
 
 # add call per library
-expGenTT.wide <- data.table(readRDS('output/expressedGenes/expGenTT.Rds'), key = "id")
+expGenTT.wide <- data.table(readRDS('output/expressedGenes/expGenTT.Rds'),
+                            key = "id")
 expGenTT <- reshape2::melt(expGenTT.wide, id.vars = "id",
                            variable.name = "library", value.name = "isExpr")
 setkey(expGenTT, "id", "library")
@@ -236,8 +239,8 @@ sf_isGenesTpm <- ggplot() +
             data = unique(genTpm[call.z == TRUE,]),
             colour = NA,  fill = "grey90") +
   stat_smooth(mapping = aes(x = stage, y = tpm, group = plotLabel),
-              data = genTpm,
-              method = "loess", se = FALSE, colour = "black", size = 0.25, alpha = 0.6) + 
+              data = genTpm, method = "loess", se = FALSE, colour = "black",
+              size = 0.25, alpha = 0.6) + 
   geom_point(mapping = aes(x = stage, y = tpm, colour = Replicate, shape = isExpr),
              data = genTpm,
              size = 1, alpha = 0.6) +
@@ -286,7 +289,8 @@ setkey(exprs, "id")
 
 plotData.wide <- exprs[cluster[Membership > memCutoff]]
 plotData.wide[, number := length(id), by = Cluster]
-plotData.wide[, label := factor(paste0("Cluster ", Cluster, "\n(", number, " genes)"))]
+plotData.wide[, label := factor(paste0("Cluster ", Cluster,
+                                       "\n(", number, " genes)"))]
 
 # relevel clusters
 centres.wide <- data.table(c1$centers)
@@ -300,8 +304,10 @@ centres.wide[, c("n1n2", "n2n4") :=
                     SM - PBM)]
 # divide these changes into categories
 centres.wide[, c("dn1n2", "dn2n4") :=
-               list(c('dec', 'small', 'inc')[cut(n1n2, breaks = c(-Inf, -0.5, 0.5, Inf))],
-                    c('dec', 'small', 'inc')[cut(n2n4, breaks = c(-Inf, -1, 1, Inf))])]               
+               list(c('dec', 'small', 'inc')[cut(n1n2,
+                                                 breaks = c(-Inf, -0.5, 0.5, Inf))],
+                    c('dec', 'small', 'inc')[cut(n2n4,
+                                                 breaks = c(-Inf, -1, 1, Inf))])]               
 
 # first, show gradual increase / decrease
 centres.wide[dn1n2 == dn2n4, cOrder := c(1,2)[order(RM)]]
@@ -362,9 +368,11 @@ f_mfuzzClusters <- ggplot(plotData,
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
         legend.key.size = grid::unit(8, "point")) +
   xlab(NULL) +
-  scale_colour_gradientn(colours = heatscale, limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
+  scale_colour_gradientn(colours = heatscale, limits = c(0, 1),
+                         breaks = seq(0, 1, 0.2)) +
   geom_line(alpha = 0.8) +
-  geom_line(data = centres, mapping = aes(group = 1), colour = "black", alpha = 0.5) +
+  geom_line(data = centres, mapping = aes(group = 1),
+            colour = "black", alpha = 0.5) +
   facet_wrap("label", ncol = 2)
 
 figCount <- incCount(figCount, "f_mfuzzClusters")
@@ -445,12 +453,15 @@ setkey(famCat, 'Family')
 setkey(gsea, 'rn')
 gsea[, Category := famCat[gsea][,Category]]
 gsea[, Category := plyr::mapvalues(Category, from = c("TF", "Other"),
-                                   to = c("Transcription factors", "Other regulators"))]
-gsea[, Category := factor(Category, levels = c("Transcription factors", "Other regulators"))]
+                                   to = c("Transcription factors",
+                                          "Other regulators"))]
+gsea[, Category := factor(Category, levels = c("Transcription factors",
+                                               "Other regulators"))]
 
 heatscale <- rev(RColorBrewer::brewer.pal(6, "RdBu"))
 
-f_gsea <- ggplot(gsea, aes(x = Stage, y = rn, label = padj, fill = `Test\nstatistic`)) +
+f_gsea <- ggplot(gsea, aes(x = Stage, y = rn, label = padj,
+                           fill = `Test\nstatistic`)) +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
   xlab(NULL) + ylab(NULL) +
   theme(legend.key.size = grid::unit(8, "point"),
@@ -485,7 +496,8 @@ exprAnnot <- madsPeptides[unique(njTree$tip.label), .(name, log2FoldChange)]
 
 # draw a tree
 heatscale <- rev(RColorBrewer::brewer.pal(5, "PuOr"))
-sf_madsTree <- ggtree::ggtree(njTree, aes(x = x, y = y, label = label), size = 0.025) +
+sf_madsTree <- ggtree::ggtree(njTree, aes(x = x, y = y, label = label),
+                              size = 0.025) +
   xlab(NULL) + ylab(NULL) +
   scale_y_continuous(expand = c(0,1)) +
   theme_minimal(base_size = 8, base_family = "Helvetica") +
