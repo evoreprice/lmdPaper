@@ -1,0 +1,34 @@
+---
+title: ""
+csl: csl/the-plant-journal.csl
+header-includes:
+  \usepackage{graphicx}
+  \usepackage[utf8]{inputenc}
+  \DeclareUnicodeCharacter{2265}{$\geq$}
+output:
+  word_document:
+    fig_caption: yes
+    reference_docx: csl/wordStyles.docx
+bibliography: bib/papersLib.bibtex
+---
+
+```{r Setup, include=FALSE, results="hide", warning=FALSE}
+knitr::opts_chunk$set(fig.path='figures/',
+               cache.path='cache/',
+               fig.align = 'center', 
+               dpi=600,
+               fig.show='hold',
+               fig.height = 4.213,
+               fig.width = 4.213,
+               echo=FALSE,
+               results="hide",
+               message=FALSE,
+               warning=FALSE)
+
+source('src/R/figures.R')
+```
+
+```{r insituRefs, results = "asis"}
+data.table::setnames(st_refTable, "MSU name", "MSU ID")
+pander::pandoc.table(st_refTable, emphasize.cols = c(1,2))
+```

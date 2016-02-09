@@ -48,6 +48,12 @@ capwords <- function(s, strict = FALSE) {
 
 st_libStats <- readRDS('output/quantStats/libStats.Rds')
 s_tableCount <- incCount(s_tableCount, "st_libStats")
+# write as tsv for tpj
+st_libStats[Sample == "ePBM/SBM", Sample := "ePBM/AM"]
+file.name <- I(pasteLabel("Table S", s_tableCount, "st_libStats"))
+write.table(st_libStats, file = paste0(
+  "xlsx/", file.name, ".tsv"
+), quote = FALSE, sep = "\t", row.names = FALSE, na = "")
 
 ################
 ### PCA PLOT ###
@@ -131,8 +137,6 @@ st_reviewInSitu <- data.table(reshape2::dcast(compare,
 st_reviewInSitu <- st_reviewInSitu[, .(
   Reference = paste(Reference, collapse = ", "))
   , by = c("msuId", "RM", "PBM", "SBM", "SM", "FM")]
-
-### THIS IS FAILING ###
 
 st_reviewInSitu[, `Gene symbol` :=
                   oryzr::LocToGeneName(msuId)$symbols,
