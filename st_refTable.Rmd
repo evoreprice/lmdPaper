@@ -32,3 +32,4 @@ source('src/R/figures.R')
 data.table::setnames(st_refTable, "MSU name", "MSU ID")
 pander::pandoc.table(st_refTable, emphasize.cols = c(1,2))
 ```
+ 
