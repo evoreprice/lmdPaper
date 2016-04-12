@@ -2,7 +2,7 @@
 
 * This repository contains the code to generate the manuscript, figures and data for the following article:
 
-    > Harrop, T. W.R., Ud Din, I., Gregis, V., Osnato, M., Jouannic, S., Adam, H. and Kater, M. (2016), Gene expression profiling of reproductive meristem types in early rice inflorescences by laser microdissection. Plant J. Accepted Author Manuscript. [doi:10.1111/tpj.13147](http://dx.doi.org/10.1111/tpj.13147)
+    > Harrop, T. W.R., Ud Din, I., Gregis, V., Osnato, M., Jouannic, S., Adam, H. and Kater, M. (2016), Gene expression profiling of reproductive meristem types in early rice inflorescences by laser microdissection. The Plant Journal, 86: 75–88. [doi:10.1111/tpj.13147](http://dx.doi.org/10.1111/tpj.13147)
 
 ### Data availability
 
